@@ -17,7 +17,7 @@ logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client({
   token: auth.token,
-  autorun: true,
+  autorun: true
 });
 
 bot.on('ready', function(evt) {
@@ -60,17 +60,19 @@ function getScramble(moves) {
 
 // ==========END SCRAMBLE LOGIC==========
 
+const botPrefix = '!';
+
 bot.on('message', function(user, userId, channelId, msg, evt) {
   // Our bot needs to know if it will execute a command
   // It will listen for messages that will start with `!`
-  if (msg.charAt(0) != '!') {
+  if (msg.substring(0, botPrefix.length) != botPrefix) {
     return;
   }
-  msg = msg.substring(1);
+  msg = msg.substring(botPrefix.length);
   if (msg.charAt(0) == '3') {
     bot.sendMessage({
       to: channelId,
-      message: getScramble(20),
+      message: getScramble(20)
     });
   }
 });
