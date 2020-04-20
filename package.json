@@ -1,12 +1,19 @@
 {
-  "name": "ScrambleBot",
-  "version": "1.0",
-  "description": "Generates scrambles for Rubik's Cubes",
+  "name": "scramblebot",
+  "version": "1.0.0",
+  "description": "Generates Rubik's Cube scrambles",
   "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndrewDongAndy/ScrambleBot.git"
+  },
   "author": "ADMathNoob",
-  "dependencies": {
-    "discord.io": "^2.5.3",
-    "discord.js": "^12.2.0",
-    "winston": "^3.2.1"
-  }
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndrewDongAndy/ScrambleBot/issues"
+  },
+  "homepage": "https://github.com/AndrewDongAndy/ScrambleBot#readme"
 }
