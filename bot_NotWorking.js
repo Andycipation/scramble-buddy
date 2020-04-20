@@ -3,9 +3,10 @@ Taken from the following article:
 https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
 */
 
-var Discord = require('discord.io');
-var logger = require('winston');
-var auth = require('./auth.json');
+const Discord = require('discord.io');
+const logger = require('winston');
+const config = require('./config.json');
+const botPrefix = config.prefix;
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -16,11 +17,11 @@ logger.level = 'debug';
 
 // Initialize Discord Bot
 var bot = new Discord.Client({
-  token: auth.token,
+  token: config.token,
   autorun: true
 });
 
-bot.on('ready', function(evt) {
+bot.once('ready', function(evt) {
   logger.info('ScrambleBot connected');
   logger.info('Logged in as: ');
   logger.info(bot.username + ' - (' + bot.id + ')');
@@ -60,12 +61,10 @@ function getScramble(moves) {
 
 // ==========END SCRAMBLE LOGIC==========
 
-const botPrefix = '!';
-
 bot.on('message', function(user, userId, channelId, msg, evt) {
   // Our bot needs to know if it will execute a command
   // It will listen for messages that will start with `!`
-  if (msg.substring(0, botPrefix.length) != botPrefix) {
+  if (!msg.startsWith(botPrefix)) {
     return;
   }
   msg = msg.substring(botPrefix.length);
