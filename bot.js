@@ -6,11 +6,7 @@ client ID:
 const Discord = require('discord.js');
 const config = require('./config.json');
 const botPrefix = config.prefix;
-
-// Initialize Discord Bot
-var bot = new Discord.Client();
-
-// console.log(config.token);
+const bot = new Discord.Client();
 
 // ==========SCRAMBLE LOGIC==========
 
@@ -19,7 +15,7 @@ function randInt(lo, hi) {
 }
 
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
-let ok = Array(6);
+let ok = Array(6); // ok[i]: whether it is ok to add move SIDES[i] next
 const DIR = ['', "'", '2'];
 
 function getScramble(moves) {
