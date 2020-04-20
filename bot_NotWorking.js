@@ -3,7 +3,7 @@ Taken from the following article:
 https://www.digitaltrends.com/gaming/how-to-make-a-discord-bot/
 */
 
-const Discord = require('discord.io');
+const Discord = require('discord.js');
 const logger = require('winston');
 const config = require('./config.json');
 const botPrefix = config.prefix;
@@ -20,6 +20,8 @@ var bot = new Discord.Client({
   token: config.token,
   autorun: true
 });
+
+console.log(config.token);
 
 bot.on('ready', function(evt) {
   logger.info('ScrambleBot connected');
@@ -61,17 +63,17 @@ function getScramble(moves) {
 
 // ==========END SCRAMBLE LOGIC==========
 
-bot.on('message', function(user, userId, channelId, msg, evt) {
-  // Our bot needs to know if it will execute a command
-  // It will listen for messages that will start with `!`
+bot.on('message', function(msg) {
+  console.log(msg.content);
+  return;
   if (!msg.startsWith(botPrefix)) {
     return;
   }
   msg = msg.substring(botPrefix.length);
   if (msg.charAt(0) == '3') {
-    bot.sendMessage({
-      to: channelId,
-      message: getScramble(20)
-    });
+    // bot.sendMessage({
+    //   to: channelId,
+    //   message: getScramble(20)
+    // });
   }
 });
