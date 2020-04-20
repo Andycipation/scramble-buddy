@@ -3,11 +3,6 @@ client ID:
 701873854930354287
 */
 
-const Discord = require('discord.js');
-const config = require('./config.json');
-const botPrefix = config.prefix;
-const bot = new Discord.Client();
-
 // ==========SCRAMBLE LOGIC==========
 
 function randInt(lo, hi) {
@@ -15,15 +10,13 @@ function randInt(lo, hi) {
 }
 
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
-let ok = Array(6); // ok[i]: whether it is ok to add move SIDES[i] next
 const DIR = ['', "'", '2'];
 
 function getScramble(moves) {
   let last = -1;
-  let res = [];
-  for (let i = 0; i < SIDES.length; i++) {
-    ok[i] = true;
-  }
+  let res = Array(moves);
+  let ok = Array(6); // ok[i]: whether it is ok to add move SIDES[i] next
+  ok.fill(true);
   for (let i = 0; i < moves; i++) {
     let x;
     do {
@@ -35,21 +28,33 @@ function getScramble(moves) {
         ok[j] = true;
       }
     }
-    res.push(SIDES[x] + DIR[randInt(0, 2)]);
+    res[i] = SIDES[x] + DIR[randInt(0, 2)];
   }
   return res.join(' ');
 }
 
 // ==========END SCRAMBLE LOGIC==========
 
+
+// ==========BOT CODE==========
+
+const Discord = require('discord.js');
+const config = require('./config.json');
+const bot = new Discord.Client();
+var botPrefix = 'cube'; // might add changeable prefixes later
+
 bot.on('message', function(message) {
-  let msg = message.content;
+  let msg = message.content.trim();
   if (!msg.startsWith(botPrefix)) {
     return;
   }
   msg = msg.substring(botPrefix.length);
-  // message.channel.send('Hi!');
   message.channel.send(getScramble(20));
+  // for (let i = 0; i < 10; i++) {
+  //   message.channel.send("@DAVID-19#1927");
+  // }
 });
+
+// ==========END BOT CODE==========
 
 bot.login(config.token);
