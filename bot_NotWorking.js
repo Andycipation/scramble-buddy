@@ -21,7 +21,7 @@ var bot = new Discord.Client({
   autorun: true
 });
 
-bot.once('ready', function(evt) {
+bot.on('ready', function(evt) {
   logger.info('ScrambleBot connected');
   logger.info('Logged in as: ');
   logger.info(bot.username + ' - (' + bot.id + ')');
