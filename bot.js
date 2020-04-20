@@ -1,25 +1,16 @@
+/*
+client ID:
+701873854930354287
+*/
+
 const Discord = require('discord.js');
-const logger = require('winston');
 const config = require('./config.json');
 const botPrefix = config.prefix;
-
-// Configure logger settings
-logger.remove(logger.transports.Console);
-logger.add(new logger.transports.Console, {
-  colorize: true
-});
-logger.level = 'debug';
 
 // Initialize Discord Bot
 var bot = new Discord.Client();
 
 // console.log(config.token);
-
-bot.once('ready', function(evt) {
-  logger.info('ScrambleBot connected');
-  logger.info('Logged in as: ');
-  logger.info(bot.username + ' - (' + bot.id + ')');
-});
 
 // ==========SCRAMBLE LOGIC==========
 
@@ -55,17 +46,14 @@ function getScramble(moves) {
 
 // ==========END SCRAMBLE LOGIC==========
 
-bot.on('message', function(msg) {
+bot.on('message', function(message) {
+  let msg = message.content;
   if (!msg.startsWith(botPrefix)) {
     return;
   }
   msg = msg.substring(botPrefix.length);
-  if (msg.charAt(0) == '3') {
-    bot.sendMessage({
-      to: channelId,
-      message: getScramble(20)
-    });
-  }
+  // message.channel.send('Hi!');
+  message.channel.send(getScramble(20));
 });
 
 bot.login(config.token);
