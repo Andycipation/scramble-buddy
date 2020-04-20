@@ -55,6 +55,6 @@ bot.on('message', function(message) {
   // }
 });
 
-// ==========END BOT CODE==========
-
 bot.login(config.token);
+
+// ==========END BOT CODE==========
