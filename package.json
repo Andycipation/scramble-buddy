@@ -4,5 +4,5 @@
   "description": "Generates scrambles for Rubik's Cubes",
   "main": "bot.js",
   "author": "ADMathNoob",
-  "dependencies": {}
+  "dependencies": {},
 }

@@ -17,7 +17,7 @@ logger.level = 'debug';
 // Initialize Discord Bot
 var bot = new Discord.Client({
   token: auth.token,
-  autorun: true
+  autorun: true,
 });
 
 bot.on('ready', function(evt) {
@@ -70,7 +70,7 @@ bot.on('message', function(user, userId, channelId, msg, evt) {
   if (msg.charAt(0) == '3') {
     bot.sendMessage({
       to: channelId,
-      message: getScramble(20)
+      message: getScramble(20),
     });
   }
 });
