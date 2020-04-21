@@ -37,15 +37,6 @@ function getScramble(moves) {
 
 // ==========TIMER LOGIC==========
 
-function padStart(str, newLength, c) {
-  let res = "";
-  for (let i = 0; i + str.length < newLength; i++) {
-    res += c;
-  }
-  res += str;
-  return res;
-}
-
 function formatTime(milliseconds) {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
