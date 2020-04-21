@@ -48,21 +48,17 @@ bot.on('message', function(message) {
     return;
   }
   let msg = message.content.trim();
-  if (msg == 'Hi!') {
+  if (msg.startsWith('Hi!')) {
     message.channel.send('Hi!');
     return;
   }
   if (!msg.startsWith(botPrefix)) {
     return;
   }
-  msg = msg.substring(botPrefix.length);
-  message.channel.send(getScramble(20));
-  // let startTime = Date.getTime();
-  // while (!message.author.typingIn(message.channel)) {
-  //
-  // }
-  // let endTime = Date.endTime();
-  // message.channel.send('Time taken: ' + (endTime - startTime))
+  msg = msg.substring(botPrefix.length).trim().toLowerCase();
+  if (msg == 'get') {
+    message.channel.send(getScramble(20));
+  }
 });
 
 bot.login(config.token);
