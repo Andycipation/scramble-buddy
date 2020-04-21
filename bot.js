@@ -57,12 +57,12 @@ bot.on('message', function(message) {
   }
   msg = msg.substring(botPrefix.length);
   message.channel.send(getScramble(20));
-  let startTime = Date.getTime();
-  while (!message.author.typingIn(message.channel)) {
-
-  }
-  let endTime = Date.endTime();
-  message.channel.send('Time taken: ' + (endTime - startTime))
+  // let startTime = Date.getTime();
+  // while (!message.author.typingIn(message.channel)) {
+  //
+  // }
+  // let endTime = Date.endTime();
+  // message.channel.send('Time taken: ' + (endTime - startTime))
 });
 
 bot.login(config.token);
