@@ -66,10 +66,7 @@ function stopTimer(id) { // returns the time taken in milliseconds
   return ret;
 }
 
-const BASE = 1000000000;
-function startTimer(userId, channelId) {
-  // let id = BASE * channelId + userId;
-  let id = userId;
+function startTimer(id) {
   timers.set(id, Date.now());
 }
 
@@ -98,8 +95,8 @@ const helpEmbed = new Discord.MessageEmbed()
   .setFooter('Trademark ADMathNoob™');
 
 bot.on('message', function(message) {
-  if (message.author.bot) {
-    return; // ignore messages set by bots
+  if (message.author.id == bot.id) {
+    return; // ignore messages set by self
   }
   // testing messages
   message.channel.send(`Your user id is ${message.author.id}.`);
@@ -132,7 +129,7 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    startTimer(message.author.id, message.channel.id);
+    startTimer(message.author.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
