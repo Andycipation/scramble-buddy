@@ -45,6 +45,10 @@ var botPrefix = 'cube'; // might add changeable prefixes later
 
 bot.on('message', function(message) {
   let msg = message.content.trim();
+  if (msg == 'Hi!') {
+    message.channel.send('Hi!');
+    return;
+  }
   if (!msg.startsWith(botPrefix)) {
     return;
   }
