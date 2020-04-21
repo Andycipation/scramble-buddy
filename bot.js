@@ -65,7 +65,7 @@ function formatTime(milliseconds) {
   seconds %= 60;
   let secString = seconds.toString();
   if (minutes > 0) {
-    secString += secString.padStart(2, '0');
+    secString = secString.padStart(2, '0');
   }
   milliseconds %= 1000;
   res += secString + '.' + milliseconds;
@@ -74,16 +74,18 @@ function formatTime(milliseconds) {
 
 var timers = new Map();
 
-function startTimer(id) {
-  timers.set(id, Date.now());
+function startTimer(userId, channelId) {
+  timers.set(userId, [Date.now(), channelId]);
 }
 
-function stopTimer(id) { // returns the time taken in milliseconds
-  if (!timers.has(id)) {
-    return -1;
-  }
-  let ret = Date.now() - timers.get(id);
-  timers.delete(id);
+function hasTimer(message) {
+  let userId = message.author.id;
+  return (timers.has(userId) && timers.get(userId)[1] == message.channel.id);
+}
+
+function stopTimer(userId) { // returns the time taken in milliseconds
+  let ret = Date.now() - timers.get(userId)[0];
+  timers.delete(userId);
   return ret;
 }
 
@@ -99,7 +101,7 @@ var prefix = 'cube'; // might add changeable prefixes later
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
-  // bot.user.setAvatar('./avatar.jpg');
+  bot.user.setAvatar('./avatar.png');
 });
 
 const helpEmbed = new Discord.MessageEmbed()
@@ -109,9 +111,9 @@ const helpEmbed = new Discord.MessageEmbed()
   .attachFiles(['./avatar.jpg'])
   .setThumbnail('attachment://avatar.jpg')
   .addField('Commands (no spaces required)',
-    `- ${prefix} help: shows this message`
-    + `\n- ${prefix} get: gets a scramble for 3x3`
-    + `\n- ${prefix} time: starts a timer for you; sending any message will stop it`
+    `- ${prefix} help: shows this message\n`
+    + `- ${prefix} get: gets a scramble for 3x3\n`
+    + `- ${prefix} time: starts a timer for you; sending any message will stop it`
   )
   .setFooter('Trademark ADMathNoob™');
 
@@ -124,9 +126,9 @@ bot.on('message', function(message) {
   // message.channel.send(`This channel's id is ${message.channel.id}.`);
 
   // timer start/stop
-  let time = stopTimer(message.author.id);
-  if (time != -1) {
-    message.channel.send(`Timer stopped for ${message.author.username}; time: ${formatTime(time)}`);
+  if (hasTimer(message)) {
+    message.channel.send(`Timer stopped for ${message.author.username}; `
+      + `time: ${formatTime(stopTimer(message.author.id))}`);
   }
 
   let msg = message.content.trim();
