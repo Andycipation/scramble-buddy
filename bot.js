@@ -42,12 +42,14 @@ const Discord = require('discord.js');
 const config = require('./config.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
+File
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
   .setAuthor('by ADMathNoob')
-  .setThumbnail('./avatar.jpg')
+  .attachFiles(['../avatar.jpg'])
+  .setThumbnail('attachment://avatar.png')
   .addField('Commands (no spaces required)',
     `- ${prefix} help: shows this message`
     + `\n- ${prefix} get: gets a scramble for 3x3`
