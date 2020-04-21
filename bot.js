@@ -57,6 +57,10 @@ function formatTime(milliseconds) {
 
 var timers = new Map();
 
+function startTimer(id) {
+  timers.set(id, Date.now());
+}
+
 function stopTimer(id) { // returns the time taken in milliseconds
   if (!timers.has(id)) {
     return -1;
@@ -66,9 +70,6 @@ function stopTimer(id) { // returns the time taken in milliseconds
   return ret;
 }
 
-function startTimer(id) {
-  timers.set(id, Date.now());
-}
 
 // ==========END TIMER LOGIC==========
 
@@ -81,16 +82,15 @@ var prefix = 'cube'; // might add changeable prefixes later
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
-  bot.user.setAvatar('./avatar.jpg');
+  // bot.user.setAvatar('./avatar.jpg');
 });
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
   .setAuthor('by ADMathNoob')
-  .setThumbnail('https://www.mindgamesbrisbane.com/wp-content/uploads/2019/03/9352214721600.jpg')
-  // .attachFiles(['../avatar.jpg'])
-  // .setThumbnail('attachment://avatar.jpg')
+  .attachFiles(['./avatar.jpg'])
+  .setThumbnail('attachment://avatar.jpg')
   .addField('Commands (no spaces required)',
     `- ${prefix} help: shows this message`
     + `\n- ${prefix} get: gets a scramble for 3x3`
