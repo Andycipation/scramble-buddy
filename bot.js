@@ -80,7 +80,8 @@ const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
 
 bot.on('ready', function() {
-  bot.user.setActivity('is my prefix', { type: prefix });
+  bot.user.setActivity(`${prefix} is my prefix`);
+  bot.user.setAvatar('./avatar.jpg');
 });
 
 const helpEmbed = new Discord.MessageEmbed()
@@ -136,6 +137,10 @@ bot.on('message', function(message) {
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
+
+bot.on('typingStart', function(channel, user)) {
+  channel.send(`${user.username} started typing.`);
+}
 
 bot.login(config.token);
 
