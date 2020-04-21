@@ -14,9 +14,9 @@ const DIR = ['', "'", '2'];
 
 function getScramble(moves) {
   let last = -1;
-  let res = Array(moves);
-  let ok = Array(6); // ok[i]: whether it is ok to add move SIDES[i] next
+  let ok = Array(SIDES.length); // ok[i]: whether it is ok to add move SIDES[i] next
   ok.fill(true);
+  let res = Array(moves);
   for (let i = 0; i < moves; i++) {
     let x;
     do {
@@ -41,11 +41,17 @@ function getScramble(moves) {
 const Discord = require('discord.js');
 const config = require('./config.json');
 const bot = new Discord.Client();
-var botPrefix = 'cube'; // might add changeable prefixes later
+var prefix = 'cube'; // might add changeable prefixes later
+
+var timers = new Map();
 
 bot.on('message', function(message) {
   if (message.author.bot) {
     return;
+  }
+  if (timers.has(message.author.id)) {
+    let time = (Date.now() - timers.get(message.author.id)) / 1000;
+    message.channel.send(`Timer stopped for ${message.author.username}; time: ${time}`);
   }
   let msg = message.content.trim();
   if (msg.startsWith('Hi!')) {
@@ -56,22 +62,28 @@ bot.on('message', function(message) {
     message.channel.send('Good night!');
     return;
   }
-  if (!msg.startsWith(botPrefix)) {
+  if (!msg.startsWith(prefix)) {
     return;
   }
-  msg = msg.substring(botPrefix.length).trim().toLowerCase();
+  msg = msg.substring(prefix.length).trim().toLowerCase();
   if (msg == 'help') {
     message.channel.send(new Discord.MessageEmbed()
       .setColor('#0099ff')
       .setTitle('ScrambleBot Help')
       .setAuthor('by ADMathNoob')
       .setThumbnail('https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/M6AAAOSwHh1dLd6f/$_1.JPG?set_id=880000500F')
-      .addField('Commands (no spaces required)', '- cube help: shows this message'
-        + '\n- cube get: gets a scramble for 3x3')
-      .setFooter('Trademark ADMatNoob™')
+      .addField('Commands (no spaces required)',
+        `- ${prefix} help: shows this message`
+        + `\n- ${prefix} get: gets a scramble for 3x3`
+        + `\n- ${prefix} time: starts a timer for you; sending any message will stop it`
+      )
+      .setFooter('Trademark ADMathNoob™')
     );
   } else if (msg == 'get') {
     message.channel.send(getScramble(20));
+  } else if (msg == 'time') {
+    timers.set(message.author.id, Date.now());
+    message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
 
