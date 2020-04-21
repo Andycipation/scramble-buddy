@@ -78,7 +78,10 @@ const Discord = require('discord.js');
 const config = require('./config.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
-bot.setGame(`My prefix is ${prefix}`);
+
+bot.on('ready', function() {
+  bot.user.setActivity(`My prefix is "${prefix}".`);
+});
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
