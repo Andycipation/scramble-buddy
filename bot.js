@@ -80,7 +80,7 @@ const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
 
 bot.on('ready', function() {
-  bot.user.setActivity(`My prefix is "${prefix}".`);
+  bot.user.setActivity('is my prefix', { type: prefix });
 });
 
 const helpEmbed = new Discord.MessageEmbed()
@@ -98,7 +98,7 @@ const helpEmbed = new Discord.MessageEmbed()
   .setFooter('Trademark ADMathNoob™');
 
 bot.on('message', function(message) {
-  if (message.author.id == bot.id) {
+  if (message.author.id == bot.user.id) {
     return; // ignore messages set by self
   }
   // testing messages
