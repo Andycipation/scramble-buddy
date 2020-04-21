@@ -152,7 +152,7 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    startTimer(message.author.id);
+    startTimer(message.author.id, message.channel.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
