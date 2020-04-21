@@ -66,7 +66,9 @@ function stopTimer(id) { // returns the time taken in milliseconds
   return ret;
 }
 
-function startTimer(id) {
+const BASE = 1000000000;
+function startTimer(userId, channelId) {
+  let id = BASE * channelId + userId;
   timers.set(id, Date.now());
 }
 
@@ -97,9 +99,10 @@ bot.on('message', function(message) {
   if (message.author.bot) {
     return;
   }
+  message.channel.send(`Your user id is ${message.author.id}.`);
   let time = stopTimer(message.author.id);
   if (time != -1) {
-    message.channel.send(`Timer stopped for ${message.author.username}; time: ${time}`);
+    message.channel.send(`Timer stopped for ${message.author.username}; time: ${formatTime(time)}`);
   }
   let msg = message.content.trim();
   if (msg.startsWith('Hi!')) {
@@ -120,7 +123,7 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    startTimer(message.author.id);
+    startTimer(message.author.id, message.channel.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
