@@ -62,7 +62,7 @@ bot.on('message', function(message) {
       .setTitle('ScrambleBot Help')
       .setAuthor('by ADMathNoob')
       .setThumbnail('https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/M6AAAOSwHh1dLd6f/$_1.JPG?set_id=880000500F')
-      .addField('Commands', '- cube help: shows this message'
+      .addField('Commands (no spaces required)', '- cube help: shows this message'
         + '\n- cube get: gets a scramble for 3x3')
       .setFooter('Trademark ADMatNoob™')
     );
