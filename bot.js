@@ -102,8 +102,8 @@ bot.on('message', function(message) {
     return; // ignore messages set by self
   }
   // testing messages
-  message.channel.send(`Your user id is ${message.author.id}.`);
-  message.channel.send(`This channel's id is ${message.channel.id}.`);
+  // message.channel.send(`Your user id is ${message.author.id}.`);
+  // message.channel.send(`This channel's id is ${message.channel.id}.`);
 
   // timer start/stop
   let time = stopTimer(message.author.id);
