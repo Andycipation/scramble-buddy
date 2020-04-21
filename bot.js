@@ -78,6 +78,9 @@ function hasTimer(userId, channelId) {
 }
 
 function stopTimer(userId) { // returns the time taken in milliseconds
+  if (!timers.has(userId)) {
+    return;
+  }
   let ret = Date.now() - timers.get(userId)[0];
   timers.delete(userId);
   return ret;
@@ -99,17 +102,26 @@ bot.on('ready', function() {
   bot.user.setAvatar('./avatar.png');
 });
 
+const COMMANDS = [
+  [['help'], 'shows a help message'],
+  [['get', 'scramble'], 'gets a scramble'],
+  [['time', 'start'], 'starts a timer for you; sending any message will stop it']
+];
+
+// var commandString =
+//   `- ${prefix} help: shows this message\n`
+//   + `- ${prefix} get: gets a scramble for 3x3\n`
+//   + `- ${prefix} time: starts a timer for you; sending any message will stop it`;
+
+var commandString = [for (p of COMMANDS) `- ${prefix}` + ([p[0].join('/')]) + ': ' + p[1]].join('\n');
+
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
   .setAuthor(`by ${pkg.author}`)
   .attachFiles(['./avatar.png'])
   .setThumbnail('attachment://avatar.png')
-  .addField('Commands (no spaces required)',
-    `- ${prefix} help: shows this message\n`
-    + `- ${prefix} get: gets a scramble for 3x3\n`
-    + `- ${prefix} time: starts a timer for you; sending any message will stop it`
-  )
+  .addField('Commands (no spaces required)', commandString)
   .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 
 bot.on('message', function(message) {
@@ -159,9 +171,13 @@ bot.on('message', function(message) {
 });
 
 // this is too slow to start/stop the timer accurately
-// bot.on('typingStart', function(channel, user) {
-//   channel.send(`${user.username} started typing.`);
-// });
+bot.on('typingStart', function(channel, user) {
+  // channel.send(`${user.username} started typing.`);
+  if (hasTimer(userId, message.channel.id)) {
+    channel.send(`Timer stopped for ${user.username}; `
+      + `time: ${formatTime(stopTimer(user.id))}`);
+  }
+});
 
 bot.login(config.token);
 
