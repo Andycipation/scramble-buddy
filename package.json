@@ -11,8 +11,9 @@
   "homepage": "https://github.com/AndrewDongAndy/ScrambleBot#readme",
   "dependencies": {
     "discord.js": "^12.2.0"
-  },
-  "scripts": {
-    "start": "node bot.js"
   }
+}
+
+"scripts": {
+  "start": "node bot.js"
 }
