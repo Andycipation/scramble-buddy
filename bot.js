@@ -78,9 +78,12 @@ function startTimer(userId, channelId) {
   timers.set(userId, [Date.now(), channelId]);
 }
 
-function hasTimer(message) {
-  let userId = message.author.id;
-  return (timers.has(userId) && timers.get(userId)[1] == message.channel.id);
+function hasTimer(userId) {
+  return timers.has(userId);
+}
+
+function hasTimer(userId, channelId) {
+  return (timers.has(userId) && timers.get(userId)[1] == channelId);
 }
 
 function stopTimer(userId) { // returns the time taken in milliseconds
@@ -118,19 +121,22 @@ const helpEmbed = new Discord.MessageEmbed()
   .setFooter('Trademark ADMathNoob™');
 
 bot.on('message', function(message) {
-  if (message.author.id == bot.user.id) {
-    return; // ignore messages set by self
+  let userId = message.author.id;
+  if (userId == bot.user.id) {
+    return; // ignore messages sent by self
   }
+  // if (message.author.bot) {
+  //   return; // ignore messages sent by bots
+  // }
   // testing messages
   // message.channel.send(`Your user id is ${message.author.id}.`);
   // message.channel.send(`This channel's id is ${message.channel.id}.`);
 
   // timer start/stop
-  if (hasTimer(message)) {
+  if (hasTimer(userId, message.channel.id)) {
     message.channel.send(`Timer stopped for ${message.author.username}; `
-      + `time: ${formatTime(stopTimer(message.author.id))}`);
+      + `time: ${formatTime(stopTimer(userId))}`);
   }
-
   let msg = message.content.trim();
   // troll messages
   if (msg.startsWith('Hi!')) {
@@ -152,7 +158,10 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    startTimer(message.author.id, message.channel.id);
+    if (hasTimer(userId)) {
+      message.channel.send('Existing timer stopped.');
+    }
+    startTimer(userId, message.channel.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
