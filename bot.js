@@ -40,7 +40,7 @@ function getScramble(moves) {
 function formatTime(milliseconds) {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 24);
+  let hours = Math.floor(minutes / 60);
   let res = '';
   if (hours > 0) {
     res += hours + ":";
@@ -99,7 +99,7 @@ bot.on('message', function(message) {
   if (!msg.startsWith(prefix)) {
     return;
   }
-  let args = msg.substring(prefix.length).trim().toLowerCase();
+  let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let cmd = args[0];
   if (cmd == 'help') {
     message.channel.send(helpEmbed);
