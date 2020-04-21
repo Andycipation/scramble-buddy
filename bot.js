@@ -99,12 +99,13 @@ bot.on('message', function(message) {
   if (!msg.startsWith(prefix)) {
     return;
   }
-  msg = msg.substring(prefix.length).trim().toLowerCase();
-  if (msg == 'help') {
+  let args = msg.substring(prefix.length).trim().toLowerCase();
+  let cmd = args[0];
+  if (cmd == 'help') {
     message.channel.send(helpEmbed);
-  } else if (msg == 'get') {
+  } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
-  } else if (msg == 'time') {
+  } else if (cmd == 'time') {
     timers.set(message.author.id, Date.now());
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
