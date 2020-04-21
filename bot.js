@@ -49,7 +49,7 @@ const helpEmbed = new Discord.MessageEmbed()
   .setTitle('ScrambleBot Help')
   .setAuthor('by ADMathNoob')
   .attachFiles(['../avatar.jpg'])
-  .setThumbnail('attachment://avatar.png')
+  .setThumbnail('attachment://avatar.jpg')
   .addField('Commands (no spaces required)',
     `- ${prefix} help: shows this message`
     + `\n- ${prefix} get: gets a scramble for 3x3`
