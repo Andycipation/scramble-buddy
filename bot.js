@@ -99,21 +99,18 @@ var prefix = 'cube'; // might add changeable prefixes later
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
-  bot.user.setAvatar('./avatar.png');
+  // bot.user.setAvatar('./avatar.png');
 });
 
 const COMMANDS = [
   [['help'], 'shows a help message'],
   [['get', 'scramble'], 'gets a scramble'],
-  [['time', 'start'], 'starts a timer for you; sending any message will stop it']
+  [['time', 'start'], 'starts a timer for you']
 ];
 
-// var commandString =
-//   `- ${prefix} help: shows this message\n`
-//   + `- ${prefix} get: gets a scramble for 3x3\n`
-//   + `- ${prefix} time: starts a timer for you; sending any message will stop it`;
-
-var commandString = [for (p of COMMANDS) `- ${prefix}` + ([p[0].join('/')]) + ': ' + p[1]].join('\n');
+var commandString = COMMANDS.map(function(p) {
+  return `\`${prefix} ${p[0].join('/')}\` ${p[1]}`
+}).join('\n');
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
@@ -159,21 +156,21 @@ bot.on('message', function(message) {
   let cmd = args[0];
   if (cmd == 'help') {
     message.channel.send(helpEmbed);
-  } else if (cmd == 'get') {
+  } else if (cmd == 'get' || cmd == 'scramble') {
     message.channel.send(getScramble(20));
-  } else if (cmd == 'time') {
+  } else if (cmd == 'time' || cmd == 'start') {
     // if (hasTimer(userId)) { // function overloading not working now
     //   message.channel.send('Existing timer stopped.');
     // }
     startTimer(userId, message.channel.id);
-    message.channel.send(`Timer started for ${message.author.username}.`);
+    message.channel.send(`Timer started for ${message.author.username}. Start typing or send anything to stop.`);
   }
 });
 
 // this is too slow to start/stop the timer accurately
 bot.on('typingStart', function(channel, user) {
   // channel.send(`${user.username} started typing.`);
-  if (hasTimer(userId, message.channel.id)) {
+  if (hasTimer(user.id, channel.id)) {
     channel.send(`Timer stopped for ${user.username}; `
       + `time: ${formatTime(stopTimer(user.id))}`);
   }
