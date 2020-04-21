@@ -47,10 +47,27 @@ function formatTime(milliseconds) {
   }
   if (minutes > 0) {
     minutes %= 60;
-    res += minutes + ":";
+    res += minutes.padStart(2, '0') + ':';
   }
-  res += milliseconds / 1000;
+  seconds %= 60;
+  milliseconds %= 1000;
+  res += seconds.padStart(2, '0') + '.' + milliseconds;
   return res;
+}
+
+var timers = new Map();
+
+function stopTimer(id) { // returns the time taken in milliseconds
+  if (!timers.has(id)) {
+    return -1;
+  }
+  let ret = Date.now() - timers.get(id);
+  timers.delete(id);
+  return ret;
+}
+
+function startTimer(id) {
+  timers.set(id, Date.now());
 }
 
 // ==========END TIMER LOGIC==========
@@ -76,16 +93,13 @@ const helpEmbed = new Discord.MessageEmbed()
   )
   .setFooter('Trademark ADMathNoob™');
 
-var timers = new Map();
-
 bot.on('message', function(message) {
   if (message.author.bot) {
     return;
   }
-  if (timers.has(message.author.id)) {
-    let time = formatTime(Date.now() - timers.get(message.author.id));
+  let time = stopTimer(message.author.id);
+  if (time != -1) {
     message.channel.send(`Timer stopped for ${message.author.username}; time: ${time}`);
-    timers.delete(message.author.id);
   }
   let msg = message.content.trim();
   if (msg.startsWith('Hi!')) {
@@ -106,7 +120,7 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    timers.set(message.author.id, Date.now());
+    startTimer(message.author.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
 });
