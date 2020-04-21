@@ -56,7 +56,17 @@ bot.on('message', function(message) {
     return;
   }
   msg = msg.substring(botPrefix.length).trim().toLowerCase();
-  if (msg == 'get') {
+  if (msg == 'help') {
+    message.channel.send(new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle('ScrambleBot Help')
+      .setAuthor('by ADMathNoob')
+      .setThumbnail('https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/M6AAAOSwHh1dLd6f/$_1.JPG?set_id=880000500F')
+      .addField('Commands', '- cube help: shows this message'
+        + '\n- cube get: gets a scramble for 3x3')
+      .setFooter('Trademark ADMatNoob™')
+    );
+  } else if (msg == 'get') {
     message.channel.send(getScramble(20));
   }
 });
