@@ -43,6 +43,18 @@ const config = require('./config.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
 
+const helpEmbed = new Discord.MessageEmbed()
+  .setColor('#0099ff')
+  .setTitle('ScrambleBot Help')
+  .setAuthor('by ADMathNoob')
+  .setThumbnail('./avatar.jpg')
+  .addField('Commands (no spaces required)',
+    `- ${prefix} help: shows this message`
+    + `\n- ${prefix} get: gets a scramble for 3x3`
+    + `\n- ${prefix} time: starts a timer for you; sending any message will stop it`
+  )
+  .setFooter('Trademark ADMathNoob™');
+
 var timers = new Map();
 
 bot.on('message', function(message) {
@@ -68,18 +80,7 @@ bot.on('message', function(message) {
   }
   msg = msg.substring(prefix.length).trim().toLowerCase();
   if (msg == 'help') {
-    message.channel.send(new Discord.MessageEmbed()
-      .setColor('#0099ff')
-      .setTitle('ScrambleBot Help')
-      .setAuthor('by ADMathNoob')
-      .setThumbnail('https://i.ebayimg.com/00/s/MTYwMFgxNjAw/z/M6AAAOSwHh1dLd6f/$_1.JPG?set_id=880000500F')
-      .addField('Commands (no spaces required)',
-        `- ${prefix} help: shows this message`
-        + `\n- ${prefix} get: gets a scramble for 3x3`
-        + `\n- ${prefix} time: starts a timer for you; sending any message will stop it`
-      )
-      .setFooter('Trademark ADMathNoob™')
-    );
+    message.channel.send(helpEmbed);
   } else if (msg == 'get') {
     message.channel.send(getScramble(20));
   } else if (msg == 'time') {
