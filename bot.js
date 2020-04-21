@@ -35,6 +35,25 @@ function getScramble(moves) {
 
 // ==========END SCRAMBLE LOGIC==========
 
+// ==========TIMER LOGIC==========
+
+function formatTime(milliseconds) {
+  let seconds = Math.floor(milliseconds / 1000);
+  let minutes = Math.floor(seconds / 60);
+  let hours = Math.floor(minutes / 24);
+  let res = '';
+  if (hours > 0) {
+    res += hours + ":";
+  }
+  if (minutes > 0) {
+    minutes %= 60;
+    res += minutes + ":";
+  }
+  res += milliseconds / 1000;
+  return res;
+}
+
+// ==========END TIMER LOGIC==========
 
 // ==========BOT CODE==========
 
@@ -47,8 +66,9 @@ const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
   .setAuthor('by ADMathNoob')
-  .attachFiles(['../avatar.jpg'])
-  .setThumbnail('attachment://avatar.jpg')
+  .setThumbnail('https://www.mindgamesbrisbane.com/wp-content/uploads/2019/03/9352214721600.jpg')
+  // .attachFiles(['../avatar.jpg'])
+  // .setThumbnail('attachment://avatar.jpg')
   .addField('Commands (no spaces required)',
     `- ${prefix} help: shows this message`
     + `\n- ${prefix} get: gets a scramble for 3x3`
@@ -63,7 +83,7 @@ bot.on('message', function(message) {
     return;
   }
   if (timers.has(message.author.id)) {
-    let time = (Date.now() - timers.get(message.author.id)) / 1000;
+    let time = formatTime(Date.now() - timers.get(message.author.id));
     message.channel.send(`Timer stopped for ${message.author.username}; time: ${time}`);
     timers.delete(message.author.id);
   }
