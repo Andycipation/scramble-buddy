@@ -52,6 +52,7 @@ bot.on('message', function(message) {
   if (timers.has(message.author.id)) {
     let time = (Date.now() - timers.get(message.author.id)) / 1000;
     message.channel.send(`Timer stopped for ${message.author.username}; time: ${time}`);
+    timers.delete(message.author.id);
   }
   let msg = message.content.trim();
   if (msg.startsWith('Hi!')) {
