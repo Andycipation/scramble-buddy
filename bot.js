@@ -52,6 +52,10 @@ bot.on('message', function(message) {
     message.channel.send('Hi!');
     return;
   }
+  if (msg.startsWith('gn')) {
+    message.channel.send('Good night!');
+    return;
+  }
   if (!msg.startsWith(botPrefix)) {
     return;
   }
