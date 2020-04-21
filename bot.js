@@ -68,7 +68,8 @@ function stopTimer(id) { // returns the time taken in milliseconds
 
 const BASE = 1000000000;
 function startTimer(userId, channelId) {
-  let id = BASE * channelId + userId;
+  // let id = BASE * channelId + userId;
+  let id = userId;
   timers.set(id, Date.now());
 }
 
@@ -80,6 +81,7 @@ const Discord = require('discord.js');
 const config = require('./config.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
+bot.setGame(`My prefix is ${prefix}`);
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
@@ -97,14 +99,20 @@ const helpEmbed = new Discord.MessageEmbed()
 
 bot.on('message', function(message) {
   if (message.author.bot) {
-    return;
+    return; // ignore messages set by bots
   }
+  // testing messages
   message.channel.send(`Your user id is ${message.author.id}.`);
+  message.channel.send(`This channel's id is ${message.channel.id}.`);
+
+  // timer start/stop
   let time = stopTimer(message.author.id);
   if (time != -1) {
     message.channel.send(`Timer stopped for ${message.author.username}; time: ${formatTime(time)}`);
   }
+
   let msg = message.content.trim();
+  // troll messages
   if (msg.startsWith('Hi!')) {
     message.channel.send('Hi!');
     return;
@@ -113,6 +121,7 @@ bot.on('message', function(message) {
     message.channel.send('Good night!');
     return;
   }
+  // actual functionality
   if (!msg.startsWith(prefix)) {
     return;
   }
