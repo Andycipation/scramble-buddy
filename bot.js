@@ -99,6 +99,7 @@ function stopTimer(userId) { // returns the time taken in milliseconds
 
 const Discord = require('discord.js');
 const config = require('./config.json');
+const pkg = require('./package.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
 
@@ -110,7 +111,7 @@ bot.on('ready', function() {
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
-  .setAuthor('by ADMathNoob')
+  .setAuthor(`by ${pkg.author}`)
   .attachFiles(['./avatar.png'])
   .setThumbnail('attachment://avatar.png')
   .addField('Commands (no spaces required)',
@@ -118,7 +119,7 @@ const helpEmbed = new Discord.MessageEmbed()
     + `- ${prefix} get: gets a scramble for 3x3\n`
     + `- ${prefix} time: starts a timer for you; sending any message will stop it`
   )
-  .setFooter('Trademark ADMathNoob™');
+  .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 
 bot.on('message', function(message) {
   let userId = message.author.id;
@@ -158,9 +159,9 @@ bot.on('message', function(message) {
   } else if (cmd == 'get') {
     message.channel.send(getScramble(20));
   } else if (cmd == 'time') {
-    if (hasTimer(userId)) {
-      message.channel.send('Existing timer stopped.');
-    }
+    // if (hasTimer(userId)) { // function overloading not working now
+    //   message.channel.send('Existing timer stopped.');
+    // }
     startTimer(userId, message.channel.id);
     message.channel.send(`Timer started for ${message.author.username}.`);
   }
