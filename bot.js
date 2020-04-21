@@ -37,6 +37,15 @@ function getScramble(moves) {
 
 // ==========TIMER LOGIC==========
 
+function padStart(str, newLength, c) {
+  let res = "";
+  for (let i = 0; i + str.length < newLength; i++) {
+    res += c;
+  }
+  res += str;
+  return res;
+}
+
 function formatTime(milliseconds) {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
@@ -47,11 +56,19 @@ function formatTime(milliseconds) {
   }
   if (minutes > 0) {
     minutes %= 60;
-    res += minutes.padStart(2, '0') + ':';
+    let minString = minutes.toString();
+    if (hours > 0) {
+      minString = minString.padStart(2, '0');
+    }
+    res += minString + ':';
   }
   seconds %= 60;
+  let secString = seconds.toString();
+  if (minutes > 0) {
+    secString += secString.padStart(2, '0');
+  }
   milliseconds %= 1000;
-  res += seconds.padStart(2, '0') + '.' + milliseconds;
+  res += secString + '.' + milliseconds;
   return res;
 }
 
