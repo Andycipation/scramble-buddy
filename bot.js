@@ -138,9 +138,10 @@ bot.on('message', function(message) {
   }
 });
 
-bot.on('typingStart', function(channel, user)) {
-  channel.send(`${user.username} started typing.`);
-}
+// this is too slow to start/stop the timer accurately
+// bot.on('typingStart', function(channel, user) {
+//   channel.send(`${user.username} started typing.`);
+// });
 
 bot.login(config.token);
 
