@@ -44,6 +44,9 @@ const bot = new Discord.Client();
 var botPrefix = 'cube'; // might add changeable prefixes later
 
 bot.on('message', function(message) {
+  if (message.author.bot) {
+    return;
+  }
   let msg = message.content.trim();
   if (msg == 'Hi!') {
     message.channel.send('Hi!');
