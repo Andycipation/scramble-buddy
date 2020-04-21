@@ -57,6 +57,8 @@ bot.on('message', function(message) {
   }
   msg = msg.substring(botPrefix.length);
   message.channel.send(getScramble(20));
+  message.author.createDM();
+  message.author.dmChannel.send('DM test');
   // for (let i = 0; i < 10; i++) {
   //   message.channel.send("@DAVID-19#1927");
   // }
