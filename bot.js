@@ -205,7 +205,7 @@ newCommand(['clearpb', 'resetpb'], 'resets your personal best',
     if (pb.delete(message.author.id)) {
       message.channel.send(`Personal best of ${message.author.username} cleared.`);
     } else {
-      message.channel.secnd(`${message.author.username} did not have an existing personal best!`);
+      message.channel.send(`${message.author.username} did not have an existing personal best!`);
     }
   }
 );
