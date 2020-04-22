@@ -168,18 +168,19 @@ bot.on('message', function(message) {
     //   message.channel.send('Existing timer stopped.');
     // }
     startTimer(userId, message.channel.id);
-    message.channel.send(`Timer started for ${message.author.username}. Start typing or send anything to stop.`);
+    message.channel.send(`Timer started for ${message.author.username}. `
+      + 'Start typing or send anything to stop.');
   }
 });
 
 // this is too slow to start/stop the timer accurately
-bot.on('typingStart', function(channel, user) {
-  // channel.send(`${user.username} started typing.`);
-  if (hasTimer(user.id, channel.id)) {
-    channel.send(`Timer stopped for ${user.username}; `
-      + `time: ${formatTime(stopTimer(user.id))}`);
-  }
-});
+// bot.on('typingStart', function(channel, user) {
+//   // channel.send(`${user.username} started typing.`);
+//   if (hasTimer(user.id, channel.id)) {
+//     channel.send(`Timer stopped for ${user.username}; `
+//       + `time: ${formatTime(stopTimer(user.id))}`);
+//   }
+// });
 
 bot.login(config.token);
 
