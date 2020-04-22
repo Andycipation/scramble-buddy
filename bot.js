@@ -97,6 +97,8 @@ const pkg = require('./package.json');
 const bot = new Discord.Client();
 var prefix = 'cube'; // might add changeable prefixes later
 
+const trollMessages = false;
+
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
   // bot.user.setAvatar('./avatar.png');
@@ -140,14 +142,17 @@ bot.on('message', function(message) {
   }
   let msg = message.content.trim();
   // troll messages
-  if (msg.startsWith('Hi!')) {
-    message.channel.send('Hi!');
-    return;
+  if (trollMessages) {
+    if (msg.startsWith('Hi!')) {
+      message.channel.send('Hi!');
+      return;
+    }
+    if (msg.startsWith('gn')) {
+      message.channel.send('Good night!');
+      return;
+    }
   }
-  if (msg.startsWith('gn')) {
-    message.channel.send('Good night!');
-    return;
-  }
+  
   // actual functionality
   if (!msg.startsWith(prefix)) {
     return;
