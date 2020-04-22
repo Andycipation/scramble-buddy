@@ -194,9 +194,16 @@ function getPbEmbed() {
     .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 }
 
-newCommand(['pb'], 'shows the personal bests of members in this server',
+newCommand(['pbs', 'pb'], 'shows the personal bests of all members (not just in this server)',
   function(message) {
     message.channel.send(getPbEmbed());
+  }
+);
+
+newCommand(['clearpbs', 'clearpb'], 'clears all records of personal bests',
+  function(message) {
+    pb.clear();
+    message.channel.send('All personal bests cleared.');
   }
 );
 
