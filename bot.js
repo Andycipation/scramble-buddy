@@ -200,7 +200,17 @@ newCommand(['pbs', 'pb'], 'shows the personal bests of all members (not just in 
   }
 );
 
-newCommand(['clearpbs', 'clearpb'], 'clears all records of personal bests',
+newCommand(['clearpb', 'resetpb'], 'resets your personal best',
+  function(message) {
+    if (pb.delete(message.author.id)) {
+      message.channel.send(`Personal best of ${message.author.username} cleared.`);
+    } else {
+      message.channel.secnd(`${message.author.username} did not have an existing personal best!`);
+    }
+  }
+);
+
+newCommand(['clearallpbs', 'resetallpbs'], 'clears all records of personal bests',
   function(message) {
     pb.clear();
     message.channel.send('All personal bests cleared.');
