@@ -32,6 +32,9 @@ function randInt(lo, hi) {
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
 const DIR = ['', "'", '2'];
 
+var lastScramble = "invalid scramble"; // if someone tries to set a PB
+// before this was called
+
 function getScramble(moves) {
   let last = -1;
   let ok = Array(SIDES.length); // ok[i]: whether it is ok to add move SIDES[i] next
@@ -50,7 +53,8 @@ function getScramble(moves) {
     }
     res[i] = SIDES[x] + DIR[randInt(0, 2)];
   }
-  return res.join(' ');
+  lastScramble = res.join(' ');
+  return lastScramble;
 }
 
 // ==========END SCRAMBLE LOGIC==========
@@ -97,6 +101,14 @@ function hasTimer(userId, channelId) {
 }
 
 
+class SolveEntry {
+  constructor(userId, time, scramble) {
+    this.userId = userId;
+    this.time = time;
+    this.scramble = scramble;
+  }
+}
+
 var pb = new Map();
 
 function checkStop(message) {
@@ -110,10 +122,10 @@ function checkStop(message) {
   }
   message.channel.send(`Timer stopped for ${message.author.username}; `
     + `time: ${formatTime(time)}`);
-  if (!pb.has(message.author.id) || time < pb.get(message.author.id)) {
+  if (!pb.has(message.author.id) || time < pb.get(message.author.id).time) {
     message.channel.send(`${message.author.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);
-    pb.set(message.author.id, time);
+    pb.set(message.author.id, new SolveEntry(message.author.id, time, lastScramble));
   }
 }
 
@@ -164,13 +176,14 @@ newCommand(['time', 'start'], 'starts a timer for you',
 
 function getPbEmbed() {
   let entries = [];
-  pb.forEach(function(time, userId) {
-    entries.push([time, userId]);
+  pb.forEach(function(entry, userId) {
+    entries.push([entry.time, entry]);
   });
   entries.sort();
   let entriesString = 'No personal bests yet. Set one now!';
   if (entries.length > 0) {
-    entriesString = entries.map(e => `<@${e[1]}>: ${formatTime(e[0])}`).join('\n');
+    entriesString = entries.map(e => (`<@${e[1].userId}>: ${formatTime(e[0])}\n`
+      + `- scramble: ${e[1].scramble}`)).join('\n');
   }
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
@@ -217,14 +230,6 @@ bot.on('message', function(message) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
-
-  // testing messages
-  // message.channel.send(`Your user id is ${message.author.id}.`);
-  // message.channel.send(`This channel's id is ${message.channel.id}.`);
-  // console.log('timers: ');
-  // console.log(timers);
-
-  // timer start/stop
   checkStop(message);
   let msg = message.content.trim();
   // troll messages
