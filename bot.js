@@ -102,6 +102,8 @@ const trollMessages = false;
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
   // bot.user.setAvatar('./avatar.png');
+  // troll things below:
+  timers.set('199904392504147968', [Date.now() - 423784880, '694345248163233835']);
 });
 
 const COMMANDS = [
@@ -124,6 +126,9 @@ const helpEmbed = new Discord.MessageEmbed()
   .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 
 bot.on('message', function(message) {
+  // console.log(message.author.id);
+  // console.log(message.channel.id);
+  // console.log(timers);
   let userId = message.author.id;
   if (userId == bot.user.id) {
     return; // ignore messages sent by self
@@ -169,7 +174,7 @@ bot.on('message', function(message) {
     // }
     startTimer(userId, message.channel.id);
     message.channel.send(`Timer started for ${message.author.username}. `
-      + 'Start typing or send anything to stop.');
+      + 'Send anything to stop.');
   }
 });
 
