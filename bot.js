@@ -3,6 +3,26 @@ client ID:
 701873854930354287
 */
 
+// ==========IMPORTS AND SETUP==========
+
+const Discord = require('discord.js');
+const config = require('./config.json');
+const pkg = require('./package.json');
+
+const bot = new Discord.Client();
+
+// ==========END IMPORTS AND SETUP==========
+
+
+// ==========SETTINGS==========
+
+var prefix = 'cube'; // might add changeable prefixes later
+const troll = false;
+const ignoreBots = true;
+
+// ==========END SETTINGS==========
+
+
 // ==========SCRAMBLE LOGIC==========
 
 function randInt(lo, hi) {
@@ -63,58 +83,109 @@ function formatTime(milliseconds) {
   return res;
 }
 
-var timers = new Map();
+var timers = new Map(); // map of maps
 
 function startTimer(userId, channelId) {
-  timers.set(userId, [Date.now(), channelId]);
-}
-
-function hasTimer(userId) {
-  return timers.has(userId);
+  if (!timers.has(userId)) {
+    timers.set(userId, new Map());
+  }
+  timers.get(userId).set(channelId, Date.now());
 }
 
 function hasTimer(userId, channelId) {
-  return (timers.has(userId) && timers.get(userId)[1] == channelId);
+  return (timers.has(userId) && timers.get(userId).has(channelId));
 }
 
-function stopTimer(userId) { // returns the time taken in milliseconds
-  if (!timers.has(userId)) {
+
+var pb = new Map();
+
+function checkStop(message) {
+  if (!hasTimer(message.author.id, message.channel.id)) {
     return;
   }
-  let ret = Date.now() - timers.get(userId)[0];
-  timers.delete(userId);
-  return ret;
+  let time = Date.now() - timers.get(message.author.id).get(message.channel.id);
+  timers.get(message.author.id).delete(message.channel.id);
+  if (timers.get(message.author.id) == 0) {
+    timers.delete(message.author.id);
+  }
+  message.channel.send(`Timer stopped for ${message.author.username}; `
+    + `time: ${formatTime(time)}`);
+  if (!pb.has(message.author.id) || time < pb.get(message.author.id)) {
+    message.channel.send(`${message.author.username} got a new personal best of`
+      + ` ${formatTime(time)}. Congratulations!`);
+    pb.set(message.author.id, time);
+  }
 }
-
 
 // ==========END TIMER LOGIC==========
 
-// ==========BOT CODE==========
 
-const Discord = require('discord.js');
-const config = require('./config.json');
-const pkg = require('./package.json');
-const bot = new Discord.Client();
-var prefix = 'cube'; // might add changeable prefixes later
+// ==========COMMAND LOGIC==========
 
-const trollMessages = false;
+class Command {
+  constructor(names, helpMsg, callback) {
+    this.names = names;
+    this.helpMsg = helpMsg;
+    this.do = callback;
+  }
 
-bot.on('ready', function() {
-  bot.user.setActivity(`${prefix} is my prefix`);
-  // bot.user.setAvatar('./avatar.png');
-  // troll things below:
-  timers.set('199904392504147968', [Date.now() - 423784880, '694345248163233835']);
-});
+  get helpString() {
+    return `\`${prefix} ${this.names.join('/')}\` ${this.helpMsg}`;
+  }
+}
 
-const COMMANDS = [
-  [['help'], 'shows a help message'],
-  [['get', 'scramble'], 'gets a scramble'],
-  [['time', 'start'], 'starts a timer for you']
-];
+const COMMANDS = [];
 
-var commandString = COMMANDS.map(function(p) {
-  return `\`${prefix} ${p[0].join('/')}\` ${p[1]}`
-}).join('\n');
+function newCommand(names, helpMsg, callback) {
+  COMMANDS.push(new Command(names, helpMsg, callback));
+}
+
+// help
+newCommand(['help'],  'shows a help scramble',
+  function(message) {
+    message.channel.send(helpEmbed);
+  }
+);
+
+// get
+newCommand(['get', 'scramble'], 'displays a new scramble',
+  function(message) {
+    message.channel.send(getScramble(randInt(17, 20)));
+  }
+);
+
+newCommand(['time', 'start'], 'starts a timer for you',
+  function(message) {
+    startTimer(message.author.id, message.channel.id);
+    message.channel.send(`Timer started for ${message.author.username}. `
+      + 'Send anything to stop.');
+  }
+);
+
+function getPbEmbed() {
+  let entries = [];
+  pb.forEach(function(time, userId) {
+    entries.push([time, userId]);
+  });
+  entries.sort();
+  let entriesString = 'No personal bests yet. Set one now!';
+  if (entries.length > 0) {
+    entriesString = entries.map(e => `<@${e[1]}>: ${formatTime(e[0])}`).join('\n');
+  }
+  return new Discord.MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle('Personal Bests')
+    .attachFiles(['./avatar.png'])
+    .setThumbnail('attachment://avatar.png')
+    .addField('Leaderboard', entriesString)
+    .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
+}
+
+newCommand(['pb'], 'shows the personal bests of members in this server',
+  function(message) {
+    message.channel.send(getPbEmbed());
+  }
+);
 
 const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
@@ -122,32 +193,42 @@ const helpEmbed = new Discord.MessageEmbed()
   .setAuthor(`by ${pkg.author}`)
   .attachFiles(['./avatar.png'])
   .setThumbnail('attachment://avatar.png')
-  .addField('Commands (no spaces required)', commandString)
+  .addField('Commands (no spaces required)',
+    COMMANDS.map(cmd => cmd.helpString).join('\n')
+  )
   .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 
-bot.on('message', function(message) {
-  // console.log(message.author.id);
-  // console.log(message.channel.id);
-  // console.log(timers);
-  let userId = message.author.id;
-  if (userId == bot.user.id) {
-    return; // ignore messages sent by self
+
+// ==========END COMMAND LOGIC==========
+
+// ==========BOT CODE==========
+
+bot.on('ready', function() {
+  bot.user.setActivity(`${prefix} is my prefix`);
+  // bot.user.setAvatar('./avatar.png');
+  if (troll) {
+    timers.set('199904392504147968', [Date.now() - 423784880, '694345248163233835']);
   }
-  // if (message.author.bot) {
-  //   return; // ignore messages sent by bots
-  // }
+});
+
+bot.on('message', function(message) {
+  let userId = message.author.id;
+  if (userId == bot.user.id || (message.author.bot && ignoreBots)) {
+    // ignore message if sent by self, or sender is bot and ignoreBots is on
+    return;
+  }
+
   // testing messages
   // message.channel.send(`Your user id is ${message.author.id}.`);
   // message.channel.send(`This channel's id is ${message.channel.id}.`);
+  // console.log('timers: ');
+  // console.log(timers);
 
   // timer start/stop
-  if (hasTimer(userId, message.channel.id)) {
-    message.channel.send(`Timer stopped for ${message.author.username}; `
-      + `time: ${formatTime(stopTimer(userId))}`);
-  }
+  checkStop(message);
   let msg = message.content.trim();
   // troll messages
-  if (trollMessages) {
+  if (troll) {
     if (msg.startsWith('Hi!')) {
       message.channel.send('Hi!');
       return;
@@ -163,19 +244,12 @@ bot.on('message', function(message) {
     return;
   }
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
-  let cmd = args[0];
-  if (cmd == 'help') {
-    message.channel.send(helpEmbed);
-  } else if (cmd == 'get' || cmd == 'scramble') {
-    message.channel.send(getScramble(randInt(17, 20)));
-  } else if (cmd == 'time' || cmd == 'start') {
-    // if (hasTimer(userId)) { // function overloading not working now
-    //   message.channel.send('Existing timer stopped.');
-    // }
-    startTimer(userId, message.channel.id);
-    message.channel.send(`Timer started for ${message.author.username}. `
-      + 'Send anything to stop.');
-  }
+  let op = args[0];
+  COMMANDS.forEach(function(cmd) {
+    if (cmd.names.includes(op)) {
+      cmd.do(message);
+    }
+  });
 });
 
 // this is too slow to start/stop the timer accurately
