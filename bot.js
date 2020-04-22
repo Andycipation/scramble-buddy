@@ -152,7 +152,7 @@ bot.on('message', function(message) {
       return;
     }
   }
-  
+
   // actual functionality
   if (!msg.startsWith(prefix)) {
     return;
@@ -162,7 +162,7 @@ bot.on('message', function(message) {
   if (cmd == 'help') {
     message.channel.send(helpEmbed);
   } else if (cmd == 'get' || cmd == 'scramble') {
-    message.channel.send(getScramble(20));
+    message.channel.send(getScramble(randInt(17, 20)));
   } else if (cmd == 'time' || cmd == 'start') {
     // if (hasTimer(userId)) { // function overloading not working now
     //   message.channel.send('Existing timer stopped.');
