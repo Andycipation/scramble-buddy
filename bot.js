@@ -238,7 +238,9 @@ bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`);
   // bot.user.setAvatar('./avatar.png');
   if (troll) {
-    timers.set('199904392504147968', [Date.now() - 423784880, '694345248163233835']);
+    // ADMathNoob in Corona Cuber Gang, #bot channel
+    timers.set('199904392504147968', new Map());
+    timers.get('199904392504147968').set('701904186081804320', Date.now() - 423784880);
   }
 });
 
