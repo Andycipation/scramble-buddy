@@ -17,9 +17,9 @@ const bot = new Discord.Client();
 // ==========SETTINGS==========
 
 var prefix = 'cube'; // might add changeable prefixes later
-const troll = true;
+const troll = false;
 const ignoreBots = true;
-const COOLDOWN = 0;
+const COOLDOWN = 1000;
 
 // ==========END SETTINGS==========
 
