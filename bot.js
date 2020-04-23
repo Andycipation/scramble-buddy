@@ -89,6 +89,7 @@ function formatTime(milliseconds) {
 }
 
 var timers = new Map(); // map of maps
+var curScramble = new Map();
 
 function startTimer(userId, channelId) {
   if (!timers.has(userId)) {
@@ -122,8 +123,9 @@ function checkStop2(channel, user) {
   if (!pb.has(user.id) || time < pb.get(user.id).time) {
     channel.send(`${user.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);
-    pb.set(user.id, new SolveEntry(user.id, time, lastScramble));
+    pb.set(user.id, new SolveEntry(user.id, time, curScramble.get(user.id)));
   }
+  curScramble.delete(user.id);
 }
 
 function checkStop(message) {
@@ -163,7 +165,9 @@ newCommand(['help'],  'shows a help scramble',
 // get
 newCommand(['get', 'scramble'], 'displays a new scramble',
   function(message) {
-    message.channel.send(getScramble(randInt(17, 20)));
+    let str = getScramble(randInt(17, 20));
+    curScramble.set(message.author.id, str);
+    message.channel.send(str);
   }
 );
 
