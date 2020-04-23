@@ -181,7 +181,13 @@ function getPbEmbed() {
     entries.push(entry);
   });
   entries.sort(function(e1, e2) {
-    return (e1.time < e2.time);
+    if (e1.time < e2.time) {
+      return -1;
+    }
+    if (e1.time > e2.time) {
+      return 1;
+    }
+    return 0;
   });
   let entriesString = 'No personal bests yet. Set one now!';
   if (entries.length > 0) {
