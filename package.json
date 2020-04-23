@@ -1,6 +1,6 @@
 {
   "name": "ScrambleBot",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Generates Rubik's Cube scrambles",
   "main": "bot.js",
   "repository": {

@@ -33,9 +33,6 @@ function randInt(lo, hi) {
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
 const DIR = ['', "'", '2'];
 
-var lastScramble = 'invalid scramble'; // if someone tries to set a PB
-// before this was called
-
 function getScramble(moves) {
   let last = -1;
   let ok = Array(SIDES.length); // ok[i]: whether it is ok to add move SIDES[i] next
@@ -54,8 +51,7 @@ function getScramble(moves) {
     }
     res[i] = SIDES[x] + DIR[randInt(0, 2)];
   }
-  lastScramble = res.join(' ');
-  return lastScramble;
+  return res.join(' ');
 }
 
 // ==========END SCRAMBLE LOGIC==========
@@ -120,6 +116,9 @@ function checkStop2(channel, user) {
   let time = Date.now() - timers.get(user.id).get(channel.id);
   timers.get(user.id).delete(channel.id);
   channel.send(`Timer stopped for ${user.username}; time: ${formatTime(time)}`);
+  if (!curScramble.has(user.id)) {
+    return; // if user didn't request a scramble, don't consider this for PB
+  }
   if (!pb.has(user.id) || time < pb.get(user.id).time) {
     channel.send(`${user.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);
@@ -163,13 +162,14 @@ newCommand(['help'],  'shows a help scramble',
 );
 
 // get
-newCommand(['get', 'scramble'], 'displays a new scramble',
-  function(message) {
-    let str = getScramble(randInt(17, 20));
-    curScramble.set(message.author.id, str);
-    message.channel.send(str);
-  }
-);
+newCommand(['get', 'scramble'], 'displays a new scramble', message => {
+  let scramble = getScramble(randInt(17, 20));
+  let str = `${scramble}\nReact with ${scrambleConfirmEmoji} to use this scramble.`;
+  message.channel.send(str).then(async sent => {
+    await sent.react(scrambleConfirmEmoji);
+    await sent.react(scrambleRemoveEmoji);
+  });
+});
 
 newCommand(['time', 'start'], 'starts a timer for you',
   function(message) {
@@ -244,6 +244,94 @@ const helpEmbed = new Discord.MessageEmbed()
 
 // ==========END COMMAND LOGIC==========
 
+
+// ==========REACTION LOGIC==========
+
+const scrambleConfirmEmoji = '✅';
+const scrambleRemoveEmoji = '❌';
+
+class ReactionAddAction {
+  constructor(emoji, callback) {
+    this.emoji = emoji;
+    this.do = callback;
+  }
+}
+
+const REACTION_ADD_ACTIONS = [];
+
+function newReactionAddAction(emoji, callback) {
+  REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, callback));
+}
+
+newReactionAddAction(scrambleConfirmEmoji, (messageReaction, user) => {
+  const message = messageReaction.message;
+  // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
+  const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(user.id));
+	for (const reaction of userReactions.values()) {
+    if (reaction.emoji.name == scrambleRemoveEmoji) {
+  		reaction.users.remove(user.id);
+    }
+	}
+  let lines = message.content.split('\n');
+  let scrambleString = lines[0];
+  let instructions = lines[1];
+  let users = lines.slice(3);
+  users.push(`<@${user.id}>`);
+  curScramble.set(user.id, scrambleString);
+  if (!message.editable) {
+    console.log('cannot edit this message');
+    return;
+  }
+  message.edit(`${scrambleString}\n${instructions}\nContenders:\n${users.join('\n')}`);
+});
+
+newReactionAddAction(scrambleRemoveEmoji, (messageReaction, user) => {
+  const message = messageReaction.message;
+  // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
+  const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(user.id));
+  for (const reaction of userReactions.values()) {
+    if (reaction.emoji.name == scrambleConfirmEmoji) {
+      reaction.users.remove(user.id);
+    }
+  }
+  let lines = message.content.split('\n');
+  let scrambleString = lines[0];
+  let instructions = lines[1];
+  let tgt = `<@${user.id}>`;
+  let users = lines.slice(3).filter(u => u != tgt);
+  // console.log('filtered users: ' + users);
+  curScramble.delete(user.id);
+  if (!message.editable) {
+    console.log('cannot edit this message');
+    return;
+  }
+  let edited = `${scrambleString}\n${instructions}`;
+  if (users.length != 0) {
+    edited += `\nContenders:\n${users.join('\n')}`;
+  }
+  message.edit(edited);
+});
+
+// class ReactionRemoveAction {
+//   constructor(emoji, callback) {
+//     this.emoji = emoji;
+//     this.do = callback;
+//   }
+// }
+//
+// const REACTION_REMOVE_ACTIONS = [];
+//
+// function newReactionRemoveAction(emoji, callback) {
+//   REACTION_REMOVE_ACTIONS.push(new ReactionRemoveAction(emoji, callback));
+// }
+//
+// newReactionRemoveAction(scrambleConfirmEmoji, (messageReaction, user) => {
+//
+// });
+
+// ==========END REACTION LOGIC==========
+
+
 // ==========BOT CODE==========
 
 bot.on('ready', function() {
@@ -254,6 +342,7 @@ bot.on('ready', function() {
     timers.set('199904392504147968', new Map());
     timers.get('199904392504147968').set('701904186081804320', Date.now() - 423784880);
   }
+  console.log('Bot is ready.');
 });
 
 const lastRequest = new Map();
@@ -262,11 +351,12 @@ function canRequest(id) {
   return (!lastRequest.has(id) || Date.now() - lastRequest.get(id) >= COOLDOWN);
 }
 
-bot.on('message', function(message) {
+bot.on('message', message => {
   if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
+  // message.react('😄');
   checkStop(message);
   let msg = message.content.trim();
   // troll messages
@@ -287,12 +377,39 @@ bot.on('message', function(message) {
   lastRequest.set(message.author.id, Date.now());
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
-  COMMANDS.forEach(function(cmd) {
+  COMMANDS.forEach(cmd => {
     if (cmd.names.includes(op)) {
       cmd.do(message);
     }
   });
 });
+
+// figure this out later
+// const rc = Discord.ReactionCollector()
+
+bot.on('messageReactionAdd', (messageReaction, user) => {
+  // console.log('someone reacted to: ' + messageReaction.message.content);
+  if (user.id == bot.user.id) {
+    return; // ignore reacts by self
+  }
+  REACTION_ADD_ACTIONS.forEach(raa => { // related acute angle lol
+    if (messageReaction.emoji.name == raa.emoji) {
+      raa.do(messageReaction, user);
+    }
+  });
+});
+
+// bot.on('messageReactionRemove', (messageReaction, user) => {
+//   // console.log('someone removed a reaction on: ' + messageReaction.message.content);
+//   if (user.id == bot.user.id) {
+//     return;
+//   }
+//   REACTION_REMOVE_ACTIONS.forEach(rda => {
+//     if (messageReaction.emoji.name == rda.emoji) {
+//       rda.do(messageReaction, user);
+//     }
+//   });
+// })
 
 // this is too slow to start/stop the timer accurately
 // bot.on('typingStart', function(channel, user) {
