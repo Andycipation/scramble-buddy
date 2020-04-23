@@ -17,8 +17,9 @@ const bot = new Discord.Client();
 // ==========SETTINGS==========
 
 var prefix = 'cube'; // might add changeable prefixes later
-const troll = false;
+const troll = true;
 const ignoreBots = true;
+const COOLDOWN = 0;
 
 // ==========END SETTINGS==========
 
@@ -32,7 +33,7 @@ function randInt(lo, hi) {
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
 const DIR = ['', "'", '2'];
 
-var lastScramble = "invalid scramble"; // if someone tries to set a PB
+var lastScramble = 'invalid scramble'; // if someone tries to set a PB
 // before this was called
 
 function getScramble(moves) {
@@ -112,9 +113,6 @@ class SolveEntry {
 var pb = new Map();
 
 function checkStop2(channel, user) {
-  // console.log(user);
-  // console.log(user.id);
-  // console.log(channel.id);
   if (!hasTimer(user.id, channel.id)) {
     return; // this user doesn't have a timer in this channel
   }
@@ -244,13 +242,17 @@ bot.on('ready', function() {
   }
 });
 
+const lastRequest = new Map();
+
+function canRequest(id) {
+  return (!lastRequest.has(id) || Date.now() - lastRequest.get(id) >= COOLDOWN);
+}
+
 bot.on('message', function(message) {
-  let userId = message.author.id;
-  if (userId == bot.user.id || (message.author.bot && ignoreBots)) {
+  if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
-  // console.log(message);
   checkStop(message);
   let msg = message.content.trim();
   // troll messages
@@ -264,11 +266,11 @@ bot.on('message', function(message) {
       return;
     }
   }
-
   // actual functionality
-  if (!msg.startsWith(prefix)) {
+  if (!msg.startsWith(prefix) || !canRequest(message.author.id)) {
     return;
   }
+  lastRequest.set(message.author.id, Date.now());
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
   COMMANDS.forEach(function(cmd) {
