@@ -84,7 +84,7 @@ function formatTime(milliseconds) {
     secString = secString.padStart(2, '0');
   }
   milliseconds %= 1000;
-  res += secString + '.' + milliseconds;
+  res += secString + '.' + milliseconds.toString().padStart(3, '0');
   return res;
 }
 
@@ -178,9 +178,11 @@ newCommand(['time', 'start'], 'starts a timer for you',
 function getPbEmbed() {
   let entries = [];
   pb.forEach(function(entry, userId) {
-    entries.push([entry.time, entry]);
+    entries.push(entry);
   });
-  entries.sort();
+  entries.sort(function(e1, e2) {
+    return (e1.time < e2.time);
+  });
   let entriesString = 'No personal bests yet. Set one now!';
   if (entries.length > 0) {
     entriesString = entries.map(e => (`<@${e[1].userId}>: ${formatTime(e[0])}\n`
