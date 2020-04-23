@@ -111,22 +111,25 @@ class SolveEntry {
 
 var pb = new Map();
 
-function checkStop(message) {
-  if (!hasTimer(message.author.id, message.channel.id)) {
-    return;
+function checkStop2(channel, user) {
+  // console.log(user);
+  // console.log(user.id);
+  // console.log(channel.id);
+  if (!hasTimer(user.id, channel.id)) {
+    return; // this user doesn't have a timer in this channel
   }
-  let time = Date.now() - timers.get(message.author.id).get(message.channel.id);
-  timers.get(message.author.id).delete(message.channel.id);
-  if (timers.get(message.author.id) == 0) {
-    timers.delete(message.author.id);
-  }
-  message.channel.send(`Timer stopped for ${message.author.username}; `
-    + `time: ${formatTime(time)}`);
-  if (!pb.has(message.author.id) || time < pb.get(message.author.id).time) {
-    message.channel.send(`${message.author.username} got a new personal best of`
+  let time = Date.now() - timers.get(user.id).get(channel.id);
+  timers.get(user.id).delete(channel.id);
+  channel.send(`Timer stopped for ${user.username}; time: ${formatTime(time)}`);
+  if (!pb.has(user.id) || time < pb.get(user.id).time) {
+    channel.send(`${user.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);
-    pb.set(message.author.id, new SolveEntry(message.author.id, time, lastScramble));
+    pb.set(user.id, new SolveEntry(user.id, time, lastScramble));
   }
+}
+
+function checkStop(message) {
+  checkStop2(message.channel, message.author);
 }
 
 // ==========END TIMER LOGIC==========
@@ -205,7 +208,7 @@ newCommand(['clearpb', 'resetpb'], 'resets your personal best',
     if (pb.delete(message.author.id)) {
       message.channel.send(`Personal best of ${message.author.username} cleared.`);
     } else {
-      message.channel.send(`${message.author.username} did not have an existing personal best!`);
+      message.channel.send(`${message.author.username} did not have an existing personal best.`);
     }
   }
 );
@@ -247,6 +250,7 @@ bot.on('message', function(message) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
+  // console.log(message);
   checkStop(message);
   let msg = message.content.trim();
   // troll messages
@@ -276,11 +280,8 @@ bot.on('message', function(message) {
 
 // this is too slow to start/stop the timer accurately
 // bot.on('typingStart', function(channel, user) {
-//   // channel.send(`${user.username} started typing.`);
-//   if (hasTimer(user.id, channel.id)) {
-//     channel.send(`Timer stopped for ${user.username}; `
-//       + `time: ${formatTime(stopTimer(user.id))}`);
-//   }
+//   console.log(user);
+//   checkStop2(channel, user);
 // });
 
 bot.login(config.token);
