@@ -185,8 +185,8 @@ function getPbEmbed() {
   });
   let entriesString = 'No personal bests yet. Set one now!';
   if (entries.length > 0) {
-    entriesString = entries.map(e => (`<@${e[1].userId}>: ${formatTime(e[0])}\n`
-      + `- scramble: ${e[1].scramble}`)).join('\n');
+    entriesString = entries.map(e => (`<@${e.userId}>: ${formatTime(e.time)}\n`
+      + `- scramble: ${e.scramble}`)).join('\n');
   }
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
