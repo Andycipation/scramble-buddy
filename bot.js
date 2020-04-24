@@ -5,7 +5,6 @@ client ID:
 
 
 const Discord = require('discord.js');
-const config = require('./config.json');
 const pkg = require('./package.json');
 
 const { prefix, troll, ignoreBots, COOLDOWN } = require('./settings.js');
