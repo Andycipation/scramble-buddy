@@ -71,8 +71,8 @@ function getPbEmbed() {
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle('Personal Bests')
-    .attachFiles(['./assets/avatar.png'])
-    .setThumbnail('attachment://avatar.png')
+    // .attachFiles(['./assets/avatar.png'])
+    // .setThumbnail('attachment://avatar.png')
     .addField('Leaderboard', entriesString)
     .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 }
@@ -105,8 +105,8 @@ const helpEmbed = new Discord.MessageEmbed()
   .setColor('#0099ff')
   .setTitle('ScrambleBot Help')
   .setAuthor(`by ${pkg.author}`)
-  .attachFiles(['./assets/avatar.png'])
-  .setThumbnail('attachment://avatar.png')
+  // .attachFiles(['./assets/avatar.png'])
+  // .setThumbnail('attachment://avatar.png')
   .addField('Commands (no spaces required)',
     COMMANDS.map(cmd => cmd.helpString).join('\n')
   )
