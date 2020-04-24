@@ -17,13 +17,13 @@ const bot = new Discord.Client();
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`); // set bot status
-  // bot.user.setAvatar('./avatar.png');
+  // bot.user.setAvatar('./assets/avatar.png');
   if (troll) {
     // ADMathNoob in Corona Cuber Gang, #bot channel
     timers.set('199904392504147968', new Map());
     timers.get('199904392504147968').set('701904186081804320', Date.now() - 423784880);
   }
-  console.log('Bot is ready.');
+  console.log(`ScrambleBot v${pkg.version} is now up and running.`);
 });
 
 const lastRequest = new Map();
