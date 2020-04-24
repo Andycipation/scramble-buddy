@@ -3,7 +3,6 @@ client ID:
 701873854930354287
 */
 
-// ==========IMPORTS AND SETUP==========
 
 const Discord = require('discord.js');
 const config = require('./config.json');
@@ -15,9 +14,6 @@ const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const timer = require('./modules/timer.js');
 
 const bot = new Discord.Client();
-
-// ==========END IMPORTS AND SETUP==========
-
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`); // set bot status
@@ -36,6 +32,7 @@ function canRequest(id) {
   return (!lastRequest.has(id) || Date.now() - lastRequest.get(id) >= COOLDOWN);
 }
 
+// when a message is sent
 bot.on('message', message => {
   if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
@@ -69,12 +66,10 @@ bot.on('message', message => {
   });
 });
 
-// figure this out later
-// const rc = Discord.ReactionCollector()
-
+// when a reaction is added to an existing message
 bot.on('messageReactionAdd', (messageReaction, user) => {
   // console.log('someone reacted to: ' + messageReaction.message.content);
-  if (user.id == bot.user.id) {
+  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
     return; // ignore reacts by self
   }
   REACTION_ADD_ACTIONS.forEach(raa => { // related acute angle lol
@@ -84,17 +79,18 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
   });
 });
 
-// bot.on('messageReactionRemove', (messageReaction, user) => {
-//   // console.log('someone removed a reaction on: ' + messageReaction.message.content);
-//   if (user.id == bot.user.id) {
-//     return;
-//   }
-//   REACTION_REMOVE_ACTIONS.forEach(rda => {
-//     if (messageReaction.emoji.name == rda.emoji) {
-//       rda.do(messageReaction, user);
-//     }
-//   });
-// })
+// when a reaction is removed from an existing message
+bot.on('messageReactionRemove', (messageReaction, user) => {
+  // // console.log('someone removed a reaction on: ' + messageReaction.message.content);
+  // if (user.id == bot.user.id || (user.bot && ignoreBots)) {
+  //   return;
+  // }
+  // REACTION_REMOVE_ACTIONS.forEach(rda => {
+  //   if (messageReaction.emoji.name == rda.emoji) {
+  //     rda.do(messageReaction, user);
+  //   }
+  // });
+})
 
 // this is too slow to start/stop the timer accurately
 // bot.on('typingStart', function(channel, user) {
