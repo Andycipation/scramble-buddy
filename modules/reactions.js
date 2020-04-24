@@ -14,6 +14,8 @@ class ReactionAddAction {
 
 const REACTION_ADD_ACTIONS = [];
 
+// add a new action to perform when a reaction is added
+// callback should take two objects as arguments: messageReaction and user
 function newReactionAddAction(emoji, callback) {
   REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, callback));
 }
