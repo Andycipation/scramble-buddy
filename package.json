@@ -11,5 +11,7 @@
   "homepage": "https://github.com/AndrewDongAndy/ScrambleBot#readme",
   "dependencies": {
     "discord.js": "^12.2.0"
-  }
+  },
+  "license": "UNLICENSED",
+  "private": true
 }

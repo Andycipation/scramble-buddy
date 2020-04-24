@@ -97,4 +97,6 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 //   checkStop2(channel, user);
 // });
 
-bot.login(process.env.token);
+// log in using environment variable!
+require('dotenv').config();
+bot.login(process.env.TOKEN);
