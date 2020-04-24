@@ -3,7 +3,7 @@ Module for managing reactions.
 */
 
 const { prefix, scrambleRemoveEmoji, scrambleConfirmEmoji } = require('../settings.js');
-const { curScramble } = require('./timer.js');
+const timer = require('./timer.js');
 
 class ReactionAddAction {
   constructor(emoji, callback) {
@@ -18,21 +18,25 @@ function newReactionAddAction(emoji, callback) {
   REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, callback));
 }
 
+function removeReaction(message, userId, emojiChar) {
+  // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
+  const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(userId));
+  for (const reaction of userReactions.values()) {
+    if (reaction.emoji.name == emojiChar) {
+      reaction.users.remove(userId);
+    }
+  }
+}
+
 newReactionAddAction(scrambleConfirmEmoji, (messageReaction, user) => {
   const message = messageReaction.message;
-  // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
-  const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(user.id));
-	for (const reaction of userReactions.values()) {
-    if (reaction.emoji.name == scrambleRemoveEmoji) {
-  		reaction.users.remove(user.id);
-    }
-	}
+  removeReaction(message, user.id, scrambleRemoveEmoji);
   let lines = message.content.split('\n');
   let scrambleString = lines[0];
   let instructions = lines[1];
   let users = lines.slice(3);
   users.push(`<@${user.id}>`);
-  curScramble.set(user.id, scrambleString);
+  timer.setScramble(user.id, scrambleString);
   if (!message.editable) {
     console.log('cannot edit this message');
     return;
@@ -42,20 +46,14 @@ newReactionAddAction(scrambleConfirmEmoji, (messageReaction, user) => {
 
 newReactionAddAction(scrambleRemoveEmoji, (messageReaction, user) => {
   const message = messageReaction.message;
-  // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
-  const userReactions = message.reactions.cache.filter(reaction => reaction.users.cache.has(user.id));
-  for (const reaction of userReactions.values()) {
-    if (reaction.emoji.name == scrambleConfirmEmoji) {
-      reaction.users.remove(user.id);
-    }
-  }
+  removeReaction(message, user.id, scrambleConfirmEmoji);
   let lines = message.content.split('\n');
   let scrambleString = lines[0];
   let instructions = lines[1];
   let tgt = `<@${user.id}>`;
   let users = lines.slice(3).filter(u => u != tgt);
   // console.log('filtered users: ' + users);
-  curScramble.delete(user.id);
+  timer.deleteScramble(user.id); // could return true or false
   if (!message.editable) {
     console.log('cannot edit this message');
     return;

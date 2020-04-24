@@ -30,11 +30,9 @@ function newCommand(names, helpMsg, callback) {
 }
 
 // help
-newCommand(['help'],  'shows a help scramble',
-  function(message) {
-    message.channel.send(helpEmbed);
-  }
-);
+newCommand(['help'], 'shows this help message', message => {
+  message.channel.send(helpEmbed);
+});
 
 // get
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
@@ -46,27 +44,29 @@ newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   });
 });
 
-newCommand(['time', 'start'], 'starts a timer for you',
-  message => {
-    timer.startTimer(message.author.id, message.channel.id);
-    message.channel.send(`Timer started for ${message.author.username}. `
-      + 'Send anything to stop.');
-  }
-);
+// start timer
+newCommand(['time', 'start', 'go'], 'starts a timer for you', message => {
+  timer.startTimer(message.author.id, message.channel.id);
+  message.channel.send(`Timer started for ${message.author.username}. `
+    + 'Send anything to stop.');
+});
 
 function getPbEmbed() {
-  let entries = [];
-  for (entry of solves.getPbs().values()) {
-    entries.push(entry);
-  }
+  let entries = Array.from(solves.getPbs().values());
   entries.sort((e1, e2) => {
-    if (e1.time < e2.time) { return -1; }
-    if (e1.time > e2.time) { return 1; }
+    if (e1.time < e2.time) {
+      return -1;
+    }
+    if (e1.time > e2.time) {
+      return 1;
+    }
     return 0;
   });
-  let entriesString = 'No personal bests yet. Set one now!';
+  let entriesString;
   if (entries.length > 0) {
     entriesString = entries.map(e => e.string).join('\n');
+  } else {
+    entriesString = 'No personal bests yet. Set one now!';
   }
   return new Discord.MessageEmbed()
     .setColor('#0099ff')
@@ -77,22 +77,23 @@ function getPbEmbed() {
     .setFooter(`ScrambleBot, version ${pkg.version} | Trademark ${pkg.author}™`);
 }
 
+// show personal bests
 newCommand(['pbs', 'pb'], 'shows the personal bests of all members (not just in this server)',
   message => {
     message.channel.send(getPbEmbed());
   }
 );
 
-newCommand(['clearpb', 'resetpb'], 'resets your personal best',
-  message => {
-    if (solves.deletePb(message.author.id)) {
-      message.channel.send(`Personal best of ${message.author.username} cleared.`);
-    } else {
-      message.channel.send(`${message.author.username} did not have an existing personal best.`);
-    }
+// clear your personal best
+newCommand(['clearpb', 'resetpb'], 'resets your personal best', message => {
+  if (solves.deletePb(message.author.id)) {
+    message.channel.send(`Personal best of ${message.author.username} cleared.`);
+  } else {
+    message.channel.send(`${message.author.username} did not have an existing personal best.`);
   }
-);
+});
 
+// clear all personal bests
 newCommand(['clearallpbs', 'resetallpbs'], 'clears all records of personal bests',
   message => {
     solves.clearAllPbs();

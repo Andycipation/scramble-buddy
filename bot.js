@@ -12,18 +12,15 @@ const pkg = require('./package.json');
 const { prefix, troll, ignoreBots, COOLDOWN } = require('./settings.js');
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
-const { checkStop } = require('./modules/timer.js');
+const timer = require('./modules/timer.js');
 
 const bot = new Discord.Client();
 
 // ==========END IMPORTS AND SETUP==========
 
 
-
-// ==========BOT CODE==========
-
 bot.on('ready', function() {
-  bot.user.setActivity(`${prefix} is my prefix`);
+  bot.user.setActivity(`${prefix} is my prefix`); // set bot status
   // bot.user.setAvatar('./avatar.png');
   if (troll) {
     // ADMathNoob in Corona Cuber Gang, #bot channel
@@ -45,7 +42,7 @@ bot.on('message', message => {
     return;
   }
   // message.react('😄');
-  checkStop(message);
+  timer.checkStop(message);
   let msg = message.content.trim();
   // troll messages
   if (troll) {
@@ -106,5 +103,3 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
 // });
 
 bot.login(config.token);
-
-// ==========END BOT CODE==========

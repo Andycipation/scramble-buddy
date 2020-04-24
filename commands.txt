@@ -1,6 +1,0 @@
-help
-shows a help message
-get scramble
-displays a new scramble
-time start
-starts a timer for you

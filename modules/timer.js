@@ -30,26 +30,26 @@ function formatTime(milliseconds) {
   return res;
 }
 
-var timers = new Map(); // map<userId, map<channelId, startTime>>
-var curScramble = new Map(); // map from user id to scramble string
+const startTimes = new Map(); // map<userId, map<channelId, startTime>>
+const curScramble = new Map(); // map from user id to scramble string
 
 function startTimer(userId, channelId) {
-  if (!timers.has(userId)) {
-    timers.set(userId, new Map());
+  if (!startTimes.has(userId)) {
+    startTimes.set(userId, new Map());
   }
-  timers.get(userId).set(channelId, Date.now());
+  startTimes.get(userId).set(channelId, Date.now());
 }
 
 function _hasTimer(userId, channelId) {
-  return (timers.has(userId) && timers.get(userId).has(channelId));
+  return (startTimes.has(userId) && startTimes.get(userId).has(channelId));
 }
 
 function _checkStop(channel, user) {
   if (!_hasTimer(user.id, channel.id)) {
     return; // this user doesn't have a timer in this channel
   }
-  let time = Date.now() - timers.get(user.id).get(channel.id);
-  timers.get(user.id).delete(channel.id);
+  let time = Date.now() - startTimes.get(user.id).get(channel.id);
+  startTimes.get(user.id).delete(channel.id);
   channel.send(`Timer stopped for ${user.username}; time: ${formatTime(time)}`);
   if (!curScramble.has(user.id)) {
     return; // if user didn't request a scramble, don't consider this for PB
@@ -65,8 +65,17 @@ function checkStop(message) {
   _checkStop(message.channel, message.author);
 }
 
+function setScramble(userId, scrambleString) {
+  curScramble.set(userId, scrambleString);
+}
+
+function deleteScramble(userId) {
+  return curScramble.delete(userId);
+}
+
 
 exports.formatTime = formatTime;
 exports.startTimer = startTimer;
 exports.checkStop = checkStop;
-exports.curScramble = curScramble; // private this later
+exports.setScramble = setScramble;
+exports.deleteScramble = deleteScramble;
