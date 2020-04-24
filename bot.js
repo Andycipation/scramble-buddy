@@ -98,4 +98,4 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 //   checkStop2(channel, user);
 // });
 
-bot.login(config.token);
+bot.login(process.env.token);
