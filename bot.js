@@ -16,7 +16,7 @@ const init = require('./modules/init.js');
 const bot = new Discord.Client();
 
 bot.on('ready', function() {
-  bot.user.setActivity(`${prefix} is my prefix`); // set bot status
+  bot.user.setActivity(`type ${prefix} help for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   for (let guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
