@@ -47,6 +47,7 @@ newCommand(['get', 'scramble'], 'displays a new scramble', message => {
     await sent.react(scrambleConfirmEmoji);
     await sent.react(scrambleRemoveEmoji);
   });
+  // console.log('scramble sent');
 });
 
 // start timer
@@ -65,7 +66,7 @@ function getPbEmbed() {
   });
   let pbStr;
   if (pbs.length > 0) {
-    pbStr = pbs.map(e => e.string).join('\n');
+    pbStr = pbs.map(e => `<@${e.userId}>: ${e.string}`).join('\n');
   } else {
     pbStr = 'No personal bests yet. Set one now!';
   }
@@ -97,8 +98,9 @@ newCommand(['view'], '`[user mention]`shows data for the given user', message =>
   if (args[0] != 'view' && args[0] != 'profile') {
     console.log('no idea how this happened');
   }
-  if (message.mentions.users.first() == null) {
-    message.channel.send('Please mention a user whose profile you want to view.');
+  let user = message.mentions.users.first();
+  if (user == null || user.bot) {
+    message.channel.send('The user mentioned in the message is invalid.');
     return;
   }
   let userId = message.mentions.users.first().id;

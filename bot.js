@@ -11,16 +11,15 @@ const { prefix, troll, ignoreBots, COOLDOWN } = require('./settings.js');
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const timer = require('./modules/timer.js');
+const init = require('./modules/init.js');
 
 const bot = new Discord.Client();
 
 bot.on('ready', function() {
   bot.user.setActivity(`${prefix} is my prefix`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
-  if (troll) {
-    // ADMathNoob in Corona Cuber Gang, #bot channel
-    timers.set('199904392504147968', new Map());
-    timers.get('199904392504147968').set('701904186081804320', Date.now() - 423784880);
+  for (let guild of bot.guilds.cache.values()) {
+    init.initGuild(guild);
   }
   console.log(`${pkg.name} v${pkg.version} is now up and running.`);
 });
@@ -37,6 +36,7 @@ bot.on('message', message => {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
+  init.initUser(message.author);
   // message.react('😄');
   timer.checkStop(message);
   let msg = message.content.trim();
@@ -64,6 +64,15 @@ bot.on('message', message => {
     }
   });
 });
+
+bot.on('guildCreate', guild => {
+  init.initGuild(guild);
+});
+
+bot.on('guildMemberAdd', member => {
+  init.initUser(member.user);
+});
+
 
 // when a reaction is added to an existing message
 bot.on('messageReactionAdd', (messageReaction, user) => {
@@ -100,3 +109,6 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 // log in using environment variable!
 require('dotenv').config();
 bot.login(process.env.TOKEN);
+
+
+exports.bot = bot;

@@ -22,4 +22,6 @@ exports.COOLDOWN = COOLDOWN;
 exports.scrambleConfirmEmoji = scrambleConfirmEmoji;
 exports.scrambleRemoveEmoji = scrambleRemoveEmoji;
 
+exports.FOOTER_STRING = FOOTER_STRING;
+
 // need to find a better way lol

@@ -1,7 +1,10 @@
 /*
 Module to manage solves.
+
+TODO: SolveEntry and Solver should store the User object they represent
 */
 
+const { bot } = require('../bot.js');
 const { formatTime } = require('./timer.js');
 const { FOOTER_STRING } = require('../settings.js');
 
@@ -16,13 +19,14 @@ class SolveEntry {
   }
 
   get string() {
-    return `<@${this.userId}>: ${formatTime(this.time)}\n- scramble: ${this.scramble}`
+    return `${formatTime(this.time)}\n- scramble: ${this.scramble}`
   }
 }
 
 class Solver { // a user who does solves
-  constructor(userId) {
+  constructor(userId, username) {
     this.userId = userId;
+    this.username = username;
     this.solves = []; // array of SolveEntry objects
     this.pbs = [];
   }
@@ -95,7 +99,7 @@ class Solver { // a user who does solves
   get embed() {
     return {
       color: 0x0099ff,
-      title: `Profile of <@${this.userId}>`,
+      title: `Profile of ${this.username}`,
       // files: ['./assets/avatar.png'],
       // thumbnail: {
       //   url: 'attachment://avatar.png'
@@ -118,22 +122,24 @@ class Solver { // a user who does solves
 
 const solvers = new Map(); // map<userId, Solver>
 
-// private functions for map initialization
 
-function _addSolverUserId(userId) {
-  if (solvers.has(userId)) {
+function _ensureUser(userId) {
+  if (!solvers.has(userId)) {
+    console.error(`${userId} does not have a Solver object`);
     return false;
   }
-  solvers.set(userId, new Solver(userId));
   return true;
 }
 
-function _initUserId(userId) {
-  _addSolverUserId(userId);
-}
-
-
 // public functions
+
+function initUser(userId, username) {
+  if (solvers.has(userId)) {
+    return false;
+  }
+  solvers.set(userId, new Solver(userId, username));
+  return true;
+}
 
 function getCurrentPbs() { // returns Array<SolveEntry>
   let res = [];
@@ -147,30 +153,26 @@ function getCurrentPbs() { // returns Array<SolveEntry>
 }
 
 function getLastSolve(userId) {
-  _initUserId(userId);
   return solvers.get(userId).lastSolve;
 }
 
-function pushSolve(userId, time, scramble) { // returns whether or not a new PB was achieved
-  _initUserId(userId);
+function pushSolve(userId, time, scramble) {
   solvers.get(userId).pushSolve(new SolveEntry(userId, time, scramble));
 }
 
 function popSolve(userId) {
-  _initUserId(userId);
   return solvers.get(userId).popSolve();
 }
 
 function getUserEmbed(userId) {
-  _initUserId(userId);
   return solvers.get(userId).embed;
 }
 
 function lastSolveWasPb(userId) {
-  _initUserId(userId);
   return solvers.get(userId).lastSolveWasPb();
 }
 
+exports.initUser = initUser;
 exports.getCurrentPbs = getCurrentPbs;
 exports.getLastSolve = getLastSolve;
 exports.pushSolve = pushSolve;
