@@ -22,7 +22,7 @@ bot.on('ready', function() {
     timers.set('199904392504147968', new Map());
     timers.get('199904392504147968').set('701904186081804320', Date.now() - 423784880);
   }
-  console.log(`ScrambleBot v${pkg.version} is now up and running.`);
+  console.log(`${pkg.name} v${pkg.version} is now up and running.`);
 });
 
 const lastRequest = new Map();

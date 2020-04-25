@@ -54,7 +54,10 @@ function _checkStop(channel, user) {
   if (!curScramble.has(user.id)) {
     return; // if user didn't request a scramble, don't consider this for PB
   }
-  if (solves.updatePb(user.id, time, curScramble.get(user.id))) {
+  // add the solve to this user's Solver object
+  solves.pushSolve(user.id, time, curScramble.get(user.id));
+  if (solves.lastSolveWasPb(user.id)) {
+    // this SolveEntry that was just added was a personal best
     channel.send(`${user.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);
   }
