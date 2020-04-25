@@ -109,6 +109,3 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 // log in using environment variable!
 require('dotenv').config();
 bot.login(process.env.TOKEN);
-
-
-exports.bot = bot;
