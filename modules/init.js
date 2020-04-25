@@ -5,6 +5,7 @@ Everything initialization-related.
 const solves = require('./solves.js');
 
 function initUser(user) {
+  console.log('initializing a user with username: ' + user.username);
   solves.initUser(user.id, user.username);
 }
 
@@ -13,7 +14,6 @@ function initGuild(guild) {
     if (guildMember.user.bot) {
       continue;
     }
-    console.log('initializing a user with username: ' + guildMember.user.username);
     initUser(guildMember.user);
   }
 }
