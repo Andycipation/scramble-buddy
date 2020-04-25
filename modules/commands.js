@@ -36,7 +36,7 @@ function newCommand(names, helpMsg, callback) {
 
 // help
 newCommand(['help'], 'shows this help message', message => {
-  message.channel.send({ embed: helpEmbed });
+  message.channel.send({ embed: getHelpEmbed() });
 });
 
 // get
@@ -80,13 +80,13 @@ function getPbEmbed() {
     fields: [
       {
         name: 'Leaderboard',
-        value: pbStr
+        value: pbStr,
       }
     ],
-    timestamp: new Date(),
+    // timestamp: new Date(),
     footer: {
-      text: FOOTER_STRING
-    }
+      text: FOOTER_STRING,
+    },
   };
 }
 
@@ -99,12 +99,14 @@ newCommand(['view'], '`[user mention]`shows data for the given user', message =>
     console.log('no idea how this happened');
   }
   let user = message.mentions.users.first();
-  if (user == null || user.bot) {
-    message.channel.send('The user mentioned in the message is invalid.');
+  if (user != null && user.bot) {
+    message.channel.send("You cannot request to view a bot's solves.");
     return;
   }
-  let userId = message.mentions.users.first().id;
-  message.channel.send({ embed: solves.getUserEmbed(userId) });
+  if (user == null) {
+    user = message.author;
+  }
+  message.channel.send({ embed: solves.getUserEmbed(user.id) });
 });
 
 // remove the last solve; maybe remove 'clearPb' stuff below
@@ -117,7 +119,7 @@ newCommand(['remove', 'pop'], 'removes your last solve', message => {
 });
 
 // show personal bests
-newCommand(['pbs', 'pb'], 'shows the personal bests of all members (not just members in this server)',
+newCommand(['pbs', 'pb'], 'shows the personal bests of all members',
   message => {
     message.channel.send({ embed: getPbEmbed() });
   }
@@ -140,28 +142,32 @@ newCommand(['pbs', 'pb'], 'shows the personal bests of all members (not just mem
 //   }
 // );
 
-var helpEmbed = {
-  color: 0x0099ff,
-  title: pkg.name,
-  author: {
-    name: `by ${pkg.author}`
-  },
-  description: 'a Discord bot for cubers',
-  // files: ['./assets/avatar.png'],
-  // thumbnail: {
-  //   url: 'attachment://avatar.png'
-  // },
-  fields: [
-    {
-      name: 'Commands (no spaces required)',
-      value: COMMANDS.map(cmd => cmd.helpString).join('\n')
-    }
-  ],
-  timestamp: new Date(),
-  footer: {
-    text: FOOTER_STRING
-  }
-};
+// use function to recalculate timestamp; otherwise, the timestamp remains at the
+// time which the bot was last put online
+function getHelpEmbed() {
+  return {
+    color: 0x0099ff,
+    title: pkg.name,
+    // author: {
+    //   name: `by ${pkg.author}`
+    // },
+    description: 'a Discord bot for cubers',
+    // files: ['./assets/avatar.png'],
+    // thumbnail: {
+    //   url: 'attachment://avatar.png'
+    // },
+    fields: [
+      {
+        name: 'Commands (no spaces required)',
+        value: COMMANDS.map(cmd => cmd.helpString).join('\n'),
+      }
+    ],
+    // timestamp: new Date(),
+    footer: {
+      text: FOOTER_STRING,
+    },
+  };
+}
 
 
 exports.COMMANDS = COMMANDS;

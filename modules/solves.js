@@ -77,14 +77,24 @@ class Solver { // a user who does solves
 
   getAverage(cnt) { // average over last cnt solves
     let n = this.solves.length;
-    if (cnt <= 0 || cnt > n) {
+    if (cnt <= 2 || cnt > n) {
       return -1;
     }
-    let s = 0;
+    let a = [];
     for (let i = n - cnt; i < n; i++) {
-      s += this.solves[i].time;
+      a.push(this.solves[i].time);
     }
-    return Math.round(s / cnt);
+    // disregard the fastest and slowest solves
+    a.sort((x, y) => {
+      if (x < y) return -1;
+      if (x > y) return 1;
+      return 0;
+    });
+    let s = 0;
+    for (let i = 1; i < cnt - 1; i++) {
+      s += a[i];
+    }
+    return Math.round(s / (cnt - 2));
   }
 
   _getAverageString(cnt) {
