@@ -36,8 +36,6 @@ bot.on('message', message => {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
-  init.initUser(message.author);
-  // message.react('😄');
   timer.checkStop(message);
   let msg = message.content.trim();
   // troll messages
