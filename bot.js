@@ -89,10 +89,10 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
 
 // when a reaction is removed from an existing message
 bot.on('messageReactionRemove', (messageReaction, user) => {
-  // // console.log('someone removed a reaction on: ' + messageReaction.message.content);
-  // if (user.id == bot.user.id || (user.bot && ignoreBots)) {
-  //   return;
-  // }
+  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
+    return;
+  }
+  REACTION_ADD_ACTIONS[1].do(messageReaction, user); // hack but whatever
   // REACTION_REMOVE_ACTIONS.forEach(rda => {
   //   if (messageReaction.emoji.name == rda.emoji) {
   //     rda.do(messageReaction, user);
