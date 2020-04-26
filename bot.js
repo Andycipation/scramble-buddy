@@ -16,7 +16,7 @@ const init = require('./modules/init.js');
 const bot = new Discord.Client();
 
 bot.on('ready', function() {
-  bot.user.setActivity(`${prefix} is my prefix`); // set bot status
+  bot.user.setActivity(`type '${prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   for (let guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
@@ -36,8 +36,6 @@ bot.on('message', message => {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
-  init.initUser(message.author);
-  // message.react('😄');
   timer.checkStop(message);
   let msg = message.content.trim();
   // troll messages
@@ -109,6 +107,3 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 // log in using environment variable!
 require('dotenv').config();
 bot.login(process.env.TOKEN);
-
-
-exports.bot = bot;
