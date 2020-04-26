@@ -90,7 +90,9 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
   if (user.id == bot.user.id || (user.bot && ignoreBots)) {
     return;
   }
-  REACTION_ADD_ACTIONS[1].do(messageReaction, user); // hack but whatever
+  if (messageReaction.emoji.name == REACTION_ADD_ACTIONS[0].emoji) {
+    REACTION_ADD_ACTIONS[1].do(messageReaction, user); // hack but whatever
+  }
   // REACTION_REMOVE_ACTIONS.forEach(rda => {
   //   if (messageReaction.emoji.name == rda.emoji) {
   //     rda.do(messageReaction, user);
