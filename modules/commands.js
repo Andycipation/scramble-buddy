@@ -11,6 +11,7 @@ const {
   scrambleConfirmEmoji,
   FOOTER_STRING
 } = require('../settings.js');
+
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
@@ -151,7 +152,7 @@ function getHelpEmbed() {
     // author: {
     //   name: `by ${pkg.author}`
     // },
-    description: 'a Discord bot for cubers',
+    description: pkg.description,
     // files: ['./assets/avatar.png'],
     // thumbnail: {
     //   url: 'attachment://avatar.png'

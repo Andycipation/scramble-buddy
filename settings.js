@@ -7,7 +7,7 @@ const pkg = require('./package.json');
 var prefix = 'cube'; // might add changeable prefixes later
 const troll = false;
 const ignoreBots = true;
-const COOLDOWN = 1000;
+const COOLDOWN = 0;
 
 const scrambleConfirmEmoji = '✅';
 const scrambleRemoveEmoji = '❌';

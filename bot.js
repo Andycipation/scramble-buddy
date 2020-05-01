@@ -1,6 +1,5 @@
 /*
-client ID:
-701873854930354287
+The driver for the ScrambleBot.
 */
 
 
@@ -18,6 +17,7 @@ const bot = new Discord.Client();
 bot.on('ready', function() {
   bot.user.setActivity(`type '${prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
+  init.loadDatabase();
   for (let guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
   }

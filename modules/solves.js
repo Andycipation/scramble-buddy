@@ -10,12 +10,15 @@ const { FOOTER_STRING } = require('../settings.js');
 
 var numSolves = 0;
 
+var entries = [];
+
 class SolveEntry {
   constructor(userId, time, scramble) {
     this.id = numSolves++;
     this.userId = userId;
     this.time = time;
     this.scramble = scramble;
+    entries.push(this);
   }
 
   get string() {
@@ -71,7 +74,7 @@ class Solver { // a user who does solves
     return pb.string;
   }
 
-  lastSolveWasPb() {
+  get lastSolveWasPb() {
     return (this.lastSolve !== null && this.lastSolve.id == this.pb.id);
   }
 
@@ -179,7 +182,7 @@ function getUserEmbed(userId) {
 }
 
 function lastSolveWasPb(userId) {
-  return solvers.get(userId).lastSolveWasPb();
+  return solvers.get(userId).lastSolveWasPb;
 }
 
 exports.initUser = initUser;
