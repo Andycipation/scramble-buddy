@@ -6,7 +6,10 @@ The driver for the ScrambleBot.
 const Discord = require('discord.js');
 const pkg = require('./package.json');
 
-const { prefix, troll, ignoreBots, COOLDOWN } = require('./settings.js');
+// settings and parameters
+const { MY_DISCORD_ID, prefix, ignoreBots, COOLDOWN } = require('./settings.js');
+var { troll } = require('./settings.js');
+
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const timer = require('./modules/timer.js');
@@ -30,32 +33,40 @@ function canRequest(id) {
   return (!lastRequest.has(id) || Date.now() - lastRequest.get(id) >= COOLDOWN);
 }
 
+function handleTroll(message) {
+  if (!troll) {
+    return;
+  }
+  if (message.content == 'Hi!') {
+    message.channel.send('Hi!');
+  }
+  if (message.content == 'gn') {
+    message.channel.send('Good night!');
+  }
+}
+
 // when a message is sent
 bot.on('message', message => {
   if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
     // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
+  handleTroll(message); // do troll responses
+  // actual functionality
   timer.checkStop(message);
   let msg = message.content.trim();
-  // troll messages
-  if (troll) {
-    if (msg.startsWith('Hi!')) {
-      message.channel.send('Hi!');
-      return;
-    }
-    if (msg.startsWith('gn')) {
-      message.channel.send('Good night!');
-      return;
-    }
-  }
-  // actual functionality
   if (!msg.startsWith(prefix) || !canRequest(message.author.id)) {
     return;
   }
   lastRequest.set(message.author.id, Date.now());
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
+  // check if troll should be toggled
+  if (message.author.id == MY_DISCORD_ID && op == 'toggletroll') {
+    troll ^= 1;
+    let s = (troll ? 'enabled' : 'disabled');
+    message.channel.send(`Troll messages ${s}.`);
+  }
   COMMANDS.forEach(cmd => {
     if (cmd.names.includes(op)) {
       cmd.do(message);

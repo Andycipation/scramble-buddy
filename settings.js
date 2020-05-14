@@ -1,11 +1,13 @@
 /*
-Settings for the bot.
+Settings and parameters for the bot.
 */
 
 const pkg = require('./package.json');
 
+const MY_DISCORD_ID = '199904392504147968';
+
 var prefix = 'cube'; // might add changeable prefixes later
-const troll = false;
+var troll = true;
 const ignoreBots = true;
 const COOLDOWN = 0;
 
@@ -13,6 +15,8 @@ const scrambleConfirmEmoji = '✅';
 const scrambleRemoveEmoji = '❌';
 
 const FOOTER_STRING = `${pkg.name}, version ${pkg.version} | Trademark ${pkg.author}™`
+
+exports.MY_DISCORD_ID = MY_DISCORD_ID;
 
 exports.prefix = prefix;
 exports.troll = troll;
