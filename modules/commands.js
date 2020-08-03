@@ -67,7 +67,7 @@ function getPbEmbed() {
   });
   let pbStr;
   if (pbs.length > 0) {
-    pbStr = pbs.map(e => `<@${e.userId}>: ${e.string}`).join('\n');
+    pbStr = pbs.map(e => `<@${e.userId}>: ${e}`).join('\n');
   } else {
     pbStr = 'No personal bests yet. Set one now!';
   }

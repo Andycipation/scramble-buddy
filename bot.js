@@ -8,22 +8,33 @@ const pkg = require('./package.json');
 
 // settings and parameters
 const { MY_DISCORD_ID, prefix, ignoreBots, COOLDOWN } = require('./settings.js');
-var { troll } = require('./settings.js');
+var { DATA_CHANNEL_ID, troll } = require('./settings.js');
 
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
-const timer = require('./modules/timer.js');
+const db = require('./modules/database.js');
 const init = require('./modules/init.js');
+const timer = require('./modules/timer.js');
 
 const bot = new Discord.Client();
 
 bot.on('ready', function() {
   bot.user.setActivity(`type '${prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
-  init.loadDatabase();
+  
+  // initialize all non-bot users
   for (let guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
   }
+  
+  // load past solves
+  bot.channels.fetch(DATA_CHANNEL_ID).then(channel => {
+    db.loadSolves(channel);
+  }).catch(error => {
+    console.error('could not fetch database channel:');
+    console.error(error);
+  });
+  
   console.log(`${pkg.name} v${pkg.version} is now up and running.`);
 });
 

@@ -4,59 +4,61 @@ Module to manage solves.
 TODO: SolveEntry and Solver should store the User object they represent
 */
 
-const { bot } = require('../bot.js');
-const { formatTime } = require('./timer.js');
+const { removeLog } = require('./database.js');
 const { FOOTER_STRING } = require('../settings.js');
+const timer = require('./timer.js');
 
-var numSolves = 0;
 
-var entries = [];
+// var entries = [];
 
 class SolveEntry {
-  constructor(userId, time, scramble) {
-    this.id = numSolves++;
+  constructor(id, userId, time, scramble) {
+    // this.id = entries.length;
+    this.id = id;  // id of this solveEntry
     this.userId = userId;
     this.time = time;
     this.scramble = scramble;
-    entries.push(this);
+    // entries.push(this);
   }
 
-  get string() {
-    return `${formatTime(this.time)}\n- scramble: ${this.scramble}`
+  toString() {
+    return `${timer.formatTime(this.time)}\n- scramble: ${this.scramble}`
   }
 }
 
-class Solver { // a user who does solves
+class Solver {  // a user who does solves
   constructor(userId, username) {
     this.userId = userId;
     this.username = username;
-    this.solves = []; // array of SolveEntry objects
-    this.pbs = [];
+    this.solves = [];  // array of SolveEntry objects
+    this.pbs = [];  // array of SolveEntry objects, in decreasing time
   }
 
-  pushSolve(se) { // argument: the SolveEntry to add
+  pushSolve(se) {  // argument: the SolveEntry to add
     this.solves.push(se);
     if (this.pb === null || se.time < this.pb.time) {
       this.pbs.push(se);
     }
   }
-
-  popSolve() {
-    if (this.solves.length == 0) {
-      return false;
-    }
-    if (this.lastSolveWasPb) {
-      this.pbs.pop();
-    }
-    this.solves.pop();
-    return true;
-  }
-
+  
   get lastSolve() {
     if (this.solves.length == 0) {
       return null;
     }
     return this.solves[this.solves.length - 1];
+  }
+
+  popSolve() {
+    // returns whether the pop was successful
+    if (this.solves.length == 0) {
+      return false;
+    }
+    removeLog(this.lastSolve.id);
+    if (this.lastSolveWasPb) {
+      this.pbs.pop();
+    }
+    this.solves.pop();
+    return true;
   }
 
   get pb() {
@@ -66,12 +68,12 @@ class Solver { // a user who does solves
     return this.pbs[this.pbs.length - 1];
   }
 
-  get pbString() {
+  pbString() {
     let pb = this.pb;
     if (pb === null) {
       return 'N/A';
     }
-    return pb.string;
+    return pb.toString();
   }
 
   get lastSolveWasPb() {
@@ -102,11 +104,10 @@ class Solver { // a user who does solves
 
   _getAverageString(cnt) {
     let avg = this.getAverage(cnt);
-    // console.log('avg: ' + avg);
     if (avg == -1) {
       return 'N/A';
     }
-    return formatTime(avg);
+    return timer.formatTime(avg);
   }
 
   get embed() {
@@ -120,7 +121,7 @@ class Solver { // a user who does solves
       fields: [
         {
           name: 'Statistics',
-          value: `Personal best: ${this.pbString}\n`
+          value: `Personal best: ${this.pbString()}\n`
             + `Average over 5: ${this._getAverageString(5)}\n`
             + `Average over 12: ${this._getAverageString(12)}`
         }
@@ -169,8 +170,8 @@ function getLastSolve(userId) {
   return solvers.get(userId).lastSolve;
 }
 
-function pushSolve(userId, time, scramble) {
-  solvers.get(userId).pushSolve(new SolveEntry(userId, time, scramble));
+function pushSolve(id, userId, time, scramble) {
+  solvers.get(userId).pushSolve(new SolveEntry(id, userId, time, scramble));
 }
 
 function popSolve(userId) {

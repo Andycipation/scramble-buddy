@@ -2,6 +2,7 @@
 Module to manage all actions related to timing.
 */
 
+const db = require('./database.js');
 const solves = require('./solves.js');
 
 function formatTime(milliseconds) {
@@ -44,7 +45,7 @@ function _hasTimer(userId, channelId) {
   return (startTimes.has(userId) && startTimes.get(userId).has(channelId));
 }
 
-function _checkStop(channel, user) {
+async function _checkStop(channel, user) {
   if (!_hasTimer(user.id, channel.id)) {
     return; // this user doesn't have a timer in this channel
   }
@@ -55,7 +56,7 @@ function _checkStop(channel, user) {
     return; // if user didn't request a scramble, don't consider this for PB
   }
   // add the solve to this user's Solver object
-  solves.pushSolve(user.id, time, curScramble.get(user.id));
+  await db.logSolve(user.id, time, curScramble.get(user.id));
   if (solves.lastSolveWasPb(user.id)) {
     // this SolveEntry that was just added was a personal best
     channel.send(`${user.username} got a new personal best of`

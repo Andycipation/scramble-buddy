@@ -40,7 +40,7 @@ newReactionAddAction(scrambleConfirmEmoji, (messageReaction, user) => {
   users.push(`<@${user.id}>`);
   timer.setScramble(user.id, scrambleString);
   if (!message.editable) {
-    console.log('cannot edit this message');
+    console.error('cannot edit this message');
     return;
   }
   message.edit(`${scrambleString}\n${instructions}\nContenders:\n${users.join('\n')}`);
