@@ -6,9 +6,15 @@ The driver for the ScrambleBot.
 const Discord = require('discord.js');
 const pkg = require('./package.json');
 
-// settings and parameters
-const { MY_DISCORD_ID, prefix, ignoreBots, COOLDOWN } = require('./settings.js');
-var { DATA_CHANNEL_ID, troll } = require('./settings.js');
+// config and parameters
+const {
+  MY_DISCORD_ID,
+  DATA_CHANNEL_ID,
+  prefix,
+  ignoreBots,
+  COOLDOWN
+} = require('./config.js');
+var { troll } = require('./config.js');
 
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
@@ -27,7 +33,7 @@ bot.on('ready', function() {
     init.initGuild(guild);
   }
   
-  // load past solves
+  // load past solves; there may be some async problems here
   bot.channels.fetch(DATA_CHANNEL_ID).then(channel => {
     db.loadSolves(channel);
   }).catch(error => {

@@ -2,7 +2,11 @@
 Module for managing reactions.
 */
 
-const { prefix, scrambleRemoveEmoji, scrambleConfirmEmoji } = require('../settings.js');
+const {
+  prefix,
+  scrambleRemoveEmoji,
+  scrambleConfirmEmoji
+} = require('../config.js');
 const timer = require('./timer.js');
 
 class ReactionAddAction {

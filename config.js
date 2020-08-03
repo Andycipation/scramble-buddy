@@ -7,6 +7,9 @@ const pkg = require('./package.json');
 const MY_DISCORD_ID = '199904392504147968';
 const DATA_CHANNEL_ID = '739940657010835506';
 
+const ENTRIES_LOADED = 100;  // number of solve entries to load
+// the Discord API limits this to 100
+
 var prefix = 'cube'; // might add changeable prefixes later
 var troll = true;
 const ignoreBots = true;
@@ -19,6 +22,8 @@ const FOOTER_STRING = `${pkg.name}, version ${pkg.version} | Trademark ${pkg.aut
 
 exports.MY_DISCORD_ID = MY_DISCORD_ID;
 exports.DATA_CHANNEL_ID = DATA_CHANNEL_ID;
+
+exports.ENTRIES_LOADED = ENTRIES_LOADED;
 
 exports.prefix = prefix;
 exports.troll = troll;

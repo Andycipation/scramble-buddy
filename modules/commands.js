@@ -10,7 +10,7 @@ const {
   scrambleRemoveEmoji,
   scrambleConfirmEmoji,
   FOOTER_STRING
-} = require('../settings.js');
+} = require('../config.js');
 
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');

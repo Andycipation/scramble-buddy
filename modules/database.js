@@ -2,7 +2,7 @@
 Loads data for users, using a certain text channel as the "database".
 */
 
-const { DATA_CHANNEL_ID } = require('../settings.js');
+const { DATA_CHANNEL_ID, ENTRIES_LOADED } = require('../config.js');
 
 const solves = require('./solves.js');
 
@@ -12,7 +12,7 @@ var channel;
 function loadSolves(_channel) {
   // only called once for each time the bot starts up
   channel = _channel;
-  channel.messages.fetch({ limit: 10 }).then(messages => {
+  channel.messages.fetch({ limit: ENTRIES_LOADED }).then(messages => {
     for (let message of messages.values()) {
       let data = message.content.split('|');
       let userId = data[0];
