@@ -54,6 +54,12 @@ function handleTroll(message) {
   if (message.content == 'gn') {
     message.channel.send('Good night!');
   }
+  if (message.content.toLowerCase().substring(0, 7) == 'vc tmr?') {
+    message.channel.send('vc tmr.');
+  }
+  if (message.content.toLowerCase().substring(0, 6) == 'vc tn?') {
+    message.channel.send('vc tn.');
+  }
 }
 
 // when a message is sent
