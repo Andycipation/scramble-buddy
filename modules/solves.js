@@ -4,6 +4,7 @@ Module to manage solves.
 TODO: SolveEntry and Solver should store the User object they represent
 */
 
+
 const { removeLog } = require('./database.js');
 const { FOOTER_STRING } = require('../config.js');
 const timer = require('./timer.js');

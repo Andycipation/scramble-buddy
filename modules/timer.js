@@ -2,6 +2,7 @@
 Module to manage all actions related to timing.
 */
 
+
 const db = require('./database.js');
 const solves = require('./solves.js');
 

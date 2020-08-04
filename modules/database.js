@@ -2,6 +2,7 @@
 Loads data for users, using a certain text channel as the "database".
 */
 
+
 const { DATA_CHANNEL_ID, ENTRIES_LOADED } = require('../config.js');
 
 const solves = require('./solves.js');

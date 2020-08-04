@@ -2,6 +2,7 @@
 Module for managing reactions.
 */
 
+
 const {
   prefix,
   scrambleRemoveEmoji,

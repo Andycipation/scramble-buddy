@@ -2,6 +2,7 @@
 The commands which the bot responds to.
 */
 
+
 const Discord = require('discord.js');
 const pkg = require('../package.json');
 

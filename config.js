@@ -2,6 +2,7 @@
 Settings and parameters for the bot.
 */
 
+
 const pkg = require('./package.json');
 
 const MY_DISCORD_ID = '199904392504147968';
