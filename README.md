@@ -2,5 +2,5 @@
 Discord bot for generating Rubik's Cube scrambles.
 
 ## To-do
-- cram more information into each log, up to the maximum message length
+- add more features, e.g. more detailed stats
 - clean up the code!
