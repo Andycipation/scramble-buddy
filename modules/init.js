@@ -3,7 +3,6 @@ Everything initialization-related.
 */
 
 
-const db = require('./database.js');
 const solves = require('./solves.js');
 
 function initUser(user) {
