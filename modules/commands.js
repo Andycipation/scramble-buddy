@@ -127,23 +127,6 @@ newCommand(['pbs', 'pb'], 'shows the personal bests of all members',
   }
 );
 
-// clear your personal best
-// newCommand(['clearpb', 'resetpb'], 'resets your personal best', message => {
-//   if (solves.deletePb(message.author.id)) {
-//     message.channel.send(`Personal best of ${message.author.username} cleared.`);
-//   } else {
-//     message.channel.send(`${message.author.username} did not have an existing personal best.`);
-//   }
-// });
-
-// clear all personal bests
-// newCommand(['clearallpbs', 'resetallpbs'], 'clears all records of personal bests',
-//   message => {
-//     solves.clearAllPbs();
-//     message.channel.send('All personal bests cleared.');
-//   }
-// );
-
 // use function to recalculate timestamp; otherwise, the timestamp remains at the
 // time which the bot was last put online
 function getHelpEmbed() {

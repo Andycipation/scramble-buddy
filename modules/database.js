@@ -15,6 +15,7 @@ async function loadSolves(_channel) {
   console.log('loading solve logs');
   channel = _channel;
   let lastId = null;
+  let entries = 0;
   while (true) {
     messages = await channel.messages.fetch({ limit: 100, before: lastId });
     if (messages.size == 0) {
@@ -27,9 +28,10 @@ async function loadSolves(_channel) {
       let scramble = data[2];
       solves.pushSolve(message.id, userId, time, scramble);
       lastId = message.id;
+      entries++;
     }
   }
-  console.log('finished loading solve logs');
+  console.log(`loaded ${entries} solve logs`);
 }
 
 async function logSolve(userId, time, scramble) {
