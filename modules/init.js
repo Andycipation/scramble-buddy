@@ -7,7 +7,7 @@ const db = require('./database.js');
 const solves = require('./solves.js');
 
 function initUser(user) {
-  console.log('initializing a user with username: ' + user.username);
+  // console.log('initializing a user with username: ' + user.username);
   solves.initUser(user.id, user.username);
 }
 

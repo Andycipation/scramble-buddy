@@ -3,25 +3,33 @@ Loads data for users, using a certain text channel as the "database".
 */
 
 
-const { DATA_CHANNEL_ID, ENTRIES_LOADED } = require('../config.js');
+const { DATA_CHANNEL_ID } = require('../config.js');
 
 const solves = require('./solves.js');
 
 
 var channel;
 
-function loadSolves(_channel) {
+async function loadSolves(_channel) {
   // only called once for each time the bot starts up
+  console.log('loading solve logs');
   channel = _channel;
-  channel.messages.fetch({ limit: ENTRIES_LOADED }).then(messages => {
+  let lastId = null;
+  while (true) {
+    messages = await channel.messages.fetch({ limit: 100, before: lastId });
+    if (messages.size == 0) {
+      break;
+    }
     for (let message of messages.values()) {
       let data = message.content.split('|');
       let userId = data[0];
       let time = parseInt(data[1], 10);  // radix 10
       let scramble = data[2];
       solves.pushSolve(message.id, userId, time, scramble);
+      lastId = message.id;
     }
-  }).catch(console.error);
+  }
+  console.log('finished loading solve logs');
 }
 
 async function logSolve(userId, time, scramble) {

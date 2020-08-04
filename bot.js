@@ -40,7 +40,6 @@ bot.on('ready', function() {
     console.error('could not fetch database channel:');
     console.error(error);
   });
-  
   console.log(`${pkg.name} v${pkg.version} is now up and running.`);
 });
 

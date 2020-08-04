@@ -54,7 +54,10 @@ async function _checkStop(channel, user) {
   startTimes.get(user.id).delete(channel.id);
   channel.send(`Timer stopped for ${user.username}; time: ${formatTime(time)}`);
   if (!curScramble.has(user.id)) {
-    return; // if user didn't request a scramble, don't consider this for PB
+    // TODO: change `cubeget` to reference modules/commands.js
+    channel.send('To track your solves, generate a scramble using `cubeget` and'
+      + ' react to it. Then, your next time will be logged.')
+    return;  // if user didn't request a scramble, don't consider this for PB
   }
   // add the solve to this user's Solver object
   await db.logSolve(user.id, time, curScramble.get(user.id));
