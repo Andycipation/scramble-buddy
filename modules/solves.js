@@ -77,7 +77,7 @@ class Solver {  // a user who does solves
     return (this.lastSolve !== null && this.lastSolve.id == this.pb.id);
   }
 
-  getAverage(cnt) { // average over last cnt solves
+  getAverage(cnt) {  // average over last cnt solves
     let n = this.solves.length;
     if (cnt <= 2 || cnt > n) {
       return -1;
@@ -113,7 +113,7 @@ class Solver {  // a user who does solves
       + `Average over 12: ${this._getAverageString(12)}`
   }
   
-  _getLastSolvesString(cnt) {
+  _getLastSolvesString(cnt) {  // most recent solve last
     cnt = Math.min(cnt, this.solves.length);
     let entries = [];
     for (let i = 0; i < cnt; i++) {
@@ -140,7 +140,7 @@ class Solver {  // a user who does solves
           value: this._getStatisticsString()
         },
         {
-          name: 'Last Solves (most recent last)',
+          name: 'Latest Solves (most recent solve last)',
           value: this._getLastSolvesString(10)  // show the last 10 solves
         },
       ],

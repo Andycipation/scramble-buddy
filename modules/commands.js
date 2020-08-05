@@ -42,7 +42,7 @@ newCommand(['help'], 'shows this help message', message => {
   message.channel.send({ embed: getHelpEmbed() });
 });
 
-// get
+// get a scramble
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   let scramble = getScramble();
   let str = `${scramble}\nReact with ${scrambleConfirmEmoji} to use this scramble.`;

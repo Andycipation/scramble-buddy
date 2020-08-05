@@ -48,7 +48,7 @@ function _hasTimer(userId, channelId) {
 
 async function _checkStop(channel, user) {
   if (!_hasTimer(user.id, channel.id)) {
-    return; // this user doesn't have a timer in this channel
+    return;  // this user doesn't have a timer in this channel
   }
   let time = Date.now() - startTimes.get(user.id).get(channel.id);
   startTimes.get(user.id).delete(channel.id);

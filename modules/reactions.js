@@ -6,9 +6,10 @@ Module for managing reactions.
 const {
   prefix,
   scrambleRemoveEmoji,
-  scrambleConfirmEmoji
+  scrambleConfirmEmoji,
 } = require('../config.js');
 const timer = require('./timer.js');
+
 
 class ReactionAddAction {
   constructor(emoji, callback) {
@@ -16,6 +17,7 @@ class ReactionAddAction {
     this.do = callback;
   }
 }
+
 
 const REACTION_ADD_ACTIONS = [];
 
@@ -60,9 +62,9 @@ newReactionAddAction(scrambleRemoveEmoji, (messageReaction, user) => {
   let tgt = `<@${user.id}>`;
   let users = lines.slice(3).filter(u => u != tgt);
   // console.log('filtered users: ' + users);
-  timer.deleteScramble(user.id); // could return true or false
+  timer.deleteScramble(user.id);  // could return true or false
   if (!message.editable) {
-    console.log('cannot edit this message');
+    console.error('cannot edit this message');
     return;
   }
   let edited = `${scrambleString}\n${instructions}`;

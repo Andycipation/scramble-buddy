@@ -12,7 +12,7 @@ const {
   DATA_CHANNEL_ID,
   prefix,
   ignoreBots,
-  COOLDOWN
+  COOLDOWN,
 } = require('./config.js');
 var { troll } = require('./config.js');
 
@@ -25,7 +25,7 @@ const timer = require('./modules/timer.js');
 const bot = new Discord.Client();
 
 bot.on('ready', function() {
-  bot.user.setActivity(`type '${prefix} help' for help`); // set bot status
+  bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   
   // initialize all non-bot users
@@ -69,11 +69,12 @@ function handleTroll(message) {
 
 // when a message is sent
 bot.on('message', message => {
+  // ignore message if sent by self, or sender is bot and ignoreBots is on
   if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
-    // ignore message if sent by self, or sender is bot and ignoreBots is on
     return;
   }
-  handleTroll(message); // do troll responses
+  handleTroll(message);  // do troll responses
+  
   // actual functionality
   timer.checkStop(message);
   let msg = message.content.trim();
@@ -83,23 +84,28 @@ bot.on('message', message => {
   lastRequest.set(message.author.id, Date.now());
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
+  
   // check if troll should be toggled
   if (message.author.id == MY_DISCORD_ID && op == 'toggletroll') {
     troll ^= 1;
     let s = (troll ? 'enabled' : 'disabled');
     message.channel.send(`Troll messages ${s}.`);
   }
-  COMMANDS.forEach(cmd => {
+  
+  // do the actual commands
+  for (let cmd of COMMANDS) {
     if (cmd.names.includes(op)) {
       cmd.do(message);
     }
-  });
+  }
 });
 
+// when the bot is added to a server
 bot.on('guildCreate', guild => {
   init.initGuild(guild);
 });
 
+// when a member joins a server the bot is currently in
 bot.on('guildMemberAdd', member => {
   init.initUser(member.user);
 });
