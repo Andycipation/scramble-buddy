@@ -14,6 +14,7 @@ const {
   LEADERBOARD_LENGTH,
 } = require('../config.js');
 
+const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
@@ -99,7 +100,6 @@ function getPbEmbed() {
 // view user's current records
 newCommand(['view'], '`[user mention]`shows data for the given user', message => {
   let msg = message.content.trim().substring(prefix.length).trim();
-  let args = msg.split(' ');
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
     message.channel.send("You cannot request to view a bot's solves.");
@@ -109,6 +109,23 @@ newCommand(['view'], '`[user mention]`shows data for the given user', message =>
     user = message.author;
   }
   message.channel.send({ embed: solves.getUserEmbed(user.id) });
+});
+
+// set the method used by user
+newCommand(['setmethod'], '`[method]`sets your solving method in your profile', message => {
+  let msg = message.content.trim().substring(prefix.length).trim();
+  // below: this is the length of the command plus the space
+  // TODO: clean up
+  let method = msg.substring(10).trim();
+  if (method.length == 0) {
+    message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
+    return;
+  }
+  if (db.setMethod(message.author.id, method)) {
+    message.channel.send(`Solving method of ${message.author.username} set to ${method}.`);
+  } else {
+    message.channel.send('Invalid method provided; solving method unchanged.');
+  }
 });
 
 // remove the last solve; maybe remove 'clearPb' stuff below
@@ -143,7 +160,7 @@ function getHelpEmbed() {
     // },
     fields: [
       {
-        name: 'Commands (no spaces required)',
+        name: 'Commands (no space required directly after `cube`)',
         value: COMMANDS.map(cmd => cmd.helpString).join('\n'),
       }
     ],

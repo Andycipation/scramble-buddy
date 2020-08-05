@@ -5,8 +5,8 @@ TODO: make a stack data structure to query minimum and pop from stack?
 */
 
 
-const { removeLog } = require('./database.js');
 const { FOOTER_STRING } = require('../config.js');
+const db = require('./database.js');
 const { Stack, MinStack } = require('./stack.js');
 const timer = require('./timer.js');
 
@@ -20,7 +20,7 @@ class SolveEntry {
   }
 
   toString() {
-    return `${timer.formatTime(this.time)} | ${this.scramble}`
+    return `${timer.formatTime(this.time)} **|** ${this.scramble}`
   }
 }
 
@@ -29,6 +29,8 @@ class Solver {  // a user who does solves
   constructor(userId, username) {
     this.userId = userId;
     this.username = username;
+    
+    this.method = 'unspecified';
     
     // Stack<SolveEntry>
     this.solves = new Stack(
@@ -68,7 +70,7 @@ class Solver {  // a user who does solves
     if (this.solves.empty()) {
       return false;
     }
-    removeLog(this.solves.top().id);
+    db.removeLog(this.solves.top().id);
     this.solves.pop();
     for (let i = 0; i < this.AVGS; i++) {
       if (!this.avg[i].empty()) {
@@ -127,31 +129,34 @@ class Solver {  // a user who does solves
   //   return timer.formatTime(avg);
   // }
   
-  _getStatisticsString() {
-    let lines = [
-      `Number of solves: ${this.solves.size()}`,
-      `Personal best: ${this.pbString()}`,
-    ];
+  _getBestAverages() {
+    let lines = [];
     for (let i = 0; i < this.AVGS; i++) {
       if (this.avg[i].empty()) {
         continue;
       }
-      lines.push(`Current average over ${this.trackedAvgs[i]}: `
-        + `${timer.formatTime(this.avg[i].top())}`);
-    }
-    for (let i = 0; i < this.AVGS; i++) {
-      if (this.avg[i].empty()) {
-        continue;
-      }
-      lines.push(`Best average over ${this.trackedAvgs[i]}: `
+      lines.push(`Over ${this.trackedAvgs[i]}: `
         + `${timer.formatTime(this.avg[i].best)}`);
     }
+    if (lines.length == 0) {
+      lines.push('none');
+    }
     return lines.join('\n');
-    
-    // return `Personal best: ${this.pbString()}\n`
-    //   + `Current average over 5: ${this._getAverageString(5)}\n`
-    //   + `Current average over 12: ${this._getAverageString(12)}\n`
-    //   + `Best average over 5: `
+  }
+  
+  _getCurrentAverages() {
+    let lines = [];
+    for (let i = 0; i < this.AVGS; i++) {
+      if (this.avg[i].empty()) {
+        continue;
+      }
+      lines.push(`Over ${this.trackedAvgs[i]}: `
+        + `${timer.formatTime(this.avg[i].top())}`);
+    }
+    if (lines.length == 0) {
+      lines.push('none');
+    }
+    return lines.join('\n');
   }
   
   _getLastSolvesString(cnt) {  // most recent solve last
@@ -177,18 +182,38 @@ class Solver {  // a user who does solves
       // },
       fields: [
         {
-          name: 'Statistics',
-          value: this._getStatisticsString()
+          name: 'Solving Method',
+          value: this.method,
+          inline: true,
+        },
+        {
+          name: 'Number of Solves',
+          value: this.solves.size(),
+          inline: true,
+        },
+        {
+          name: 'Personal Best',
+          value: this.pbString(),
+        },
+        {
+          name: 'Best Averages',
+          value: this._getBestAverages(),
+          inline: true,
+        },
+        {
+          name: 'Current Averages',
+          value: this._getCurrentAverages(),
+          inline: true,
         },
         {
           name: 'Latest Solves (most recent solve last)',
-          value: this._getLastSolvesString(10)  // show the last 10 solves
+          value: this._getLastSolvesString(5)  // show the last 10 solves
         },
       ],
       timestamp: new Date(),
       footer: {
         text: FOOTER_STRING
-      }
+      },
     };
   }
 }
@@ -245,6 +270,10 @@ function lastSolveWasPb(userId) {
   return solvers.get(userId).lastSolveWasPb();
 }
 
+function setMethod(userId, method) {
+  solvers.get(userId).method = method;
+}
+
 exports.initUser = initUser;
 exports.getCurrentPbs = getCurrentPbs;
 exports.getLastSolve = getLastSolve;
@@ -252,3 +281,4 @@ exports.pushSolve = pushSolve;
 exports.popSolve = popSolve;
 exports.getUserEmbed = getUserEmbed;
 exports.lastSolveWasPb = lastSolveWasPb;
+exports.setMethod = setMethod;

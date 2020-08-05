@@ -27,14 +27,24 @@ async function loadSolves(_channel) {
     }
   }
   logMessages.reverse();  // push the entries in order
+  let solveLogs = 0;
+  let methodLogs = 0;
   for (let message of logMessages) {
     let data = message.content.split('|');
-    let userId = data[0];
-    let time = parseInt(data[1], 10);  // radix 10
-    let scramble = data[2];
-    solves.pushSolve(message.id, userId, time, scramble);
+    if (data.length == 3) {  // solve log
+      let userId = data[0];
+      let time = parseInt(data[1], 10);  // radix 10
+      let scramble = data[2];
+      solves.pushSolve(message.id, userId, time, scramble);
+      solveLogs++;
+    } else if (data.length == 2) {  // method-setting log
+      let userId = data[0];
+      let method = data[1];
+      solves.setMethod(userId, method);
+      methodLogs++;
+    }
   }
-  console.log(`loaded ${logMessages.length} solve logs`);
+  console.log(`loaded ${solveLogs} solve logs and ${methodLogs} method logs`);
 }
 
 async function logSolve(userId, time, scramble) {
@@ -43,6 +53,16 @@ async function logSolve(userId, time, scramble) {
   // in timer.js) will be called before the solve is pushed to the solves module
   let sent = await channel.send(logString);
   solves.pushSolve(sent.id, userId, time, scramble);
+}
+
+function setMethod(userId, method) {
+  if (method.includes('|')) {
+    return false;
+  }
+  let logString = `${userId}|${method}`;
+  channel.send(logString);
+  solves.setMethod(userId, method);
+  return true;
 }
 
 function removeLog(messageId) {
@@ -59,4 +79,5 @@ function removeLog(messageId) {
 
 exports.loadSolves = loadSolves;
 exports.logSolve = logSolve;
+exports.setMethod = setMethod;
 exports.removeLog = removeLog;
