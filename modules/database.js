@@ -31,7 +31,6 @@ async function loadSolves(_channel) {
     let data = message.content.split('|');
     let userId = data[0];
     let time = parseInt(data[1], 10);  // radix 10
-    console.log(time);
     let scramble = data[2];
     solves.pushSolve(message.id, userId, time, scramble);
   }
