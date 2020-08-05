@@ -7,12 +7,13 @@ TODO: make a stack data structure to query minimum and pop from stack?
 
 const { removeLog } = require('./database.js');
 const { FOOTER_STRING } = require('../config.js');
+const { Stack, MinStack } = require('./stack.js');
 const timer = require('./timer.js');
 
 
 class SolveEntry {
   constructor(id, userId, time, scramble) {
-    this.id = id;  // id of this solveEntry
+    this.id = id;  // id of this solveEntry; the id of the log message
     this.userId = userId;
     this.time = time;
     this.scramble = scramble;
@@ -23,46 +24,65 @@ class SolveEntry {
   }
 }
 
+
 class Solver {  // a user who does solves
   constructor(userId, username) {
     this.userId = userId;
     this.username = username;
-    this.solves = [];  // array of SolveEntry objects
-    this.pbs = [];  // array of SolveEntry objects, in decreasing time
+    
+    // Stack<SolveEntry>
+    this.solves = new Stack(
+      (se1, se2) => (se1.time < se2.time),
+      (se1, se2) => (se1.id == se2.id)
+    )
+    this.psa = [0];  // prefix sum array of times
+    
+    this.AVGS = 3;
+    this.trackedAvgs = [5, 12, 100];
+    this.avg = Array(this.AVGS);
+    for (let i = 0; i < this.AVGS; i++) {
+      this.avg[i] = new MinStack();
+    }
   }
 
   pushSolve(se) {  // argument: the SolveEntry to add
     this.solves.push(se);
-    if (this.pb === null || se.time < this.pb.time) {
-      this.pbs.push(se);
+    this.psa.push(this.psa[this.solves.size()] + se.time);
+    for (let i = 0; i < this.AVGS; i++) {
+      let a = this.getAverage(this.trackedAvgs[i]);
+      if (a != -1) {
+        this.avg[i].push(a);
+      }
     }
   }
   
   get lastSolve() {
-    if (this.solves.length == 0) {
+    if (this.solves.empty()) {
       return null;
     }
-    return this.solves[this.solves.length - 1];
+    return this.solves.top();
   }
 
   popSolve() {
     // returns whether the pop was successful
-    if (this.solves.length == 0) {
+    if (this.solves.empty()) {
       return false;
     }
-    removeLog(this.lastSolve.id);
-    if (this.lastSolveWasPb) {
-      this.pbs.pop();
-    }
+    removeLog(this.solves.top().id);
     this.solves.pop();
+    for (let i = 0; i < this.AVGS; i++) {
+      if (!this.avg[i].empty()) {
+        this.avg[i].pop();
+      }
+    }
     return true;
   }
 
   get pb() {
-    if (this.pbs.length == 0) {
+    if (this.solves.empty()) {
       return null;
     }
-    return this.pbs[this.pbs.length - 1];
+    return this.solves.best;
   }
 
   pbString() {
@@ -73,51 +93,72 @@ class Solver {  // a user who does solves
     return pb.toString();
   }
 
-  get lastSolveWasPb() {
+  lastSolveWasPb() {
     return (this.lastSolve !== null && this.lastSolve.id == this.pb.id);
   }
 
   getAverage(cnt) {  // average over last cnt solves
-    let n = this.solves.length;
+    let n = this.solves.size();
     if (cnt <= 2 || cnt > n) {
       return -1;
     }
     let a = [];
     for (let i = n - cnt; i < n; i++) {
-      a.push(this.solves[i].time);
+      a.push(this.solves.stk[i].time);
     }
-    // disregard the fastest and slowest solves
     a.sort((x, y) => {
       if (x < y) return -1;
       if (x > y) return 1;
       return 0;
     });
     let s = 0;
+    // disregard the fastest and slowest solves
     for (let i = 1; i < cnt - 1; i++) {
       s += a[i];
     }
     return Math.round(s / (cnt - 2));
   }
 
-  _getAverageString(cnt) {
-    let avg = this.getAverage(cnt);
-    if (avg == -1) {
-      return 'N/A';
-    }
-    return timer.formatTime(avg);
-  }
+  // _getAverageString(cnt) {
+  //   let avg = this.getAverage(cnt);
+  //   if (avg == -1) {
+  //     return 'N/A';
+  //   }
+  //   return timer.formatTime(avg);
+  // }
   
   _getStatisticsString() {
-    return `Personal best: ${this.pbString()}\n`
-      + `Average over 5: ${this._getAverageString(5)}\n`
-      + `Average over 12: ${this._getAverageString(12)}`
+    let lines = [
+      `Number of solves: ${this.solves.size()}`,
+      `Personal best: ${this.pbString()}`,
+    ];
+    for (let i = 0; i < this.AVGS; i++) {
+      if (this.avg[i].empty()) {
+        continue;
+      }
+      lines.push(`Current average over ${this.trackedAvgs[i]}: `
+        + `${timer.formatTime(this.avg[i].top())}`);
+    }
+    for (let i = 0; i < this.AVGS; i++) {
+      if (this.avg[i].empty()) {
+        continue;
+      }
+      lines.push(`Best average over ${this.trackedAvgs[i]}: `
+        + `${timer.formatTime(this.avg[i].best)}`);
+    }
+    return lines.join('\n');
+    
+    // return `Personal best: ${this.pbString()}\n`
+    //   + `Current average over 5: ${this._getAverageString(5)}\n`
+    //   + `Current average over 12: ${this._getAverageString(12)}\n`
+    //   + `Best average over 5: `
   }
   
   _getLastSolvesString(cnt) {  // most recent solve last
-    cnt = Math.min(cnt, this.solves.length);
+    cnt = Math.min(cnt, this.solves.size());
     let entries = [];
     for (let i = 0; i < cnt; i++) {
-      let se = this.solves[this.solves.length - cnt + i];
+      let se = this.solves.stk[this.solves.size() - cnt + i];
       entries.push(`${se.toString()}`);
     }
     if (entries.length == 0) {
@@ -154,7 +195,6 @@ class Solver {  // a user who does solves
 
 const solvers = new Map();  // map<userId, Solver>
 
-
 // function _ensureUser(userId) {
 //   if (!solvers.has(userId)) {
 //     console.error(`${userId} does not have a Solver object`);
@@ -162,6 +202,7 @@ const solvers = new Map();  // map<userId, Solver>
 //   }
 //   return true;
 // }
+
 
 // public functions
 
@@ -201,7 +242,7 @@ function getUserEmbed(userId) {
 }
 
 function lastSolveWasPb(userId) {
-  return solvers.get(userId).lastSolveWasPb;
+  return solvers.get(userId).lastSolveWasPb();
 }
 
 exports.initUser = initUser;

@@ -74,12 +74,14 @@ newReactionAddAction(scrambleRemoveEmoji, (messageReaction, user) => {
   message.edit(edited);
 });
 
+
 // class ReactionRemoveAction {
 //   constructor(emoji, callback) {
 //     this.emoji = emoji;
 //     this.do = callback;
 //   }
 // }
+//
 //
 // const REACTION_REMOVE_ACTIONS = [];
 //
