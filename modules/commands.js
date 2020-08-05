@@ -10,7 +10,8 @@ const {
   prefix,
   scrambleRemoveEmoji,
   scrambleConfirmEmoji,
-  FOOTER_STRING
+  FOOTER_STRING,
+  LEADERBOARD_LENGTH,
 } = require('../config.js');
 
 const { getScramble } = require('./scramble.js');
@@ -66,12 +67,15 @@ function getPbEmbed() {
     if (e1.time > e2.time) return 1;
     return 0;
   });
-  let pbStr;
-  if (pbs.length > 0) {
-    pbStr = pbs.map(e => `<@${e.userId}>: ${e}`).join('\n');
-  } else {
-    pbStr = 'No personal bests yet. Set one now!';
+  pbs.length = Math.min(pbs.length, LEADERBOARD_LENGTH);
+  let strings = [];
+  for (let i = 0; i < pbs.length; i++) {
+    strings.push(`${i + 1}. ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
   }
+  if (strings.length == 0) {
+    strings.push('No one has a personal best yet. Be the first to have one!');
+  }
+  let pbStr = strings.join('\n');
   return {
     color: 0x0099ff,
     title: 'Personal Bests',
@@ -85,7 +89,7 @@ function getPbEmbed() {
         value: pbStr,
       }
     ],
-    // timestamp: new Date(),
+    timestamp: new Date(),
     footer: {
       text: FOOTER_STRING,
     },
@@ -95,11 +99,7 @@ function getPbEmbed() {
 // view user's current records
 newCommand(['view'], '`[user mention]`shows data for the given user', message => {
   let msg = message.content.trim().substring(prefix.length).trim();
-  // console.log(msg);
   let args = msg.split(' ');
-  if (args[0] != 'view' && args[0] != 'profile') {
-    console.log('no idea how this happened');
-  }
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
     message.channel.send("You cannot request to view a bot's solves.");
@@ -147,7 +147,7 @@ function getHelpEmbed() {
         value: COMMANDS.map(cmd => cmd.helpString).join('\n'),
       }
     ],
-    // timestamp: new Date(),
+    timestamp: new Date(),
     footer: {
       text: FOOTER_STRING,
     },

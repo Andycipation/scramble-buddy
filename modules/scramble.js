@@ -12,7 +12,8 @@ const DIR = ['', "'", '2'];
 
 function _getScramble(moves) {
   let last = -1;
-  let ok = Array(SIDES.length); // ok[i]: whether it is ok to add move SIDES[i] next
+  // ok[i]: whether it is ok to add move SIDES[i] next
+  let ok = Array(SIDES.length);
   ok.fill(true);
   let res = Array(moves);
   for (let i = 0; i < moves; i++) {

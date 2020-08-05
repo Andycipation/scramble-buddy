@@ -8,6 +8,8 @@ const pkg = require('./package.json');
 const MY_DISCORD_ID = '199904392504147968';
 const DATA_CHANNEL_ID = '739940657010835506';
 
+const LEADERBOARD_LENGTH = 10;
+
 var prefix = 'cube'; // might add changeable prefixes later
 var troll = true;
 const ignoreBots = true;
@@ -20,6 +22,8 @@ const FOOTER_STRING = `${pkg.name}, version ${pkg.version} | Trademark ${pkg.aut
 
 exports.MY_DISCORD_ID = MY_DISCORD_ID;
 exports.DATA_CHANNEL_ID = DATA_CHANNEL_ID;
+
+exports.LEADERBOARD_LENGTH = LEADERBOARD_LENGTH;
 
 exports.prefix = prefix;
 exports.troll = troll;

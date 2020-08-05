@@ -1,7 +1,7 @@
 /*
 Module to manage solves.
 
-TODO: SolveEntry and Solver should store the User object they represent
+TODO: make a stack data structure to query minimum and pop from stack?
 */
 
 
@@ -10,20 +10,16 @@ const { FOOTER_STRING } = require('../config.js');
 const timer = require('./timer.js');
 
 
-// var entries = [];
-
 class SolveEntry {
   constructor(id, userId, time, scramble) {
-    // this.id = entries.length;
     this.id = id;  // id of this solveEntry
     this.userId = userId;
     this.time = time;
     this.scramble = scramble;
-    // entries.push(this);
   }
 
   toString() {
-    return `${timer.formatTime(this.time)}\n- scramble: ${this.scramble}`
+    return `${timer.formatTime(this.time)} | ${this.scramble}`
   }
 }
 
@@ -110,6 +106,25 @@ class Solver {  // a user who does solves
     }
     return timer.formatTime(avg);
   }
+  
+  _getStatisticsString() {
+    return `Personal best: ${this.pbString()}\n`
+      + `Average over 5: ${this._getAverageString(5)}\n`
+      + `Average over 12: ${this._getAverageString(12)}`
+  }
+  
+  _getLastSolvesString(cnt) {
+    cnt = Math.min(cnt, this.solves.length);
+    let entries = [];
+    for (let i = 0; i < cnt; i++) {
+      let se = this.solves[this.solves.length - cnt + i];
+      entries.push(`${se.toString()}`);
+    }
+    if (entries.length == 0) {
+      entries.push('none');
+    }
+    return entries.join('\n');
+  }
 
   get embed() {
     return {
@@ -122,10 +137,12 @@ class Solver {  // a user who does solves
       fields: [
         {
           name: 'Statistics',
-          value: `Personal best: ${this.pbString()}\n`
-            + `Average over 5: ${this._getAverageString(5)}\n`
-            + `Average over 12: ${this._getAverageString(12)}`
-        }
+          value: this._getStatisticsString()
+        },
+        {
+          name: 'Last Solves (most recent last)',
+          value: this._getLastSolvesString(5)
+        },
       ],
       timestamp: new Date(),
       footer: {
@@ -135,16 +152,16 @@ class Solver {  // a user who does solves
   }
 }
 
-const solvers = new Map(); // map<userId, Solver>
+const solvers = new Map();  // map<userId, Solver>
 
 
-function _ensureUser(userId) {
-  if (!solvers.has(userId)) {
-    console.error(`${userId} does not have a Solver object`);
-    return false;
-  }
-  return true;
-}
+// function _ensureUser(userId) {
+//   if (!solvers.has(userId)) {
+//     console.error(`${userId} does not have a Solver object`);
+//     return false;
+//   }
+//   return true;
+// }
 
 // public functions
 
@@ -156,7 +173,7 @@ function initUser(userId, username) {
   return true;
 }
 
-function getCurrentPbs() { // returns Array<SolveEntry>
+function getCurrentPbs() {  // returns Array<SolveEntry>
   let res = [];
   for (let solver of solvers.values()) {
     let pb = solver.pb;
