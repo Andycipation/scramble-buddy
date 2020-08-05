@@ -15,23 +15,27 @@ async function loadSolves(_channel) {
   console.log('loading solve logs');
   channel = _channel;
   let lastId = null;
-  let entries = 0;
+  let logMessages = [];
   while (true) {
-    messages = await channel.messages.fetch({ limit: 100, before: lastId });
+    let messages = await channel.messages.fetch({ limit: 100, before: lastId });
     if (messages.size == 0) {
       break;
     }
     for (let message of messages.values()) {
-      let data = message.content.split('|');
-      let userId = data[0];
-      let time = parseInt(data[1], 10);  // radix 10
-      let scramble = data[2];
-      solves.pushSolve(message.id, userId, time, scramble);
+      logMessages.push(message);
       lastId = message.id;
-      entries++;
     }
   }
-  console.log(`loaded ${entries} solve logs`);
+  logMessages.reverse();  // push the entries in order
+  for (let message of logMessages) {
+    let data = message.content.split('|');
+    let userId = data[0];
+    let time = parseInt(data[1], 10);  // radix 10
+    console.log(time);
+    let scramble = data[2];
+    solves.pushSolve(message.id, userId, time, scramble);
+  }
+  console.log(`loaded ${logMessages.length} solve logs`);
 }
 
 async function logSolve(userId, time, scramble) {
