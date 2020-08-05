@@ -141,7 +141,7 @@ class Solver {  // a user who does solves
         },
         {
           name: 'Last Solves (most recent last)',
-          value: this._getLastSolvesString(5)
+          value: this._getLastSolvesString(10)  // show the last 10 solves
         },
       ],
       timestamp: new Date(),
