@@ -56,7 +56,7 @@ async function _checkStop(channel, user) {
   if (!curScramble.has(user.id)) {
     // TODO: change `cubeget` to reference modules/commands.js
     s += '\nTo track your solves, generate a scramble using `cubeget` and'
-      + ' react to it. Then, your next time will be logged.');
+      + ' react to it. Then, your next time will be logged.';
     channel.send(s);
     return;  // if user didn't request a scramble, don't consider this for PB
   }
