@@ -65,10 +65,10 @@ function handleTroll(message) {
   if (message.content == 'gn') {
     message.channel.send('Good night!');
   }
-  if (message.content.toLowerCase().substring(0, 7) == 'vc tmr?') {
+  if (message.content.toLowerCase().startsWith('vc tmr?')) {
     message.channel.send('vc tmr.');
   }
-  if (message.content.toLowerCase().substring(0, 6) == 'vc tn?') {
+  if (message.content.toLowerCase().startsWith('vc tn?')) {
     message.channel.send('vc tn.');
   }
 }
@@ -136,7 +136,7 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
     return;
   }
   if (messageReaction.emoji.name == REACTION_ADD_ACTIONS[0].emoji) {
-    REACTION_ADD_ACTIONS[1].do(messageReaction, user); // hack but whatever
+    REACTION_ADD_ACTIONS[1].do(messageReaction, user);  // hack but whatever
   }
   // REACTION_REMOVE_ACTIONS.forEach(rda => {
   //   if (messageReaction.emoji.name == rda.emoji) {

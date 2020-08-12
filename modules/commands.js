@@ -97,7 +97,7 @@ function getPbEmbed() {
 }
 
 // view user's current records
-newCommand(['view'], '`[user mention]`shows data for the given user', message => {
+newCommand(['view'], '`[user mention]` shows data for the given user', message => {
   let msg = message.content.trim().substring(prefix.length).trim();
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
@@ -111,7 +111,7 @@ newCommand(['view'], '`[user mention]`shows data for the given user', message =>
 });
 
 // set the method used by user
-newCommand(['setmethod'], '`[method]`sets your solving method in your profile', message => {
+newCommand(['setmethod'], '`[method]` sets your solving method in your profile', message => {
   let msg = message.content.trim().substring(prefix.length).trim();
   // below: this is the length of the command plus the space
   // TODO: clean up
