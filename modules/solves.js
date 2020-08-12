@@ -1,7 +1,10 @@
 /*
 Module to manage solves.
 
-TODO: make a stack data structure to query minimum and pop from stack?
+TODO: possibly implement segment tree to query min and max, then compute
+averages faster using PSA and segment tree queries?/
+
+this is probably not a good idea lol
 */
 
 
@@ -55,7 +58,7 @@ class Solver {  // a user who does solves
     this.solves = new Stack(
       (se1, se2) => (se1.time <= se2.time),  // comparison; <= to make stack work
       (se1, se2) => (se1.id == se2.id)       // equality of two SolveEntry objects
-    )
+    );
     this.psa = [0];  // prefix sum array of times
     
     this.AVGS = 3;
