@@ -36,4 +36,5 @@ function getScramble() {
   return _getScramble(randInt(17, 20));
 }
 
+
 exports.getScramble = getScramble;

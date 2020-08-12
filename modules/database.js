@@ -96,6 +96,7 @@ function togglePlusTwo(userId) {
   return false;
 }
 
+
 exports.loadSolves = loadSolves;
 exports.logSolve = logSolve;
 exports.setMethod = setMethod;
