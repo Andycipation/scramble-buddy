@@ -6,7 +6,9 @@ Module to manage all actions related to timing.
 const db = require('./database.js');
 const solves = require('./solves.js');
 
-function formatTime(milliseconds) {
+function formatTime(milliseconds, plusTwo) {
+  // plusTwo - whether the time was a +2
+  // returns a formatted string, with a + at the end if the solve was a +2
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);
@@ -29,6 +31,9 @@ function formatTime(milliseconds) {
   }
   milliseconds %= 1000;
   res += secString + '.' + milliseconds.toString().padStart(3, '0');
+  if (plusTwo) {
+    res += '+';
+  }
   return res;
 }
 

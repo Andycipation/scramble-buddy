@@ -61,7 +61,6 @@ newReactionAddAction(scrambleRemoveEmoji, (messageReaction, user) => {
   let instructions = lines[1];
   let tgt = `<@${user.id}>`;
   let users = lines.slice(3).filter(u => u != tgt);
-  // console.log('filtered users: ' + users);
   timer.deleteScramble(user.id);  // could return true or false
   if (!message.editable) {
     console.error('cannot edit this message');

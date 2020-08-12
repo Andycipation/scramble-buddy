@@ -33,9 +33,10 @@ async function loadSolves(_channel) {
     let data = message.content.split('|');
     if (data.length == 3) {  // solve log
       let userId = data[0];
-      let time = parseInt(data[1], 10);  // radix 10
+      let time = parseInt(data[1], 10);  // radix 10; it is okay for data[1] to end with '+'
       let scramble = data[2];
-      solves.pushSolve(message.id, userId, time, scramble);
+      let plusTwo = data[1].endsWith('+');
+      solves.pushSolve(message.id, userId, time, scramble, plusTwo);
       solveLogs++;
     } else if (data.length == 2) {  // method-setting log
       let userId = data[0];
@@ -48,11 +49,12 @@ async function loadSolves(_channel) {
 }
 
 async function logSolve(userId, time, scramble) {
+  // logs the solve where plusTwo is false by default
   let logString = `${userId}|${time}|${scramble}`;
   // async stuff is required, or else solves.lastSolveWasPb(user.id) (line 60
   // in timer.js) will be called before the solve is pushed to the solves module
   let sent = await channel.send(logString);
-  solves.pushSolve(sent.id, userId, time, scramble);
+  solves.pushSolve(sent.id, userId, time, scramble, false);
 }
 
 function setMethod(userId, method) {
@@ -69,15 +71,33 @@ function removeLog(messageId) {
   // removes the message with the given id
   // returns whether the removal was successful
   channel.messages.fetch(messageId).then(message => {
+    if (!message.deletable) {
+      console.error(`why is this message in the bot log not deletable? id: ${message.id}`);
+      return;
+    }
     message.delete();
+  }).catch(console.error);
+}
+
+function togglePlusTwo(userId) {
+  // toggles whether the last solve of the given user was a +2
+  // returns whether or not the toggle was successful
+  if (solves.togglePlusTwo(userId)) {
+    let se = solves.getLastSolve(userId);
+    channel.messages.fetch(se.id).then(message => {
+      if (!message.editable) {  // this should never happen lol
+        console.error(`why is this message in the bot log not editable? id: ${message.id}`);
+        return;
+      }
+      message.edit(se.logString());
+    }).catch(console.error);
     return true;
-  }).catch(error => {
-    console.error(error);
-    return false;
-  });
+  }
+  return false;
 }
 
 exports.loadSolves = loadSolves;
 exports.logSolve = logSolve;
 exports.setMethod = setMethod;
 exports.removeLog = removeLog;
+exports.togglePlusTwo = togglePlusTwo;

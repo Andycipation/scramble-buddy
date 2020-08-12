@@ -12,15 +12,34 @@ const timer = require('./timer.js');
 
 
 class SolveEntry {
-  constructor(id, userId, time, scramble) {
+  constructor(id, userId, time, scramble, plusTwo) {
     this.id = id;  // id of this solveEntry; the id of the log message
     this.userId = userId;
     this.time = time;
     this.scramble = scramble;
+    this.plusTwo = plusTwo;  // if plusTwo, time has already been increased by 2000
   }
 
   toString() {
-    return `${timer.formatTime(this.time)} **|** ${this.scramble}`
+    return `${timer.formatTime(this.time, this.plusTwo)} **|** ${this.scramble}`
+  }
+  
+  logString() {
+    let timeString = `${this.time}`;
+    if (this.plusTwo) {
+      timeString += '+';
+    }
+    return `${this.userId}|${timeString}|${this.scramble}`;
+  }
+  
+  togglePlusTwo() {
+    if (!this.plusTwo) {
+      this.time += 2000;
+      this.plusTwo = true;
+    } else {
+      this.time -= 2000;
+      this.plusTwo = false;
+    }
   }
 }
 
@@ -34,8 +53,8 @@ class Solver {  // a user who does solves
     
     // Stack<SolveEntry>
     this.solves = new Stack(
-      (se1, se2) => (se1.time < se2.time),
-      (se1, se2) => (se1.id == se2.id)
+      (se1, se2) => (se1.time <= se2.time),  // comparison; <= to make stack work
+      (se1, se2) => (se1.id == se2.id)       // equality of two SolveEntry objects
     )
     this.psa = [0];  // prefix sum array of times
     
@@ -63,6 +82,22 @@ class Solver {  // a user who does solves
       return null;
     }
     return this.solves.top();
+  }
+  
+  togglePlusTwoOnLastSolve() {
+    if (this.solves.empty()) {
+      return false;  // no solve to toggle
+    }
+    let se = this.solves.top();
+    this.solves.pop();
+    for (let i = 0; i < this.AVGS; i++) {
+      if (!this.avg[i].empty()) {
+        this.avg[i].pop();
+      }
+    }
+    se.togglePlusTwo();
+    this.pushSolve(se);
+    return true;
   }
 
   popSolve() {
@@ -120,14 +155,6 @@ class Solver {  // a user who does solves
     }
     return Math.round(s / (cnt - 2));
   }
-
-  // _getAverageString(cnt) {
-  //   let avg = this.getAverage(cnt);
-  //   if (avg == -1) {
-  //     return 'N/A';
-  //   }
-  //   return timer.formatTime(avg);
-  // }
   
   _getBestAverages() {
     let lines = [];
@@ -136,7 +163,7 @@ class Solver {  // a user who does solves
         continue;
       }
       lines.push(`Over ${this.trackedAvgs[i]}: `
-        + `${timer.formatTime(this.avg[i].best)}`);
+        + `${timer.formatTime(this.avg[i].best, false)}`);
     }
     if (lines.length == 0) {
       lines.push('none');
@@ -151,7 +178,7 @@ class Solver {  // a user who does solves
         continue;
       }
       lines.push(`Over ${this.trackedAvgs[i]}: `
-        + `${timer.formatTime(this.avg[i].top())}`);
+        + `${timer.formatTime(this.avg[i].top(), false)}`);
     }
     if (lines.length == 0) {
       lines.push('none');
@@ -254,8 +281,8 @@ function getLastSolve(userId) {
   return solvers.get(userId).lastSolve;
 }
 
-function pushSolve(id, userId, time, scramble) {
-  solvers.get(userId).pushSolve(new SolveEntry(id, userId, time, scramble));
+function pushSolve(id, userId, time, scramble, plusTwo) {
+  solvers.get(userId).pushSolve(new SolveEntry(id, userId, time, scramble, plusTwo));
 }
 
 function popSolve(userId) {
@@ -274,6 +301,11 @@ function setMethod(userId, method) {
   solvers.get(userId).method = method;
 }
 
+function togglePlusTwo(userId) {
+  return solvers.get(userId).togglePlusTwoOnLastSolve();
+}
+
+
 exports.initUser = initUser;
 exports.getCurrentPbs = getCurrentPbs;
 exports.getLastSolve = getLastSolve;
@@ -282,3 +314,4 @@ exports.popSolve = popSolve;
 exports.getUserEmbed = getUserEmbed;
 exports.lastSolveWasPb = lastSolveWasPb;
 exports.setMethod = setMethod;
+exports.togglePlusTwo = togglePlusTwo;

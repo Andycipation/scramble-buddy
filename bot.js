@@ -28,6 +28,12 @@ bot.on('ready', function() {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   
+  // create a new server and invite myself to it!
+  // bot.guilds.create("ScrambleBot's Server");
+  // bot.users.fetch(MY_DISCORD_ID).then(user => {
+  // 
+  // });
+  
   // initialize all non-bot users
   for (let guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
