@@ -127,7 +127,6 @@ newCommand(['setmethod'], '`[method]` sets your solving method in your profile',
   }
 });
 
-// remove the last solve; maybe remove 'clearPb' stuff below
 newCommand(['remove', 'pop'], 'removes your last solve', message => {
   if (solves.popSolve(message.author.id)) {
     message.channel.send(`Last solve of ${message.author.username} removed.`);
@@ -136,8 +135,7 @@ newCommand(['remove', 'pop'], 'removes your last solve', message => {
   }
 });
 
-// changes whether the last solve was a +2
-newCommand(['toggle+2', 'toggle+'], 'changes whether your last solve was a +2', message => {
+newCommand(['+2'], 'changes whether your last solve was a +2', message => {
   if (db.togglePlusTwo(message.author.id)) {
     let se = solves.getLastSolve(message.author.id);
     message.channel.send(`+2 was ${se.plusTwo ? 'added to' : 'removed from'} `
@@ -148,11 +146,9 @@ newCommand(['toggle+2', 'toggle+'], 'changes whether your last solve was a +2', 
 });
 
 // show personal bests
-newCommand(['pbs', 'pb'], 'shows the personal bests of all members',
-  message => {
-    message.channel.send({ embed: getPbEmbed() });
-  }
-);
+newCommand(['pbs', 'pb'], 'shows the personal bests of all members', message => {
+  message.channel.send({ embed: getPbEmbed() });
+});
 
 // use function to recalculate timestamp; otherwise, the timestamp remains at the
 // time which the bot was last put online
