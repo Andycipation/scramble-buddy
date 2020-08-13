@@ -12,6 +12,7 @@ const {
   LEFT_EMOJI,
   RIGHT_EMOJI,
   LAST_EMOJI,
+  REFRESH_EMOJI,
 } = require('../config.js');
 
 const solves = require('./solves.js');
@@ -130,10 +131,17 @@ function isProfilePage(message) {
 }
 
 
-const PROFILE_EMOJIS = [FIRST_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, LAST_EMOJI];
+const PROFILE_EMOJIS = [
+  FIRST_EMOJI,
+  LEFT_EMOJI,
+  REFRESH_EMOJI,
+  RIGHT_EMOJI,
+  LAST_EMOJI,
+];
 const FUNCTIONS = [
   (userId, x) => 0,
   (userId, x) => x - 1,
+  (userId, x) => x,
   (userId, x) => x + 1,
   (userId, x) => solves.getNumPages(userId) - 1,
 ]

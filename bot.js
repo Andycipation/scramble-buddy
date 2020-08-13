@@ -11,7 +11,7 @@ const {
   MY_DISCORD_ID,
   DATA_CHANNEL_ID,
   prefix,
-  ignoreBots,
+  IGNORE_BOTS,
   COOLDOWN,
 } = require('./config.js');
 var { troll } = require('./config.js');
@@ -84,8 +84,8 @@ function handleTroll(message) {
 
 // when a message is sent
 bot.on('message', message => {
-  // ignore message if sent by self, or sender is bot and ignoreBots is on
-  if (message.author.id == bot.user.id || (message.author.bot && ignoreBots)) {
+  // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
+  if (message.author.id == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
     return;
   }
   handleTroll(message);  // do troll responses
@@ -131,7 +131,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
   if (messageReaction.message.author.id != bot.user.id) {
     return;  // only handle reactions to messages sent by this bot
   }
-  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
+  if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
     return;  // ignore reacts by self
   }
   for (const raa of REACTION_ADD_ACTIONS) {  // related acute angle lol
@@ -144,7 +144,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
 
 // when a reaction is removed from an existing message
 bot.on('messageReactionRemove', (messageReaction, user) => {
-  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
+  if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
     return;
   }
   if (messageReaction.emoji.name == REACTION_ADD_ACTIONS[0].emoji) {

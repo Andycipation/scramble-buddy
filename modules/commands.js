@@ -13,6 +13,7 @@ const {
 
   FIRST_EMOJI,
   LEFT_EMOJI,
+  REFRESH_EMOJI,
   RIGHT_EMOJI,
   LAST_EMOJI,
 
@@ -24,7 +25,6 @@ const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
-const { parseMention } = require('./util.js');
 const { MessageEmbed } = require('discord.js');
 
 
@@ -116,6 +116,7 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
     // collect reactions for moving left or right
     await sent.react(FIRST_EMOJI);
     await sent.react(LEFT_EMOJI);
+    await sent.react(REFRESH_EMOJI);
     await sent.react(RIGHT_EMOJI);
     await sent.react(LAST_EMOJI);
   });
