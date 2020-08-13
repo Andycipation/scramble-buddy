@@ -10,8 +10,12 @@ const {
   REMOVE_EMOJI,
   CONFIRM_EMOJI,
   SCRAMBLE_REACT_PROMPT,
+
+  FIRST_EMOJI,
   LEFT_EMOJI,
   RIGHT_EMOJI,
+  LAST_EMOJI,
+
   FOOTER_STRING,
   LEADERBOARD_LENGTH,
 } = require('../config.js');
@@ -20,22 +24,44 @@ const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
+const { parseMention } = require('./util.js');
+const { MessageEmbed } = require('discord.js');
 
+
+/**
+ * A class representing a Command that can be called by the user.
+ */
 class Command {
+  /**
+   * The constructor for a Command object.
+   * @param {Array<string>} names the tokens that will trigger this command
+   * @param {string} helpMsg the message shown in the help embed
+   * @param {Function} callback the function that executes when the command is called
+   */
   constructor(names, helpMsg, callback) {
     this.names = names;
     this.helpMsg = helpMsg;
     this.do = callback;
   }
 
+  /**
+   * Returns the string that appears in the help embed for this command.
+   */
   get helpString() {
     // maybe prefix shouldn't even be in this file
     return `\`${prefix} ${this.names.join('/')}\` ${this.helpMsg}`;
   }
 }
 
+
 const COMMANDS = [];
 
+/**
+ * Adds a new Command to the COMMANDS array, which is exported to the bot.js file.
+ * @param {Array<string>} names the tokens that will trigger this command
+ * @param {string} helpMsg the message shown in the help embed
+ * @param {Function} callback the function that executes when the command is called
+ */
 function newCommand(names, helpMsg, callback) {
   COMMANDS.push(new Command(names, helpMsg, callback));
 }
@@ -62,6 +88,79 @@ newCommand(['time', 'start', 'go'], 'starts a timer for you', message => {
     + 'Send anything to stop.');
 });
 
+// view user's current records
+newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
+  let user = message.mentions.users.first();
+  if (user != null && user.bot) {
+    message.channel.send("You cannot request to view a bot's solves.");
+    return;
+  }
+  if (user == null) {
+    user = message.author;
+  }
+  const msg = message.content.trim().substring(prefix.length).trim();
+  const data = msg.split(' ');
+  let page = 0;
+  for (let j = 1; j <= 2; j++) {
+    if (!isNaN(parseInt(data[j], 10))) {
+      page = parseInt(data[j], 10) - 1;
+      break;
+    }
+  }
+  const embed = solves.getUserEmbed(user.id, page);
+  if (embed === null) {
+    message.channel.send('Invalid page number.');
+    return;
+  }
+  message.channel.send({ embed: embed }).then(async sent => {
+    // collect reactions for moving left or right
+    await sent.react(FIRST_EMOJI);
+    await sent.react(LEFT_EMOJI);
+    await sent.react(RIGHT_EMOJI);
+    await sent.react(LAST_EMOJI);
+  });
+});
+
+// set the method used by user
+newCommand(['setmethod'], '`[method]` sets your solving method in your profile', message => {
+  const msg = message.content.trim().substring(prefix.length).trim();
+  const method = msg.split(' ').slice(1).join(' ');
+  if (method.length == 0) {
+    message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
+    return;
+  }
+  if (db.setMethod(message.author.id, method)) {
+    message.channel.send(`Solving method of ${message.author.username} set to ${method}.`);
+  } else {
+    message.channel.send('Invalid method provided; solving method unchanged.');
+  }
+});
+
+newCommand(['remove', 'pop'], 'removes your last solve', message => {
+  if (solves.popSolve(message.author.id)) {
+    message.channel.send(`Last solve of ${message.author.username} removed.`);
+  } else {
+    message.channel.send(`${message.author.username} does not have an existing solve.`);
+  }
+});
+
+newCommand(['+2'], 'changes whether your last solve was a +2', message => {
+  if (db.togglePlusTwo(message.author.id)) {
+    let se = solves.getLastSolve(message.author.id);
+    message.channel.send(`+2 was ${se.plusTwo ? 'added to' : 'removed from'} `
+        + `${message.author.username}'s last solve.`);
+  } else {
+    message.channel.send(`${message.author.username} does not have an existing solve.`);
+  }
+});
+
+
+/**
+ * Returns a MessageEmbed containing the leaderboard, ranked by personal
+ * bests. This function must be above the newCommand declaration for
+ * the 'cube pb' command.
+ * @returns {MessageEmbed} the leaderboard embed
+ */
 function getPbEmbed() {
   let pbs = solves.getCurrentPbs();
   pbs.sort((e1, e2) => {
@@ -98,77 +197,15 @@ function getPbEmbed() {
   };
 }
 
-// view user's current records
-newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
-  let user = message.mentions.users.first();
-  if (user != null && user.bot) {
-    message.channel.send("You cannot request to view a bot's solves.");
-    return;
-  }
-  if (user == null) {
-    user = message.author;
-  }
-  let msg = message.content.trim().substring(prefix.length).trim();
-  const data = msg.split(' ');
-  let page = 0;
-  for (let j = 1; j <= 2; j++) {
-    if (!isNaN(parseInt(data[j], 10))) {
-      page = parseInt(data[j], 10) - 1;
-      break;
-    }
-  }
-  const embed = solves.getUserEmbed(user.id, page);
-  if (embed === null) {
-    message.channel.send('Invalid page number.');
-    return;
-  }
-  message.channel.send({ embed: embed }).then(async sent => {
-    // collect reactions for moving left or right
-    await sent.react(LEFT_EMOJI);
-    await sent.react(RIGHT_EMOJI);
-  });
-});
-
-// set the method used by user
-newCommand(['setmethod'], '`[method]` sets your solving method in your profile', message => {
-  let msg = message.content.trim().substring(prefix.length).trim();
-  let method = msg.split(' ').slice(1).join(' ');
-  if (method.length == 0) {
-    message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
-    return;
-  }
-  if (db.setMethod(message.author.id, method)) {
-    message.channel.send(`Solving method of ${message.author.username} set to ${method}.`);
-  } else {
-    message.channel.send('Invalid method provided; solving method unchanged.');
-  }
-});
-
-newCommand(['remove', 'pop'], 'removes your last solve', message => {
-  if (solves.popSolve(message.author.id)) {
-    message.channel.send(`Last solve of ${message.author.username} removed.`);
-  } else {
-    message.channel.send(`${message.author.username} does not have an existing solve.`);
-  }
-});
-
-newCommand(['+2'], 'changes whether your last solve was a +2', message => {
-  if (db.togglePlusTwo(message.author.id)) {
-    let se = solves.getLastSolve(message.author.id);
-    message.channel.send(`+2 was ${se.plusTwo ? 'added to' : 'removed from'} `
-        + `${message.author.username}'s last solve.`);
-  } else {
-    message.channel.send(`${message.author.username} does not have an existing solve.`);
-  }
-});
-
 // show personal bests
 newCommand(['pbs', 'pb'], 'shows the personal bests of all members', message => {
   message.channel.send({ embed: getPbEmbed() });
 });
 
-// use function to recalculate timestamp; otherwise, the timestamp remains at the
-// time which the bot was last put online
+/**
+ * Returns a MessageEmbed containing the help strings for each command.
+ * @returns {MessageEmbed} the help embed
+ */
 function getHelpEmbed() {
   return {
     color: 0x0099ff,

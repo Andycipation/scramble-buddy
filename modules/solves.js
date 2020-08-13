@@ -8,13 +8,26 @@ this is probably not a good idea lol
 */
 
 
+const Discord = require('discord.js');
+
 const { FOOTER_STRING, SOLVES_PER_PAGE } = require('../config.js');
 const db = require('./database.js');
 const { Stack, MinStack } = require('./stack.js');
 const timer = require('./timer.js');
 
 
+/**
+ * The class representing a solve.
+ */
 class SolveEntry {
+  /**
+   * The constructor of a SolveEntry.
+   * @param {string} id the id of the message that logged this solve
+   * @param {string} userId the id of the user who did this solve
+   * @param {Number} time the number of milliseconds the solve took
+   * @param {string} scramble the scramble of the solve
+   * @param {boolean} plusTwo whether or not the solve got a +2
+   */
   constructor(id, userId, time, scramble, plusTwo) {
     this.id = id;  // id of this solveEntry; the id of the log message
     this.userId = userId;
@@ -27,6 +40,9 @@ class SolveEntry {
     return `${timer.formatTime(this.time, this.plusTwo)} **|** ${this.scramble}`
   }
   
+  /**
+   * Returns the string that is sent in the log to record the SolveEntry.
+   */
   logString() {
     let timeString = `${this.time}`;
     if (this.plusTwo) {
@@ -35,6 +51,9 @@ class SolveEntry {
     return `${this.userId}|${timeString}|${this.scramble}`;
   }
   
+  /**
+   * Toggles whether or not this solve had a +2.
+   */
   togglePlusTwo() {
     if (!this.plusTwo) {
       this.time += 2000;
@@ -47,7 +66,15 @@ class SolveEntry {
 }
 
 
-class Solver {  // a user who does solves
+/**
+ * The class for a user who does solves.
+ */
+class Solver {
+  /**
+   * The constructor for the Solver class.
+   * @param {string} userId the id of this Discord user
+   * @param {string} username the user's username
+   */
   constructor(userId, username) {
     this.userId = userId;
     this.username = username;
@@ -69,7 +96,11 @@ class Solver {  // a user who does solves
     }
   }
 
-  pushSolve(se) {  // argument: the SolveEntry to add
+  /**
+   * Pushes a solve to this user's logs.
+   * @param {SolveEntry} se the SolveEntry to add to the user's solves
+   */
+  pushSolve(se) {
     this.solves.push(se);
     this.psa.push(this.psa[this.solves.size()] + se.time);
     for (let i = 0; i < this.AVGS; i++) {
@@ -80,6 +111,12 @@ class Solver {  // a user who does solves
     }
   }
   
+  /**
+   * Returns the last solve of this Solver, or null if this Solver has
+   * no solves completed.
+   * @returns {SolveEntry} the last SolveEntry this user generated, or
+   * null if no solves have been completed
+   */
   get lastSolve() {
     if (this.solves.empty()) {
       return null;
@@ -87,6 +124,10 @@ class Solver {  // a user who does solves
     return this.solves.top();
   }
   
+  /**
+   * Toggles whether or not the last solve was a +2.
+   * @returns {boolean} whether or not the toggle was successful
+   */
   togglePlusTwoOnLastSolve() {
     if (this.solves.empty()) {
       return false;  // no solve to toggle
@@ -103,8 +144,11 @@ class Solver {  // a user who does solves
     return true;
   }
 
+  /**
+   * Pops the last SolveEntry of this Solver.
+   * @returns {boolean} whether the pop was successful
+   */
   popSolve() {
-    // returns whether the pop was successful
     if (this.solves.empty()) {
       return false;
     }
@@ -118,6 +162,10 @@ class Solver {  // a user who does solves
     return true;
   }
 
+  /**
+   * Returns the SolveEntry denoting this Solver's personal best.
+   * @returns {SolveEntry} this Solver's personal best
+   */
   get pb() {
     if (this.solves.empty()) {
       return null;
@@ -125,6 +173,10 @@ class Solver {  // a user who does solves
     return this.solves.best;
   }
 
+  /**
+   * Returns the string showing this Solver's personal best.
+   * @returns the personal best string
+   */
   pbString() {
     let pb = this.pb;
     if (pb === null) {
@@ -133,11 +185,22 @@ class Solver {  // a user who does solves
     return pb.toString();
   }
 
+  /**
+   * Returns whether or not the last solve of this Solver was a personal best.
+   * @returns whether the last solve was a personal best
+   */
   lastSolveWasPb() {
     return (this.lastSolve !== null && this.lastSolve.id == this.pb.id);
   }
 
-  getAverage(cnt) {  // average over last cnt solves
+  /**
+   * Returns the average over a given number of solves, with the fastest
+   * and slowest solves ignored.
+   * @param {Number} cnt the number of solves to compute the average over
+   * @returns {Number} the average number of milliseconds a solve took,
+   * or -1 if cnt is less than 3
+   */
+  getAverage(cnt) {
     let n = this.solves.size();
     if (cnt <= 2 || cnt > n) {
       return -1;
@@ -159,7 +222,7 @@ class Solver {  // a user who does solves
     return Math.round(s / (cnt - 2));
   }
   
-  _getBestAverages() {
+  _getBestAveragesString() {
     let lines = [];
     for (let i = 0; i < this.AVGS; i++) {
       if (this.avg[i].empty()) {
@@ -174,7 +237,7 @@ class Solver {  // a user who does solves
     return lines.join('\n');
   }
   
-  _getCurrentAverages() {
+  _getCurrentAveragesString() {
     let lines = [];
     for (let i = 0; i < this.AVGS; i++) {
       if (this.avg[i].empty()) {
@@ -205,8 +268,9 @@ class Solver {  // a user who does solves
   /**
    * Returns the string representing the solves in the given range,
    * in reverse order as on https://cstimer.net/.
-   * @param {int} from the starting index, inclusive
-   * @param {int} to the ending index, inclusive
+   * @param {Number} from the starting index, inclusive
+   * @param {Number} to the ending index, inclusive
+   * @returns {string} the string showing all solves in the given range
    */
   _getSolvesString(from, to) {
     if (from < 0 || from > to || to >= this.solves.size()) {
@@ -225,11 +289,16 @@ class Solver {  // a user who does solves
 
   /**
    * Returns the number of pages the profile would require.
+   * @returns {Number} the number of pages the profile would require
    */
   get numPages() {
     return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
   }
 
+  /**
+   * Returns the embed showing this Solver's profile.
+   * @returns {Discord.MessageEmbed} the profile embed for this Solver
+   */
   getProfileEmbed() {
     return {
       color: 0x0099ff,
@@ -258,12 +327,12 @@ class Solver {  // a user who does solves
         },
         {
           name: 'Best Averages',
-          value: this._getBestAverages(),
+          value: this._getBestAveragesString(),
           inline: true,
         },
         {
           name: 'Current Averages',
-          value: this._getCurrentAverages(),
+          value: this._getCurrentAveragesString(),
           inline: true,
         },
       ],
@@ -275,6 +344,11 @@ class Solver {  // a user who does solves
     };
   }
 
+  /**
+   * Returns the embed for the given page.
+   * @param {Number} page the page number to return
+   * @returns {Discord.MessageEmbed} the message embed for the given page
+   */
   getSolvesEmbed(page) {
     // page - the solve page id, from 0 to ceil(# solves / SOLVES_PER_PAGE) - 1
     if (page < 0 || page >= this.numPages - 1) {
@@ -320,6 +394,12 @@ const solvers = new Map();  // map<userId, Solver>
 
 // public functions
 
+/**
+ * Initializes a Solver in in the `solvers` Map.
+ * @param {string} userId the user id for this Solver
+ * @param {string} username the username of this Solver
+ * @returns {boolean} whether a new key was created in the `solvers` Map
+ */
 function initUser(userId, username) {
   if (solvers.has(userId)) {
     return false;
@@ -328,7 +408,11 @@ function initUser(userId, username) {
   return true;
 }
 
-function getCurrentPbs() {  // returns Array<SolveEntry>
+/**
+ * Returns all current personal bests.
+ * @returns {Array<SolveEntry>} all personal best SolveEntry objects
+ */
+function getCurrentPbs() {
   let res = [];
   for (let solver of solvers.values()) {
     let pb = solver.pb;
@@ -339,10 +423,24 @@ function getCurrentPbs() {  // returns Array<SolveEntry>
   return res;
 }
 
+/**
+ * Returns the last solve for the given user, or null if no solve has
+ * been completed by the user.
+ * @param {string} userId the user to query
+ * @returns {SolveEntry} the last solve
+ */
 function getLastSolve(userId) {
   return solvers.get(userId).lastSolve;
 }
 
+/**
+ * Adds a SolveEntry for the given user.
+ * @param {string} id the id of the message that logged this solve
+ * @param {string} userId the id of the user who did this solve
+ * @param {Number} time the number of milliseconds the solve took
+ * @param {string} scramble the scramble of the solve
+ * @param {boolean} plusTwo whether or not the solve got a +2
+ */
 function pushSolve(id, userId, time, scramble, plusTwo) {
   solvers.get(userId).pushSolve(new SolveEntry(id, userId, time, scramble, plusTwo));
 }
@@ -351,6 +449,21 @@ function popSolve(userId) {
   return solvers.get(userId).popSolve();
 }
 
+/**
+ * Returns the number of pages the user's profile embed requires.
+ * @param {string} userId the user's id
+ * @returns {Number} the number of pages required
+ */
+function getNumPages(userId) {
+  return solvers.get(userId).numPages;
+}
+
+/**
+ * Returns the requested profile embed.
+ * @param {string} userId the user's id
+ * @param {Number} page the page number to get
+ * @returns {Discord.MessageEmbed} the corresponding MessageEmbed
+ */
 function getUserEmbed(userId, page) {
   const solver = solvers.get(userId);
   if (page == 0) {
@@ -377,6 +490,7 @@ exports.getCurrentPbs = getCurrentPbs;
 exports.getLastSolve = getLastSolve;
 exports.pushSolve = pushSolve;
 exports.popSolve = popSolve;
+exports.getNumPages = getNumPages;
 exports.getUserEmbed = getUserEmbed;
 exports.lastSolveWasPb = lastSolveWasPb;
 exports.setMethod = setMethod;

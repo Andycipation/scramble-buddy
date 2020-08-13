@@ -19,8 +19,10 @@ const CONFIRM_EMOJI = '✅';
 const REMOVE_EMOJI = '❌';
 const SCRAMBLE_REACT_PROMPT = `React with ${CONFIRM_EMOJI} to use this scramble.`;
 
-const LEFT_EMOJI = '⬅️';
-const RIGHT_EMOJI = '➡️';
+const FIRST_EMOJI = '⏮️';
+const LEFT_EMOJI = '◀️';
+const RIGHT_EMOJI = '▶️';
+const LAST_EMOJI = '⏭️';
 const SOLVES_PER_PAGE = 10;  // number of solves per page for profile embeds
 
 const FOOTER_STRING = `${pkg.name}, version ${pkg.version} | Trademark ${pkg.author}™`
@@ -42,8 +44,10 @@ exports.CONFIRM_EMOJI = CONFIRM_EMOJI;
 exports.REMOVE_EMOJI = REMOVE_EMOJI;
 exports.SCRAMBLE_REACT_PROMPT = SCRAMBLE_REACT_PROMPT;
 
+exports.FIRST_EMOJI = FIRST_EMOJI;
 exports.LEFT_EMOJI = LEFT_EMOJI;
 exports.RIGHT_EMOJI = RIGHT_EMOJI;
+exports.LAST_EMOJI = LAST_EMOJI;
 exports.SOLVES_PER_PAGE = SOLVES_PER_PAGE;
 
 exports.FOOTER_STRING = FOOTER_STRING;

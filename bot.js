@@ -51,10 +51,19 @@ bot.on('ready', function() {
 
 const lastRequest = new Map();
 
+/**
+ * Checks if the user with the given id can make a request to the bot.
+ * @param {string} id the id of the user to check
+ * @returns {boolean} whether or not the user can make a request at this time
+ */
 function canRequest(id) {
   return (!lastRequest.has(id) || Date.now() - lastRequest.get(id) >= COOLDOWN);
 }
 
+/**
+ * Handles all troll features of this bot.
+ * @param {Discord.Message} message the message for which to handle troll actions
+ */
 function handleTroll(message) {
   if (!troll) {
     return;
@@ -94,12 +103,11 @@ bot.on('message', message => {
   // check if troll should be toggled
   if (message.author.id == MY_DISCORD_ID && op == 'toggletroll') {
     troll ^= 1;
-    let s = (troll ? 'enabled' : 'disabled');
-    message.channel.send(`Troll messages ${s}.`);
+    message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
   }
   
   // do the actual commands
-  for (let cmd of COMMANDS) {
+  for (const cmd of COMMANDS) {
     if (cmd.names.includes(op)) {
       cmd.do(message);
     }

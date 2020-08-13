@@ -7,12 +7,16 @@ const {
   REMOVE_EMOJI,
   CONFIRM_EMOJI,
   SCRAMBLE_REACT_PROMPT,
+
+  FIRST_EMOJI,
   LEFT_EMOJI,
   RIGHT_EMOJI,
+  LAST_EMOJI,
 } = require('../config.js');
 
 const solves = require('./solves.js');
 const timer = require('./timer.js');
+const { parseMention } = require('./util.js');
 
 
 // action to take when a reaction is added
@@ -28,12 +32,23 @@ class ReactionAddAction {
 
 const REACTION_ADD_ACTIONS = [];
 
-// add a new action to perform when a reaction is added
-// callback should take two objects as arguments: reaction and user
+/**
+ * Adds an action to perform when a reaction is added.
+ * @param {string} emoji the emoji the action applies to
+ * @param {Function} verifier the function that confirms validity of the reaction
+ * @param {Function} callback the action taken when the reaction is made
+ */
 function newReactionAddAction(emoji, verifier, callback) {
   REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, verifier, callback));
 }
 
+
+/**
+ * Removes the reaction from the given message made by the user.
+ * @param {Message} message message to remove reaction from
+ * @param {string} userId the user id of the user who reacted
+ * @param {string} emojiChar the emoji to remove
+ */
 function removeReaction(message, userId, emojiChar) {
   // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
   const userReactions = message.reactions.cache.filter(
@@ -47,8 +62,12 @@ function removeReaction(message, userId, emojiChar) {
 }
 
 
-// check mark and cross for contending for a scramble
-
+/**
+ * Returns whether or not the given message is a scramble, i.e. if it
+ * was sent as a result of a call to `cube get`.
+ * @param {Message} message the message to verify
+ * @returns {boolean} whether or not the given message shows a scramble
+ */
 function isScramble(message) {
   let lines = message.content.split('\n');
   if (lines.length <= 1) {
@@ -80,7 +99,7 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
   let scrambleString = lines[0];
   let instructions = lines[1];
   let tgt = `<@${user.id}>`;
-  let users = lines.slice(3).filter(u => u != tgt);
+  let users = lines.slice(3).filter(u => (u != tgt));
   timer.deleteScramble(user.id);  // could return true or false
   if (!message.editable) {
     console.error('cannot edit this message');
@@ -100,6 +119,7 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
  * Checks if the given message is a profile embed message, called by
  * the message 'cube view [user mention]'.
  * @param {Message} message the message to verify
+ * @returns {boolean} whether or not the given message is a profile embed
  */
 function isProfilePage(message) {
   let embeds = message.embeds;
@@ -109,45 +129,39 @@ function isProfilePage(message) {
   return (embeds[0].footer.text.includes('/'));
 }
 
-newReactionAddAction(LEFT_EMOJI, message => isProfilePage(message, 2), (reaction, user) => {
-  const message = reaction.message;
-  // clear emojis of both types
-  removeReaction(message, user.id, LEFT_EMOJI);
-  removeReaction(message, user.id, RIGHT_EMOJI);
-  if (!message.editable) {
-    console.error('cannot scroll left on profile');
-    return;
-  }
-  const embed = message.embeds[0];
-  let userId = embed.description.split(' ')[2];
-  userId = userId.substring(2, userId.length - 1);
-  const strs = embed.footer.text.split(' ');
-  const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
-  const newEmbed = solves.getUserEmbed(userId, currentPage - 1);  // the only difference from below
-  if (newEmbed !== null) {
-    message.edit({ embed: newEmbed });
-  }
-});
 
-newReactionAddAction(RIGHT_EMOJI, message => isProfilePage(message, 1), (reaction, user) => {
-  const message = reaction.message;
-  // clear emojis of both types
-  removeReaction(message, user.id, LEFT_EMOJI);
-  removeReaction(message, user.id, RIGHT_EMOJI);
-  if (!message.editable) {
-    console.error('cannot scroll right on profile');
-    return;
-  }
-  const embed = message.embeds[0];
-  let userId = embed.description.split(' ')[2];
-  userId = userId.substring(2, userId.length - 1);
-  const strs = embed.footer.text.split(' ');
-  const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
-  const newEmbed = solves.getUserEmbed(userId, currentPage + 1);  // the only difference from above
-  if (newEmbed !== null) {
+const PROFILE_EMOJIS = [FIRST_EMOJI, LEFT_EMOJI, RIGHT_EMOJI, LAST_EMOJI];
+const FUNCTIONS = [
+  (userId, x) => 0,
+  (userId, x) => x - 1,
+  (userId, x) => x + 1,
+  (userId, x) => solves.getNumPages(userId) - 1,
+]
+
+for (let i = 0; i < PROFILE_EMOJIS.length; i++) {
+  const emoji = PROFILE_EMOJIS[i];
+  const func = FUNCTIONS[i];
+  // add the reaction action that changes the profile page
+  newReactionAddAction(emoji, isProfilePage, (reaction, user) => {
+    const message = reaction.message;
+    removeReaction(message, user.id, emoji);
+    if (!message.editable) {
+      console.error('cannot scroll right on profile');
+      return false;
+    }
+    const embed = message.embeds[0];
+    const userId = parseMention(embed.description.split(' ')[2]);
+    const strs = embed.footer.text.split(' ');
+    const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
+    const newEmbed = solves.getUserEmbed(userId, func(userId, currentPage));
+    if (newEmbed === null) {
+      return false;
+    }
     message.edit({ embed: newEmbed });
-  }
-});
+    return true;
+  });
+}
+
 
 // class ReactionRemoveAction {
 //   constructor(emoji, callback) {
