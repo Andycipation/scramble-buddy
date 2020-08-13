@@ -8,7 +8,7 @@ this is probably not a good idea lol
 */
 
 
-const { FOOTER_STRING } = require('../config.js');
+const { FOOTER_STRING, SOLVES_PER_PAGE } = require('../config.js');
 const db = require('./database.js');
 const { Stack, MinStack } = require('./stack.js');
 const timer = require('./timer.js');
@@ -189,20 +189,48 @@ class Solver {  // a user who does solves
     return lines.join('\n');
   }
   
-  _getLastSolvesString(cnt) {  // most recent solve last
-    cnt = Math.min(cnt, this.solves.size());
-    let entries = [];
-    for (let i = 0; i < cnt; i++) {
-      let se = this.solves.stk[this.solves.size() - cnt + i];
-      entries.push(`${se.toString()}`);
+  // _getLastSolvesString(cnt) {  // most recent solve last
+  //   cnt = Math.min(cnt, this.solves.size());
+  //   let entries = [];
+  //   for (let i = 0; i < cnt; i++) {
+  //     let se = this.solves.stk[this.solves.size() - cnt + i];
+  //     entries.push(`${se.toString()}`);
+  //   }
+  //   if (entries.length == 0) {
+  //     entries.push('none');
+  //   }
+  //   return entries.join('\n');
+  // }
+
+  /**
+   * Returns the string representing the solves in the given range,
+   * in reverse order as on https://cstimer.net/.
+   * @param {int} from the starting index, inclusive
+   * @param {int} to the ending index, inclusive
+   */
+  _getSolvesString(from, to) {
+    if (from < 0 || from > to || to >= this.solves.size()) {
+      console.error('tried to get solves in an invalid range');
+      return null;
     }
-    if (entries.length == 0) {
-      entries.push('none');
+    let res = '';
+    for (let i = to; i >= from; i--) {
+      if (i != to) {
+        res += '\n';
+      }
+      res += `${i + 1}) ${this.solves.stk[i].toString()}`;
     }
-    return entries.join('\n');
+    return res;
   }
 
-  get embed() {
+  /**
+   * Returns the number of pages the profile would require.
+   */
+  get numPages() {
+    return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
+  }
+
+  getProfileEmbed() {
     return {
       color: 0x0099ff,
       title: `Profile of ${this.username}`,
@@ -210,6 +238,9 @@ class Solver {  // a user who does solves
       // thumbnail: {
       //   url: 'attachment://avatar.png'
       // },
+
+      // this description mention is how page changing works
+      description: `Discord User: <@${this.userId}>`,
       fields: [
         {
           name: 'Solving Method',
@@ -235,14 +266,42 @@ class Solver {  // a user who does solves
           value: this._getCurrentAverages(),
           inline: true,
         },
+      ],
+      timestamp: new Date(),
+      footer: {
+        // NOTE: the format 'Page x/y' is required for arrows to work
+        text: `${FOOTER_STRING} | Page 1/${this.numPages}`
+      },
+    };
+  }
+
+  getSolvesEmbed(page) {
+    // page - the solve page id, from 0 to ceil(# solves / SOLVES_PER_PAGE) - 1
+    if (page < 0 || page >= this.numPages - 1) {
+      // not an error
+      // console.log('tried to get an embed page out of range');
+      return null;
+    }
+    let to = this.solves.size() - 1 - page * SOLVES_PER_PAGE;
+    let from = Math.max(to - SOLVES_PER_PAGE + 1, 0);
+    return {
+      color: 0x0099ff,
+      // below: the title starting with 'Profile of' is what is used
+      // in reactions.js to check if the message is a Profile message
+      title: `Profile of ${this.username}`,
+
+      // this description mention is how page changing works
+      description: `Discord User: <@${this.userId}>`,
+      fields: [
         {
-          name: 'Latest Solves (most recent solve last)',
-          value: this._getLastSolvesString(5)  // show the last 10 solves
+          name: 'Solves (most recent solve first)',
+          value: this._getSolvesString(from, to),
         },
       ],
       timestamp: new Date(),
       footer: {
-        text: FOOTER_STRING
+        // NOTE: the format 'Page x/y' is required for arrows to work
+        text: `${FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
       },
     };
   }
@@ -292,8 +351,12 @@ function popSolve(userId) {
   return solvers.get(userId).popSolve();
 }
 
-function getUserEmbed(userId) {
-  return solvers.get(userId).embed;
+function getUserEmbed(userId, page) {
+  const solver = solvers.get(userId);
+  if (page == 0) {
+    return solver.getProfileEmbed();
+  }
+  return solver.getSolvesEmbed(page - 1);
 }
 
 function lastSolveWasPb(userId) {

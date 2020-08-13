@@ -120,14 +120,18 @@ bot.on('guildMemberAdd', member => {
 // when a reaction is added to an existing message
 bot.on('messageReactionAdd', (messageReaction, user) => {
   // console.log('someone reacted to: ' + messageReaction.message.content);
-  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
-    return; // ignore reacts by self
+  if (messageReaction.message.author.id != bot.user.id) {
+    return;  // only handle reactions to messages sent by this bot
   }
-  REACTION_ADD_ACTIONS.forEach(raa => { // related acute angle lol
-    if (messageReaction.emoji.name == raa.emoji) {
+  if (user.id == bot.user.id || (user.bot && ignoreBots)) {
+    return;  // ignore reacts by self
+  }
+  for (const raa of REACTION_ADD_ACTIONS) {  // related acute angle lol
+    if (messageReaction.emoji.name == raa.emoji
+        && raa.appliesTo(messageReaction.message)) {
       raa.do(messageReaction, user);
     }
-  });
+  }
 });
 
 // when a reaction is removed from an existing message

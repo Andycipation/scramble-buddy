@@ -3,13 +3,15 @@ The commands which the bot responds to.
 */
 
 
-const Discord = require('discord.js');
 const pkg = require('../package.json');
 
 const {
   prefix,
-  scrambleRemoveEmoji,
-  scrambleConfirmEmoji,
+  REMOVE_EMOJI,
+  CONFIRM_EMOJI,
+  SCRAMBLE_REACT_PROMPT,
+  LEFT_EMOJI,
+  RIGHT_EMOJI,
   FOOTER_STRING,
   LEADERBOARD_LENGTH,
 } = require('../config.js');
@@ -46,10 +48,10 @@ newCommand(['help'], 'shows this help message', message => {
 // get a scramble
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   let scramble = getScramble();
-  let str = `${scramble}\nReact with ${scrambleConfirmEmoji} to use this scramble.`;
+  let str = `${scramble}\n${SCRAMBLE_REACT_PROMPT}`;
   message.channel.send(str).then(async sent => {
-    await sent.react(scrambleConfirmEmoji);
-    await sent.react(scrambleRemoveEmoji);
+    await sent.react(CONFIRM_EMOJI);
+    await sent.react(REMOVE_EMOJI);
   });
 });
 
@@ -70,7 +72,7 @@ function getPbEmbed() {
   pbs.length = Math.min(pbs.length, LEADERBOARD_LENGTH);
   let strings = [];
   for (let i = 0; i < pbs.length; i++) {
-    strings.push(`${i + 1}. ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
+    strings.push(`${i + 1}) ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
   }
   if (strings.length == 0) {
     strings.push('No one has a personal best yet. Be the first to have one!');
@@ -97,8 +99,7 @@ function getPbEmbed() {
 }
 
 // view user's current records
-newCommand(['view'], '`[user mention]` shows data for the given user', message => {
-  let msg = message.content.trim().substring(prefix.length).trim();
+newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
     message.channel.send("You cannot request to view a bot's solves.");
@@ -107,15 +108,31 @@ newCommand(['view'], '`[user mention]` shows data for the given user', message =
   if (user == null) {
     user = message.author;
   }
-  message.channel.send({ embed: solves.getUserEmbed(user.id) });
+  let msg = message.content.trim().substring(prefix.length).trim();
+  const data = msg.split(' ');
+  let page = 0;
+  for (let j = 1; j <= 2; j++) {
+    if (!isNaN(parseInt(data[j], 10))) {
+      page = parseInt(data[j], 10) - 1;
+      break;
+    }
+  }
+  const embed = solves.getUserEmbed(user.id, page);
+  if (embed === null) {
+    message.channel.send('Invalid page number.');
+    return;
+  }
+  message.channel.send({ embed: embed }).then(async sent => {
+    // collect reactions for moving left or right
+    await sent.react(LEFT_EMOJI);
+    await sent.react(RIGHT_EMOJI);
+  });
 });
 
 // set the method used by user
 newCommand(['setmethod'], '`[method]` sets your solving method in your profile', message => {
   let msg = message.content.trim().substring(prefix.length).trim();
-  // below: this is the length of the command plus the space
-  // TODO: clean up
-  let method = msg.substring(10).trim();
+  let method = msg.split(' ').slice(1).join(' ');
   if (method.length == 0) {
     message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
     return;
