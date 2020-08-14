@@ -2,16 +2,13 @@
 Module to manage solves.
 
 TODO: possibly implement segment tree to query min and max, then compute
-averages faster using PSA and segment tree queries?/
-
-this is probably not a good idea lol
+averages faster using PSA and segment tree queries?
 */
 
 
 const Discord = require('discord.js');
 
 const { FOOTER_STRING, SOLVES_PER_PAGE } = require('../config.js');
-const db = require('./database.js');
 const { Stack, MinStack } = require('./stack.js');
 const timer = require('./timer.js');
 
@@ -80,6 +77,7 @@ class Solver {
     this.username = username;
     
     this.method = 'unspecified';
+    this.methodLogId = null;
     
     // Stack<SolveEntry>
     this.solves = new Stack(
@@ -94,6 +92,35 @@ class Solver {
     for (let i = 0; i < this.AVGS; i++) {
       this.avg[i] = new MinStack();
     }
+  }
+
+  /**
+   * Sets the method of this Solver.
+   * @param {string} method the method to assign to this Solver
+   * @returns {boolean} whether the assignment was successful
+   */
+  setMethod(method) {
+    if (method.includes('|')) {
+      return false;
+    }
+    this.method = method;
+    return true;
+  }
+
+  /**
+   * Sets the method log id for this Solver.
+   * @param {string} methodLogId the id of the message that logged this change
+   */
+  setMethodLogId(methodLogId) {
+    this.methodLogId = methodLogId;
+  }
+
+  /**
+   * Returns the string that is sent in the log to record the SolveEntry.
+   * @returns {string} the log message
+   */
+  methodLogString() {
+    return `${this.userId}|${this.method}`;
   }
 
   /**
@@ -117,7 +144,7 @@ class Solver {
    * @returns {SolveEntry} the last SolveEntry this user generated, or
    * null if no solves have been completed
    */
-  get lastSolve() {
+  getLastSolve() {
     if (this.solves.empty()) {
       return null;
     }
@@ -128,7 +155,7 @@ class Solver {
    * Toggles whether or not the last solve was a +2.
    * @returns {boolean} whether or not the toggle was successful
    */
-  togglePlusTwoOnLastSolve() {
+  togglePlusTwo() {
     if (this.solves.empty()) {
       return false;  // no solve to toggle
     }
@@ -146,20 +173,20 @@ class Solver {
 
   /**
    * Pops the last SolveEntry of this Solver.
-   * @returns {boolean} whether the pop was successful
+   * @returns {string} the id of the removed solve, or null if no solves existed
    */
   popSolve() {
     if (this.solves.empty()) {
-      return false;
+      return null;
     }
-    db.removeLog(this.solves.top().id);
+    const removedId = this.solves.top().id;
     this.solves.pop();
     for (let i = 0; i < this.AVGS; i++) {
       if (!this.avg[i].empty()) {
         this.avg[i].pop();
       }
     }
-    return true;
+    return removedId;
   }
 
   /**
@@ -190,7 +217,7 @@ class Solver {
    * @returns whether the last solve was a personal best
    */
   lastSolveWasPb() {
-    return (this.lastSolve !== null && this.lastSolve.id == this.pb.id);
+    return (this.getLastSolve() !== null && this.getLastSolve().id == this.pb.id);
   }
 
   /**
@@ -381,15 +408,8 @@ class Solver {
   }
 }
 
-const solvers = new Map();  // map<userId, Solver>
 
-// function _ensureUser(userId) {
-//   if (!solvers.has(userId)) {
-//     console.error(`${userId} does not have a Solver object`);
-//     return false;
-//   }
-//   return true;
-// }
+const solvers = new Map();  // map<userId, Solver>
 
 
 // public functions
@@ -424,47 +444,12 @@ function getCurrentPbs() {
 }
 
 /**
- * Returns the last solve for the given user, or null if no solve has
- * been completed by the user.
- * @param {string} userId the user to query
- * @returns {SolveEntry} the last solve
- */
-function getLastSolve(userId) {
-  return solvers.get(userId).lastSolve;
-}
-
-/**
- * Adds a SolveEntry for the given user.
- * @param {string} id the id of the message that logged this solve
- * @param {string} userId the id of the user who did this solve
- * @param {Number} time the number of milliseconds the solve took
- * @param {string} scramble the scramble of the solve
- * @param {boolean} plusTwo whether or not the solve got a +2
- */
-function pushSolve(id, userId, time, scramble, plusTwo) {
-  solvers.get(userId).pushSolve(new SolveEntry(id, userId, time, scramble, plusTwo));
-}
-
-function popSolve(userId) {
-  return solvers.get(userId).popSolve();
-}
-
-/**
- * Returns the number of pages the user's profile embed requires.
- * @param {string} userId the user's id
- * @returns {Number} the number of pages required
- */
-function getNumPages(userId) {
-  return solvers.get(userId).numPages;
-}
-
-/**
  * Returns the requested profile embed.
  * @param {string} userId the user's id
  * @param {Number} page the page number to get
  * @returns {Discord.MessageEmbed} the corresponding MessageEmbed
  */
-function getUserEmbed(userId, page) {
+function getSolverEmbed(userId, page) {
   const solver = solvers.get(userId);
   if (page == 0) {
     return solver.getProfileEmbed();
@@ -472,26 +457,21 @@ function getUserEmbed(userId, page) {
   return solver.getSolvesEmbed(page - 1);
 }
 
-function lastSolveWasPb(userId) {
-  return solvers.get(userId).lastSolveWasPb();
-}
-
-function setMethod(userId, method) {
-  solvers.get(userId).method = method;
-}
-
-function togglePlusTwo(userId) {
-  return solvers.get(userId).togglePlusTwoOnLastSolve();
+/**
+ * Returns the Solver with the given id.
+ * @param {string} userId the user id of the Solver object to get
+ * @returns {Solver} the Solver object of this user
+ */
+function getSolver(userId) {
+  if (!solvers.has(userId)) {
+    process.exit(1);
+  }
+  return solvers.get(userId);
 }
 
 
 exports.initUser = initUser;
 exports.getCurrentPbs = getCurrentPbs;
-exports.getLastSolve = getLastSolve;
-exports.pushSolve = pushSolve;
-exports.popSolve = popSolve;
-exports.getNumPages = getNumPages;
-exports.getUserEmbed = getUserEmbed;
-exports.lastSolveWasPb = lastSolveWasPb;
-exports.setMethod = setMethod;
-exports.togglePlusTwo = togglePlusTwo;
+exports.getSolverEmbed = getSolverEmbed;
+exports.getSolver = getSolver;
+exports.SolveEntry = SolveEntry;

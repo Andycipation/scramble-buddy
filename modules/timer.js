@@ -6,9 +6,14 @@ Module to manage all actions related to timing.
 const db = require('./database.js');
 const solves = require('./solves.js');
 
+
+/**
+ * Returns a formatted string for the given solve result.
+ * @param {Number} milliseconds the time to format in milliseconds
+ * @param {boolean} plusTwo whether the solve was a +2
+ * @returns {string} the formatted time
+ */
 function formatTime(milliseconds, plusTwo) {
-  // plusTwo - whether the time was a +2
-  // returns a formatted string, with a + at the end if the solve was a +2
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);
@@ -36,6 +41,7 @@ function formatTime(milliseconds, plusTwo) {
   }
   return res;
 }
+
 
 const startTimes = new Map(); // map<userId, map<channelId, startTime>>
 const curScramble = new Map(); // map from user id to scramble string
@@ -68,7 +74,7 @@ async function _checkStop(channel, user) {
   channel.send(s);
   // add the solve to this user's Solver object
   await db.logSolve(user.id, time, curScramble.get(user.id));
-  if (solves.lastSolveWasPb(user.id)) {
+  if (solves.getSolver(user.id).lastSolveWasPb()) {
     // this SolveEntry that was just added was a personal best
     channel.send(`${user.username} got a new personal best of`
       + ` ${formatTime(time)}. Congratulations!`);

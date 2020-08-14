@@ -18,7 +18,7 @@ module.exports = {
 
   CONFIRM_EMOJI: '✅',
   REMOVE_EMOJI: '❌',
-  SCRAMBLE_REACT_PROMPT: `React with ${this.CONFIRM_EMOJI} to use this scramble.`,
+  SCRAMBLE_REACT_PROMPT: `React with ✅ to use this scramble.`,
 
   FIRST_EMOJI: '⏮️',
   LEFT_EMOJI: '◀️',

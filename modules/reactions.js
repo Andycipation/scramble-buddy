@@ -161,7 +161,7 @@ for (let i = 0; i < PROFILE_EMOJIS.length; i++) {
     const userId = parseMention(embed.description.split(' ')[2]);
     const strs = embed.footer.text.split(' ');
     const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
-    const newEmbed = solves.getUserEmbed(userId, func(userId, currentPage));
+    const newEmbed = solves.getSolverEmbed(userId, func(userId, currentPage));
     if (newEmbed === null) {
       return false;
     }

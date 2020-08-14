@@ -107,7 +107,7 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
       break;
     }
   }
-  const embed = solves.getUserEmbed(user.id, page);
+  const embed = solves.getSolverEmbed(user.id, page);
   if (embed === null) {
     message.channel.send('Invalid page number.');
     return;
@@ -123,14 +123,14 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
 });
 
 // set the method used by user
-newCommand(['setmethod'], '`[method]` sets your solving method in your profile', message => {
+newCommand(['setmethod'], '`[method]` sets your solving method in your profile', async message => {
   const msg = message.content.trim().substring(prefix.length).trim();
   const method = msg.split(' ').slice(1).join(' ');
   if (method.length == 0) {
     message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
     return;
   }
-  if (db.setMethod(message.author.id, method)) {
+  if (await db.setMethod(message.author.id, method)) {
     message.channel.send(`Solving method of ${message.author.username} set to ${method}.`);
   } else {
     message.channel.send('Invalid method provided; solving method unchanged.');
@@ -138,7 +138,7 @@ newCommand(['setmethod'], '`[method]` sets your solving method in your profile',
 });
 
 newCommand(['remove', 'pop'], 'removes your last solve', message => {
-  if (solves.popSolve(message.author.id)) {
+  if (db.popSolve(message.author.id)) {
     message.channel.send(`Last solve of ${message.author.username} removed.`);
   } else {
     message.channel.send(`${message.author.username} does not have an existing solve.`);
@@ -146,8 +146,9 @@ newCommand(['remove', 'pop'], 'removes your last solve', message => {
 });
 
 newCommand(['+2'], 'changes whether your last solve was a +2', message => {
+  const solver = solves.getSolver(message.author.id);
   if (db.togglePlusTwo(message.author.id)) {
-    let se = solves.getLastSolve(message.author.id);
+    let se = solver.getLastSolve();
     message.channel.send(`+2 was ${se.plusTwo ? 'added to' : 'removed from'} `
         + `${message.author.username}'s last solve.`);
   } else {
