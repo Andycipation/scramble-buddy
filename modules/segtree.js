@@ -14,11 +14,16 @@ class Node {
     this.mx = v;
   }
 
+  /**
+   * Applies an update to this Node.
+   * @param {Number} v the value to assign to this Node
+   */
   apply(v) {
     this.mn = Math.min(this.mn, v);
     this.mx = Math.max(this.mx, v);
   }
 }
+
 
 class _SegTree {
   /**
@@ -75,6 +80,21 @@ class _SegTree {
     }
     return this.unite(this.get(x + 1, l, y, ll, rr), this.get(z, y + 1, r, ll, rr));
   }
+
+  modify(x, l, r, p, v) {
+    if (l == r) {
+      this.tree[x].apply(v);
+      return;
+    }
+    y = (l + r) >> 1;
+    z = x + ((y - l + 1) << 1);
+    if (p <= y) {
+      this.modify(x + 1, l, y, p, v);
+    } else {
+      this.modify(z, y + 1, r, p, v);
+    }
+    this.pull(x, z);
+  }
 }
 
 
@@ -87,7 +107,9 @@ class SegTree extends _SegTree {
     super.get(0, 0, super.n - 1, ll, rr);
   }
 
-
+  modify(p, v) {
+    super.modify(0, 0, super.n - 1, p, v);
+  }
 }
 
 
