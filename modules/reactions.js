@@ -143,7 +143,7 @@ const FUNCTIONS = [
   (userId, x) => x - 1,
   (userId, x) => x,
   (userId, x) => x + 1,
-  (userId, x) => solves.getNumPages(userId) - 1,
+  (userId, x) => solves.getSolver(userId).numPages - 1,
 ]
 
 for (let i = 0; i < PROFILE_EMOJIS.length; i++) {

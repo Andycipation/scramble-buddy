@@ -20,11 +20,12 @@ const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
 const init = require('./modules/init.js');
+const solves = require('./modules/solves.js');
 const timer = require('./modules/timer.js');
 
 const bot = new Discord.Client();
 
-bot.on('ready', function() {
+bot.on('ready', async function() {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   
@@ -35,18 +36,16 @@ bot.on('ready', function() {
   // });
   
   // initialize all non-bot users
-  for (let guild of bot.guilds.cache.values()) {
+  for (const guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
   }
   
-  // load past solves; there may be some async problems here
-  bot.channels.fetch(DATA_CHANNEL_ID).then(channel => {
-    db.loadSolves(channel);
-  }).catch(error => {
-    console.error('could not fetch database channel:');
-    console.error(error);
-  });
-  console.log(`${pkg.name} v${pkg.version} is now up and running.`);
+  // load past solves
+  data_channel = await bot.channels.fetch(DATA_CHANNEL_ID);
+  await db.loadSolves(data_channel);
+
+  // ready to go
+  console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
 });
 
 const lastRequest = new Map();
@@ -64,7 +63,7 @@ function canRequest(id) {
  * Handles all troll features of this bot.
  * @param {Discord.Message} message the message for which to handle troll actions
  */
-function handleTroll(message) {
+async function handleTroll(message) {
   if (!troll) {
     return;
   }
@@ -83,20 +82,40 @@ function handleTroll(message) {
 }
 
 // when a message is sent
-bot.on('message', message => {
+bot.on('message', async message => {
+  const userId = message.author.id;
   // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
-  if (message.author.id == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
+  if (userId == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
     return;
   }
-  handleTroll(message);  // do troll responses
+  await handleTroll(message);  // do troll responses
   
-  // actual functionality
-  timer.checkStop(message);
+  // check timer
+  if (timer.hasTimer(userId, message.channel.id)) {
+    let time = await timer.stopTimer(message);
+    let hadScramble = true;
+    if (time < 0) {
+      time = -time;
+      hadScramble = false;
+    }
+    let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time)}**`;
+    if (!hadScramble) {
+      s += '\nTo track your solves, generate a scramble using `cube get` and'
+          + ' react to it. Then, your next time will be logged on your profile.';
+    } else if (solves.getSolver(userId).lastSolveWasPb()) {
+      s += `\nThat is a new personal best. Congratulations!`;
+    }
+    message.channel.send(s);
+  }
+
+  // check if message was a valid command and not "spammed" too quickly
   let msg = message.content.trim();
   if (!msg.startsWith(prefix) || !canRequest(message.author.id)) {
     return;
   }
-  lastRequest.set(message.author.id, Date.now());
+  lastRequest.set(message.author.id, Date.now());  // note cooldown timer
+
+  // check commands
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
   
@@ -160,7 +179,7 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 // this is too slow to start/stop the timer accurately
 // bot.on('typingStart', function(channel, user) {
 //   console.log(user);
-//   checkStop2(channel, user);
+//   timer._stopTimer(channel, user);  // this is currently private
 // });
 
 // log in using environment variable!

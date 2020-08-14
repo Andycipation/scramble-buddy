@@ -10,7 +10,7 @@ function initUser(user) {
 }
 
 function initGuild(guild) {
-  for (let guildMember of guild.members.cache.values()) {
+  for (const guildMember of guild.members.cache.values()) {
     if (guildMember.user.bot) {
       continue;
     }

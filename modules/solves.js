@@ -464,6 +464,7 @@ function getSolverEmbed(userId, page) {
  */
 function getSolver(userId) {
   if (!solvers.has(userId)) {
+    console.error('tried to get a Solver which does not exist');
     process.exit(1);
   }
   return solvers.get(userId);

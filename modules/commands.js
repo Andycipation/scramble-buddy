@@ -4,22 +4,7 @@ The commands which the bot responds to.
 
 
 const pkg = require('../package.json');
-
-const {
-  prefix,
-  REMOVE_EMOJI,
-  CONFIRM_EMOJI,
-  SCRAMBLE_REACT_PROMPT,
-
-  FIRST_EMOJI,
-  LEFT_EMOJI,
-  REFRESH_EMOJI,
-  RIGHT_EMOJI,
-  LAST_EMOJI,
-
-  FOOTER_STRING,
-  LEADERBOARD_LENGTH,
-} = require('../config.js');
+const config = require('../config.js');
 
 const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
@@ -48,8 +33,8 @@ class Command {
    * Returns the string that appears in the help embed for this command.
    */
   get helpString() {
-    // maybe prefix shouldn't even be in this file
-    return `\`${prefix} ${this.names.join('/')}\` ${this.helpMsg}`;
+    // maybe config.prefix shouldn't even be in this file
+    return `\`${config.prefix} ${this.names.join('/')}\` ${this.helpMsg}`;
   }
 }
 
@@ -74,10 +59,10 @@ newCommand(['help'], 'shows this help message', message => {
 // get a scramble
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   let scramble = getScramble();
-  let str = `${scramble}\n${SCRAMBLE_REACT_PROMPT}`;
+  let str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}`;
   message.channel.send(str).then(async sent => {
-    await sent.react(CONFIRM_EMOJI);
-    await sent.react(REMOVE_EMOJI);
+    await sent.react(config.CONFIRM_EMOJI);
+    await sent.react(config.REMOVE_EMOJI);
   });
 });
 
@@ -98,7 +83,7 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
   if (user == null) {
     user = message.author;
   }
-  const msg = message.content.trim().substring(prefix.length).trim();
+  const msg = message.content.trim().substring(config.prefix.length).trim();
   const data = msg.split(' ');
   let page = 0;
   for (let j = 1; j <= 2; j++) {
@@ -114,17 +99,17 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
   }
   message.channel.send({ embed: embed }).then(async sent => {
     // collect reactions for moving left or right
-    await sent.react(FIRST_EMOJI);
-    await sent.react(LEFT_EMOJI);
-    await sent.react(REFRESH_EMOJI);
-    await sent.react(RIGHT_EMOJI);
-    await sent.react(LAST_EMOJI);
+    await sent.react(config.FIRST_EMOJI);
+    await sent.react(config.LEFT_EMOJI);
+    await sent.react(config.REFRESH_EMOJI);
+    await sent.react(config.RIGHT_EMOJI);
+    await sent.react(config.LAST_EMOJI);
   });
 });
 
 // set the method used by user
 newCommand(['setmethod'], '`[method]` sets your solving method in your profile', async message => {
-  const msg = message.content.trim().substring(prefix.length).trim();
+  const msg = message.content.trim().substring(config.prefix.length).trim();
   const method = msg.split(' ').slice(1).join(' ');
   if (method.length == 0) {
     message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
@@ -170,7 +155,7 @@ function getPbEmbed() {
     if (e1.time > e2.time) return 1;
     return 0;
   });
-  pbs.length = Math.min(pbs.length, LEADERBOARD_LENGTH);
+  pbs.length = Math.min(pbs.length, config.LEADERBOARD_LENGTH);
   let strings = [];
   for (let i = 0; i < pbs.length; i++) {
     strings.push(`${i + 1}) ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
@@ -194,7 +179,7 @@ function getPbEmbed() {
     ],
     timestamp: new Date(),
     footer: {
-      text: FOOTER_STRING,
+      text: config.FOOTER_STRING,
     },
   };
 }
@@ -211,7 +196,7 @@ newCommand(['pbs', 'pb'], 'shows the personal bests of all members', message => 
 function getHelpEmbed() {
   return {
     color: 0x0099ff,
-    title: pkg.name,
+    title: config.BOT_NAME,
     // author: {
     //   name: `by ${pkg.author}`
     // },
@@ -228,7 +213,7 @@ function getHelpEmbed() {
     ],
     timestamp: new Date(),
     footer: {
-      text: FOOTER_STRING,
+      text: config.FOOTER_STRING,
     },
   };
 }

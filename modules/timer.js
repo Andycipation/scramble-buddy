@@ -3,8 +3,9 @@ Module to manage all actions related to timing.
 */
 
 
+const Discord = require('discord.js');
+
 const db = require('./database.js');
-const solves = require('./solves.js');
 
 
 /**
@@ -43,9 +44,14 @@ function formatTime(milliseconds, plusTwo) {
 }
 
 
-const startTimes = new Map(); // map<userId, map<channelId, startTime>>
-const curScramble = new Map(); // map from user id to scramble string
+const startTimes = new Map();  // map<userId, map<channelId, startTime>>
+const curScramble = new Map();  // map from user id to scramble string
 
+/**
+ * Starts a timer for a user in a channel.
+ * @param {string} userId the id of the user to start a timer for
+ * @param {string} channelId the channel the timer is bound to
+ */
 function startTimer(userId, channelId) {
   if (!startTimes.has(userId)) {
     startTimes.set(userId, new Map());
@@ -53,37 +59,45 @@ function startTimer(userId, channelId) {
   startTimes.get(userId).set(channelId, Date.now());
 }
 
-function _hasTimer(userId, channelId) {
+/**
+ * Returns whether there is a timer for a user in a channel.
+ * @param {string} userId the id of the user to check
+ * @param {string} channelId the id of the channel to check
+ * @returns {boolean} whether there is a timer with the given parameters
+ */
+function hasTimer(userId, channelId) {
   return (startTimes.has(userId) && startTimes.get(userId).has(channelId));
 }
 
-async function _checkStop(channel, user) {
-  if (!_hasTimer(user.id, channel.id)) {
-    return;  // this user doesn't have a timer in this channel
+/**
+ * Stops the timer and returns the solve time of the user. If a scramble was
+ * selected, logs the solve in the database.
+ * @param {Discord.User} user the user to check
+ * @param {Discord.Channel} channel the channel to check
+ * @returns {Promise<Number>} the solve time, or its negative if no scramble was selected
+ */
+async function _stopTimer(user, channel) {
+  if (!hasTimer(user.id, channel.id)) {
+    return null;
   }
-  let time = Date.now() - startTimes.get(user.id).get(channel.id);
+  const time = Date.now() - startTimes.get(user.id).get(channel.id);
   startTimes.get(user.id).delete(channel.id);
-  let s = `Timer stopped for ${user.username}; time: ${formatTime(time)}`;
   if (!curScramble.has(user.id)) {
-    // TODO: change `cubeget` to reference modules/commands.js
-    s += '\nTo track your solves, generate a scramble using `cubeget` and'
-      + ' react to it. Then, your next time will be logged.';
-    channel.send(s);
-    return;  // if user didn't request a scramble, don't consider this for PB
+    return -time;  // nothing to log or delete
   }
-  channel.send(s);
-  // add the solve to this user's Solver object
   await db.logSolve(user.id, time, curScramble.get(user.id));
-  if (solves.getSolver(user.id).lastSolveWasPb()) {
-    // this SolveEntry that was just added was a personal best
-    channel.send(`${user.username} got a new personal best of`
-      + ` ${formatTime(time)}. Congratulations!`);
-  }
   curScramble.delete(user.id);
+  return time;
 }
 
-function checkStop(message) {
-  _checkStop(message.channel, message.author);
+/**
+ * Stops the timer and returns the solve time of the user. If a scramble was
+ * selected, logs the solve in the database.
+ * @param {Discord.Message} message the message to check
+ * @returns {Promise<Number>} the solve time, or its negative if no scramble was selected
+ */
+async function stopTimer(message) {
+  return _stopTimer(message.author, message.channel);
 }
 
 function setScramble(userId, scrambleString) {
@@ -96,7 +110,8 @@ function deleteScramble(userId) {
 
 
 exports.formatTime = formatTime;
+exports.hasTimer = hasTimer;
 exports.startTimer = startTimer;
-exports.checkStop = checkStop;
+exports.stopTimer = stopTimer;
 exports.setScramble = setScramble;
 exports.deleteScramble = deleteScramble;
