@@ -6,7 +6,7 @@ Settings and parameters for the bot.
 const pkg = require('./package.json');
 
 module.exports = {
-  BOT_NAME: 'ScrambleBot',
+  BOT_NAME: 'ScrambleBuddy',
 
   MY_DISCORD_ID: '199904392504147968',
   DATA_CHANNEL_ID: '739940657010835506',
@@ -29,5 +29,5 @@ module.exports = {
   LAST_EMOJI: '⏭️',
   SOLVES_PER_PAGE: 10,  // number of solves per page for profile embeds
 
-  FOOTER_STRING: `ScrambleBot, v${pkg.version} | Trademark ${pkg.author}™`,
+  FOOTER_STRING: `ScrambleBuddy, v${pkg.version} | Trademark ${pkg.author}™`,
 };

@@ -1,5 +1,5 @@
 /*
-The driver for the ScrambleBot.
+The driver for the bot.
 */
 
 
@@ -28,18 +28,18 @@ const bot = new Discord.Client();
 bot.on('ready', async function() {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
-  
+
   // create a new server and invite myself to it!
-  // bot.guilds.create("ScrambleBot's Server");
+  // bot.guilds.create("ScrambleBuddy's Server");
   // bot.users.fetch(MY_DISCORD_ID).then(user => {
-  // 
+  //
   // });
-  
+
   // initialize all non-bot users
   for (const guild of bot.guilds.cache.values()) {
     init.initGuild(guild);
   }
-  
+
   // load past solves
   data_channel = await bot.channels.fetch(DATA_CHANNEL_ID);
   await db.loadSolves(data_channel);
@@ -89,7 +89,7 @@ bot.on('message', async message => {
     return;
   }
   await handleTroll(message);  // do troll responses
-  
+
   // check timer
   if (timer.hasTimer(userId, message.channel.id)) {
     let time = await timer.stopTimer(message);
@@ -118,13 +118,13 @@ bot.on('message', async message => {
   // check commands
   let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
   let op = args[0];
-  
+
   // check if troll should be toggled
   if (message.author.id == MY_DISCORD_ID && op == 'toggletroll') {
     troll ^= 1;
     message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
   }
-  
+
   // do the actual commands
   for (const cmd of COMMANDS) {
     if (cmd.names.includes(op)) {
