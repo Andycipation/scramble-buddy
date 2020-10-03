@@ -5,10 +5,10 @@
   "main": "bot.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AndrewDongAndy/ScrambleBot.git"
+    "url": "git+https://github.com/AndrewDongAndy/scramble-buddy.git"
   },
   "author": "ADMathNoob",
-  "homepage": "https://github.com/AndrewDongAndy/ScrambleBot#readme",
+  "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
   "dependencies": {
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
