@@ -22,21 +22,21 @@ class SolveEntry {
    * @param {string} id the id of the message that logged this solve
    * @param {string} userId the id of the user who did this solve
    * @param {Number} time the number of milliseconds the solve took
-   * @param {string} scramble the scramble of the solve
    * @param {boolean} plusTwo whether or not the solve got a +2
+   * @param {string} scramble the scramble of the solve
    */
-  constructor(id, userId, time, scramble, plusTwo) {
+  constructor(id, userId, time, plusTwo, scramble) {
     this.id = id;  // id of this solveEntry; the id of the log message
     this.userId = userId;
     this.time = time;
-    this.scramble = scramble;
     this.plusTwo = plusTwo;  // if plusTwo, time has already been increased by 2000
+    this.scramble = scramble;
   }
 
   toString() {
     return `${timer.formatTime(this.time, this.plusTwo)} **|** ${this.scramble}`
   }
-  
+
   /**
    * Returns the string that is sent in the log to record the SolveEntry.
    */
@@ -47,7 +47,7 @@ class SolveEntry {
     }
     return `${this.userId}|${timeString}|${this.scramble}`;
   }
-  
+
   /**
    * Toggles whether or not this solve had a +2.
    */
@@ -70,22 +70,20 @@ class Solver {
   /**
    * The constructor for the Solver class.
    * @param {string} userId the id of this Discord user
-   * @param {string} username the user's username
    */
-  constructor(userId, username) {
+  constructor(userId) {
     this.userId = userId;
-    this.username = username;
-    
+
     this.method = 'unspecified';
     this.methodLogId = null;
-    
+
     // Stack<SolveEntry>
     this.solves = new Stack(
       (se1, se2) => (se1.time <= se2.time),  // comparison; <= to make stack work
       (se1, se2) => (se1.id == se2.id)       // equality of two SolveEntry objects
     );
     this.psa = [0];  // prefix sum array of times
-    
+
     this.AVGS = 3;
     this.trackedAvgs = [5, 12, 100];
     this.avg = Array(this.AVGS);
@@ -128,8 +126,8 @@ class Solver {
    * @param {SolveEntry} se the SolveEntry to add to the user's solves
    */
   pushSolve(se) {
-    this.solves.push(se);
     this.psa.push(this.psa[this.solves.size()] + se.time);
+    this.solves.push(se);
     for (let i = 0; i < this.AVGS; i++) {
       let a = this.getAverage(this.trackedAvgs[i]);
       if (a != -1) {
@@ -137,7 +135,7 @@ class Solver {
       }
     }
   }
-  
+
   /**
    * Returns the last solve of this Solver, or null if this Solver has
    * no solves completed.
@@ -150,7 +148,7 @@ class Solver {
     }
     return this.solves.top();
   }
-  
+
   /**
    * Toggles whether or not the last solve was a +2.
    * @returns {boolean} whether or not the toggle was successful
@@ -248,7 +246,7 @@ class Solver {
     }
     return Math.round(s / (cnt - 2));
   }
-  
+
   _getBestAveragesString() {
     let lines = [];
     for (let i = 0; i < this.AVGS; i++) {
@@ -263,7 +261,7 @@ class Solver {
     }
     return lines.join('\n');
   }
-  
+
   _getCurrentAveragesString() {
     let lines = [];
     for (let i = 0; i < this.AVGS; i++) {
@@ -278,7 +276,7 @@ class Solver {
     }
     return lines.join('\n');
   }
-  
+
   // _getLastSolvesString(cnt) {  // most recent solve last
   //   cnt = Math.min(cnt, this.solves.size());
   //   let entries = [];
@@ -329,7 +327,7 @@ class Solver {
   getProfileEmbed() {
     return {
       color: 0x0099ff,
-      title: `Profile of ${this.username}`,
+      title: `User Profile`,
       // files: ['./assets/avatar.png'],
       // thumbnail: {
       //   url: 'attachment://avatar.png'
@@ -389,7 +387,7 @@ class Solver {
       color: 0x0099ff,
       // below: the title starting with 'Profile of' is what is used
       // in reactions.js to check if the message is a Profile message
-      title: `Profile of ${this.username}`,
+      title: `User Profile`,
 
       // this description mention is how page changing works
       description: `Discord User: <@${this.userId}>`,
@@ -413,20 +411,6 @@ const solvers = new Map();  // map<userId, Solver>
 
 
 // public functions
-
-/**
- * Initializes a Solver in in the `solvers` Map.
- * @param {string} userId the user id for this Solver
- * @param {string} username the username of this Solver
- * @returns {boolean} whether a new key was created in the `solvers` Map
- */
-function initUser(userId, username) {
-  if (solvers.has(userId)) {
-    return false;
-  }
-  solvers.set(userId, new Solver(userId, username));
-  return true;
-}
 
 /**
  * Returns all current personal bests.
@@ -458,20 +442,20 @@ function getSolverEmbed(userId, page) {
 }
 
 /**
- * Returns the Solver with the given id.
- * @param {string} userId the user id of the Solver object to get
+ * Returns the Solver for the given User object, making a new Solver
+ * if one does not already exist.
+ * @param {string} userId the id of the user to retrieve a Solver for
  * @returns {Solver} the Solver object of this user
  */
 function getSolver(userId) {
   if (!solvers.has(userId)) {
-    console.error('tried to get a Solver which does not exist');
-    process.exit(1);
+    console.log(`creating a Solver for the user with id ${userId}`);
+    solvers.set(userId, new Solver(userId));
   }
   return solvers.get(userId);
 }
 
 
-exports.initUser = initUser;
 exports.getCurrentPbs = getCurrentPbs;
 exports.getSolverEmbed = getSolverEmbed;
 exports.getSolver = getSolver;

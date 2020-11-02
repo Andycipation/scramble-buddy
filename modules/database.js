@@ -35,16 +35,16 @@ async function loadSolves(_channel) {
     const solver = solves.getSolver(userId);
     if (data.length == 3) {  // solve log
       let time = parseInt(data[1], 10);  // radix 10; it is okay for data[1] to end with '+'
-      let scramble = data[2];
       let plusTwo = data[1].endsWith('+');
-      const se = new solves.SolveEntry(message.id, userId, time, scramble, plusTwo);
+      let scramble = data[2];
+      const se = new solves.SolveEntry(message.id, userId, time, plusTwo, scramble);
       solver.pushSolve(se);
-      solveLogs++;
+      ++solveLogs;
     } else if (data.length == 2) {  // method-setting log
       let method = data[1];
       solver.setMethod(method);
       solver.setMethodLogId(message.id);
-      methodLogs++;
+      ++methodLogs;
     }
   }
   console.log(`loaded ${solveLogs} solve logs and ${methodLogs} method logs`);

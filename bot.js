@@ -19,13 +19,12 @@ var { troll } = require('./config.js');
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
-const init = require('./modules/init.js');
 const solves = require('./modules/solves.js');
 const timer = require('./modules/timer.js');
 
 const bot = new Discord.Client();
 
-bot.on('ready', async function() {
+bot.on('ready', async() => {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
 
@@ -35,14 +34,9 @@ bot.on('ready', async function() {
   //
   // });
 
-  // initialize all non-bot users
-  for (const guild of bot.guilds.cache.values()) {
-    init.initGuild(guild);
-  }
-
   // load past solves
-  data_channel = await bot.channels.fetch(DATA_CHANNEL_ID);
-  await db.loadSolves(data_channel);
+  let dataChannel = await bot.channels.fetch(DATA_CHANNEL_ID);
+  await db.loadSolves(dataChannel);
 
   // ready to go
   console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
@@ -132,17 +126,6 @@ bot.on('message', async message => {
     }
   }
 });
-
-// when the bot is added to a server
-bot.on('guildCreate', guild => {
-  init.initGuild(guild);
-});
-
-// when a member joins a server the bot is currently in
-bot.on('guildMemberAdd', member => {
-  init.initUser(member.user);
-});
-
 
 // when a reaction is added to an existing message
 bot.on('messageReactionAdd', (messageReaction, user) => {
