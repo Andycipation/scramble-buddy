@@ -158,6 +158,9 @@ function getPbEmbed() {
   });
   pbs.length = Math.min(pbs.length, config.LEADERBOARD_LENGTH);
   let strings = [];
+  // TODO: don't mention them, just use their username to avoid the
+  // ugly snowflake if a viewer is not friends
+  // e.g. https://cdn.discordapp.com/attachments/701904186081804320/772957988763074570/unknown.png
   for (let i = 0; i < pbs.length; i++) {
     strings.push(`${i + 1}) ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
   }

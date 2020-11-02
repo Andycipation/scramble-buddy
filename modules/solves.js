@@ -421,6 +421,9 @@ function getCurrentPbs() {
   for (let solver of solvers.values()) {
     let pb = solver.pb;
     if (pb !== null) {
+      // this is an important check because it is still possible to
+      // have Solver objects with no SolveEntry, e.g. if someone
+      // chooses to view someone's profile before they have done a solve
       res.push(pb);
     }
   }
