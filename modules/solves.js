@@ -428,20 +428,6 @@ function getCurrentPbs() {
 }
 
 /**
- * Returns the requested profile embed.
- * @param {string} userId the user's id
- * @param {Number} page the page number to get
- * @returns {Discord.MessageEmbed} the corresponding MessageEmbed
- */
-function getSolverEmbed(userId, page) {
-  const solver = solvers.get(userId);
-  if (page == 0) {
-    return solver.getProfileEmbed();
-  }
-  return solver.getSolvesEmbed(page - 1);
-}
-
-/**
  * Returns the Solver for the given User object, making a new Solver
  * if one does not already exist.
  * @param {string} userId the id of the user to retrieve a Solver for
@@ -455,8 +441,22 @@ function getSolver(userId) {
   return solvers.get(userId);
 }
 
+/**
+ * Returns the requested profile embed.
+ * @param {string} userId the user's id
+ * @param {Number} page the page number to get
+ * @returns {Discord.MessageEmbed} the corresponding MessageEmbed
+ */
+function getSolverEmbed(userId, page) {
+  const solver = getSolver(userId);
+  if (page == 0) {
+    return solver.getProfileEmbed();
+  }
+  return solver.getSolvesEmbed(page - 1);
+}
+
 
 exports.getCurrentPbs = getCurrentPbs;
-exports.getSolverEmbed = getSolverEmbed;
 exports.getSolver = getSolver;
+exports.getSolverEmbed = getSolverEmbed;
 exports.SolveEntry = SolveEntry;

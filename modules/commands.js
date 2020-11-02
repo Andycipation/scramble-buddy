@@ -87,6 +87,7 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
   const data = msg.split(' ');
   let page = 0;
   for (let j = 1; j <= 2; j++) {
+    // check all possible optional command arguments
     if (!isNaN(parseInt(data[j], 10))) {
       page = parseInt(data[j], 10) - 1;
       break;
