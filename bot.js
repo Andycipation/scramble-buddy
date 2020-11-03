@@ -10,23 +10,34 @@ const pkg = require('./package.json');
 const {
   MY_DISCORD_ID,
   DATA_CHANNEL_ID,
+  CCG_GUILD_ID,
   prefix,
   IGNORE_BOTS,
   COOLDOWN,
 } = require('./config.js');
-var { troll } = require('./config.js');
 
 const { COMMANDS } = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
 const solves = require('./modules/solves.js');
 const timer = require('./modules/timer.js');
+const { randInt } = require('./modules/util.js');
 
 const bot = new Discord.Client();
 
-bot.on('ready', async() => {
+// troll stuff
+var { troll } = require('./config.js');
+const JOKE_FILE = './jokes.txt';
+const JOKES = [];
+let fs = require('fs');
+
+bot.on('ready', async () => {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
+
+  // for (const guild of bot.guilds.cache.values()) {
+  //   console.log(`${guild.name} has id ${guild.id}`);
+  // }
 
   // create a new server and invite myself to it!
   // bot.guilds.create("ScrambleBuddy's Server");
@@ -37,6 +48,16 @@ bot.on('ready', async() => {
   // load past solves
   let dataChannel = await bot.channels.fetch(DATA_CHANNEL_ID);
   await db.loadSolves(dataChannel);
+
+  // load jokes
+  fs.readFile(JOKE_FILE, (error, data) => {
+    let lines = data.toString().split('\n');
+    for (const line of lines) {
+      if (line.length > 0) {
+        JOKES.push(line);
+      }
+    }
+  });
 
   // ready to go
   console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
@@ -72,6 +93,12 @@ async function handleTroll(message) {
   }
   if (message.content.toLowerCase().startsWith('vc tn?')) {
     message.channel.send('vc tn.');
+  }
+  if (message.guild.id == CCG_GUILD_ID) {
+    if (message.content.includes('joke')) {
+      let joke = JOKES[randInt(0, JOKES.length - 1)];
+      message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');
+    }
   }
 }
 
@@ -137,8 +164,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
     return;  // ignore reacts by self
   }
   for (const raa of REACTION_ADD_ACTIONS) {  // related acute angle lol
-    if (messageReaction.emoji.name == raa.emoji
-        && raa.appliesTo(messageReaction.message)) {
+    if (messageReaction.emoji.name == raa.emoji && raa.appliesTo(messageReaction.message)) {
       raa.do(messageReaction, user);
     }
   }

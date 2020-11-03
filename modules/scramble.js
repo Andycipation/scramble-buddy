@@ -3,9 +3,7 @@ Functions for generating scramble strings.
 */
 
 
-function randInt(lo, hi) {
-  return lo + Math.floor(Math.random() * (hi - lo + 1));
-}
+const { randInt } = require('./util.js');
 
 const SIDES = ['U', 'D', 'L', 'R', 'F', 'B'];
 const DIR = ['', "'", '2'];

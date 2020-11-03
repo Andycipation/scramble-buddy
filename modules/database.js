@@ -8,6 +8,7 @@ const { DATA_CHANNEL_ID } = require('../config.js');
 const solves = require('./solves.js');
 
 
+// TODO: find a cleaner way
 var channel;
 
 async function loadSolves(_channel) {
@@ -58,7 +59,7 @@ async function loadSolves(_channel) {
  */
 async function logSolve(userId, time, scramble) {
   const solver = solves.getSolver(userId);
-  const se = new solves.SolveEntry(null, userId, time, scramble, false);
+  const se = new solves.SolveEntry(null, userId, time, false, scramble);
   // async stuff is required, or else solves.lastSolveWasPb(user.id) (line 60
   // in timer.js) will be called before the solve is pushed to the solves module
   const id = await sendLog(se.logString());
