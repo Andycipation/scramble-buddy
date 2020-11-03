@@ -16,7 +16,7 @@ const {
   COOLDOWN,
 } = require('./config.js');
 
-const { COMMANDS } = require('./modules/commands.js');
+const commands = require('./modules/commands.js');
 const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
 const solves = require('./modules/solves.js');
@@ -102,6 +102,8 @@ async function handleTroll(message) {
   }
 }
 
+const solveMode = new Set();
+
 // when a message is sent
 bot.on('message', async message => {
   const userId = message.author.id;
@@ -131,13 +133,17 @@ bot.on('message', async message => {
 
   // check if message was a valid command and not "spammed" too quickly
   let msg = message.content.trim();
-  if (!msg.startsWith(prefix) || !canRequest(message.author.id)) {
+  if (!canRequest(message.author.id) || (!msg.startsWith(prefix) && !commands.inSolveMode.has(userId))) {
     return;
   }
-  lastRequest.set(message.author.id, Date.now());  // note cooldown timer
+  if (msg.startsWith(prefix)) {
+    // get rid of the prefix
+    msg = msg.substring(prefix.length).trim();
+  }
+  lastRequest.set(message.author.id, Date.now());  // reset cooldown
 
   // check commands
-  let args = msg.substring(prefix.length).trim().toLowerCase().split(' ');
+  let args = msg.toLowerCase().split(' ');
   let op = args[0];
 
   // check if troll should be toggled
@@ -147,7 +153,7 @@ bot.on('message', async message => {
   }
 
   // do the actual commands
-  for (const cmd of COMMANDS) {
+  for (const cmd of commands.COMMANDS) {
     if (cmd.names.includes(op)) {
       cmd.do(message);
     }

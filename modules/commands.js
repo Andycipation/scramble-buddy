@@ -56,6 +56,19 @@ newCommand(['help'], 'shows this help message', message => {
   message.channel.send({ embed: getHelpEmbed() });
 });
 
+const inSolveMode = new Set();
+
+// solve mode
+newCommand(['solvemode'], 'enters solve mode (no prefix required to call commands)', message => {
+  inSolveMode.add(message.author.id);
+  message.channel.send(`${message.author.username}, you no longer need the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
+});
+
+newCommand(['exitsolvemode'], 'exits solve mode', message => {
+  inSolveMode.delete(message.author.id);
+  message.channel.send(`${message.author.username}, you now need the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
+});
+
 // get a scramble
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   let scramble = getScramble();
@@ -226,3 +239,4 @@ function getHelpEmbed() {
 
 
 exports.COMMANDS = COMMANDS;
+exports.inSolveMode = inSolveMode;
