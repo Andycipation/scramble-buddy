@@ -84,7 +84,15 @@ newReactionAddAction(CONFIRM_EMOJI, isScramble, (reaction, user) => {
   let scrambleString = lines[0];
   let instructions = lines[1];
   let users = lines.slice(3);
-  users.push(`<@${user.id}>`);
+  let addUser = true;
+  for (const str of users) {
+    if (parseMention(str) == user.id) {
+      addUser = false;
+    }
+  }
+  if (addUser) {
+    users.push(`<@${user.id}>`);
+  }
   timer.setScramble(user.id, scrambleString);
   if (!message.editable) {
     console.error('cannot edit this message');

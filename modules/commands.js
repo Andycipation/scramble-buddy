@@ -59,7 +59,9 @@ newCommand(['help'], 'shows this help message', message => {
 // get a scramble
 newCommand(['get', 'scramble'], 'displays a new scramble', message => {
   let scramble = getScramble();
-  let str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}`;
+  // add the sender automatically
+  timer.setScramble(message.author.id, scramble);
+  let str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
   message.channel.send(str).then(async sent => {
     await sent.react(config.CONFIRM_EMOJI);
     await sent.react(config.REMOVE_EMOJI);
