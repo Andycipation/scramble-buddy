@@ -29,7 +29,7 @@ const bot = new Discord.Client();
 var { troll } = require('./config.js');
 const JOKE_FILE = './jokes.txt';
 const JOKES = [];
-let fs = require('fs');
+const fs = require('fs');
 
 bot.on('ready', async () => {
   bot.user.setActivity(`type '${prefix} help' for help`);  // set bot status
@@ -166,7 +166,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
   if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
     return;  // ignore reacts by self
   }
-  for (const raa of REACTION_ADD_ACTIONS) {  // related acute angle lol
+  for (const raa of REACTION_ADD_ACTIONS) {
     if (messageReaction.emoji.name == raa.emoji && raa.appliesTo(messageReaction.message)) {
       raa.do(messageReaction, user);
     }

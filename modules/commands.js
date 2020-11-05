@@ -1,5 +1,5 @@
 /*
-The commands which the bot responds to.
+The commands that the bot responds to.
 */
 
 
