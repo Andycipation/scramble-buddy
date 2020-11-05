@@ -87,7 +87,7 @@ class Solver {
     this.AVGS = 3;
     this.trackedAvgs = [5, 12, 100];
     this.avg = Array(this.AVGS);
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       this.avg[i] = new MinStack();
     }
   }
@@ -128,7 +128,7 @@ class Solver {
   pushSolve(se) {
     this.psa.push(this.psa[this.solves.size()] + se.time);
     this.solves.push(se);
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       let a = this.getAverage(this.trackedAvgs[i]);
       if (a != -1) {
         this.avg[i].push(a);
@@ -159,7 +159,7 @@ class Solver {
     }
     let se = this.solves.top();
     this.solves.pop();
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       if (!this.avg[i].empty()) {
         this.avg[i].pop();
       }
@@ -179,7 +179,7 @@ class Solver {
     }
     const removedId = this.solves.top().id;
     this.solves.pop();
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       if (!this.avg[i].empty()) {
         this.avg[i].pop();
       }
@@ -231,7 +231,7 @@ class Solver {
       return -1;
     }
     let a = [];
-    for (let i = n - cnt; i < n; i++) {
+    for (let i = n - cnt; i < n; ++i) {
       a.push(this.solves.stk[i].time);
     }
     a.sort((x, y) => {
@@ -241,7 +241,7 @@ class Solver {
     });
     let s = 0;
     // disregard the fastest and slowest solves
-    for (let i = 1; i < cnt - 1; i++) {
+    for (let i = 1; i < cnt - 1; ++i) {
       s += a[i];
     }
     return Math.round(s / (cnt - 2));
@@ -249,7 +249,7 @@ class Solver {
 
   _getBestAveragesString() {
     let lines = [];
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       if (this.avg[i].empty()) {
         continue;
       }
@@ -264,7 +264,7 @@ class Solver {
 
   _getCurrentAveragesString() {
     let lines = [];
-    for (let i = 0; i < this.AVGS; i++) {
+    for (let i = 0; i < this.AVGS; ++i) {
       if (this.avg[i].empty()) {
         continue;
       }
@@ -280,7 +280,7 @@ class Solver {
   // _getLastSolvesString(cnt) {  // most recent solve last
   //   cnt = Math.min(cnt, this.solves.size());
   //   let entries = [];
-  //   for (let i = 0; i < cnt; i++) {
+  //   for (let i = 0; i < cnt; ++i) {
   //     let se = this.solves.stk[this.solves.size() - cnt + i];
   //     entries.push(`${se.toString()}`);
   //   }

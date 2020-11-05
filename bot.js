@@ -21,7 +21,7 @@ const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
 const solves = require('./modules/solves.js');
 const timer = require('./modules/timer.js');
-const { randInt } = require('./modules/util.js');
+const { parseCommand, randInt } = require('./modules/util.js');
 
 const bot = new Discord.Client();
 
@@ -133,17 +133,16 @@ bot.on('message', async message => {
 
   // check if message was a valid command and not "spammed" too quickly
   let msg = message.content.trim();
-  if (!canRequest(message.author.id) || (!msg.startsWith(prefix) && !commands.inSolveMode.has(userId))) {
+  if (!canRequest(message.author.id)) {
     return;
   }
-  if (msg.startsWith(prefix)) {
-    // get rid of the prefix
-    msg = msg.substring(prefix.length).trim();
+  if (!msg.startsWith(prefix) && !commands.inSolveMode.has(userId)) {
+    return;
   }
+  let args = parseCommand(msg);
   lastRequest.set(message.author.id, Date.now());  // reset cooldown
 
   // check commands
-  let args = msg.toLowerCase().split(' ');
   let op = args[0];
 
   // check if troll should be toggled
@@ -152,11 +151,9 @@ bot.on('message', async message => {
     message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
   }
 
-  // do the actual commands
-  for (const cmd of commands.COMMANDS) {
-    if (cmd.names.includes(op)) {
-      cmd.do(message);
-    }
+  // do the actual command
+  if (commands.COMMANDS.has(op)) {
+    commands.COMMANDS.get(op).do(message);
   }
 });
 

@@ -10,6 +10,8 @@ const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
+const { parseCommand } = require('./util.js');
+
 const { MessageEmbed } = require('discord.js');
 
 
@@ -19,12 +21,12 @@ const { MessageEmbed } = require('discord.js');
 class Command {
   /**
    * The constructor for a Command object.
-   * @param {Array<string>} names the tokens that will trigger this command
+   * @param {string} name the token that will trigger this command
    * @param {string} helpMsg the message shown in the help embed
    * @param {Function} callback the function that executes when the command is called
    */
-  constructor(names, helpMsg, callback) {
-    this.names = names;
+  constructor(name, helpMsg, callback) {
+    this.name = name;
     this.helpMsg = helpMsg;
     this.do = callback;
   }
@@ -34,43 +36,48 @@ class Command {
    */
   get helpString() {
     // maybe config.prefix shouldn't even be in this file
-    return `\`${config.prefix} ${this.names.join('/')}\` ${this.helpMsg}`;
+    return `\`${config.prefix} ${this.name}\` ${this.helpMsg}`;
   }
 }
 
 
-const COMMANDS = [];
+const COMMANDS = new Map();
 
 /**
  * Adds a new Command to the COMMANDS array, which is exported to the bot.js file.
- * @param {Array<string>} names the tokens that will trigger this command
+ * @param {string} name the token that will trigger this command
  * @param {string} helpMsg the message shown in the help embed
  * @param {Function} callback the function that executes when the command is called
  */
-function newCommand(names, helpMsg, callback) {
-  COMMANDS.push(new Command(names, helpMsg, callback));
+function newCommand(name, helpMsg, callback) {
+  COMMANDS.set(name, new Command(name, helpMsg, callback));
 }
 
+// ========== COMMAND DEFINITIONS ==========
+
 // help
-newCommand(['help'], 'shows this help message', message => {
+newCommand('help', 'shows this help message', message => {
   message.channel.send({ embed: getHelpEmbed() });
 });
 
 const inSolveMode = new Set();
 
 // solve mode
-newCommand(['solvemode'], 'enters solve mode (no prefix required to call commands)', message => {
+// TODO: automatically exit solve mode after a certain period of inactivity
+newCommand('solvemode', 'enters solve mode (no prefix required to call commands)', message => {
   inSolveMode.add(message.author.id);
-  message.channel.send(`${message.author.username}, you no longer need the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
+  message.channel.send(`${message.author.username}, you no longer need `
+      + `the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
 });
 
-newCommand(['exitsolvemode'], 'exits solve mode', message => {
+newCommand('exitsolvemode', 'exits solve mode', message => {
   inSolveMode.delete(message.author.id);
-  message.channel.send(`${message.author.username}, you now need the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
+  message.channel.send(`${message.author.username}, you now need `
+      + `the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
 });
 
 // get a scramble
-newCommand(['get', 'scramble'], 'displays a new scramble', message => {
+newCommand('get', 'generates a new scramble', message => {
   let scramble = getScramble();
   // add the sender automatically
   timer.setScramble(message.author.id, scramble);
@@ -82,14 +89,14 @@ newCommand(['get', 'scramble'], 'displays a new scramble', message => {
 });
 
 // start timer
-newCommand(['time', 'start', 'go'], 'starts a timer for you', message => {
+newCommand('go', 'starts a timer for you', message => {
   timer.startTimer(message.author.id, message.channel.id);
   message.channel.send(`Timer started for ${message.author.username}. `
     + 'Send anything to stop.');
 });
 
 // view user's current records
-newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
+newCommand('view', '`[user mention] [page]` shows user profile', message => {
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
     message.channel.send("You cannot request to view a bot's solves.");
@@ -98,13 +105,13 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
   if (user == null) {
     user = message.author;
   }
-  const msg = message.content.trim().substring(config.prefix.length).trim();
-  const data = msg.split(' ');
+  let args = parseCommand(message.content);
   let page = 0;
-  for (let j = 1; j <= 2; j++) {
+  for (let j = 1; j <= 2; ++j) {
     // check all possible optional command arguments
-    if (!isNaN(parseInt(data[j], 10))) {
-      page = parseInt(data[j], 10) - 1;
+    let x = parseInt(args[j], 10);
+    if (!isNaN(x)) {
+      page = x - 1;
       break;
     }
   }
@@ -124,9 +131,10 @@ newCommand(['view'], '`[user mention] [page]` shows user profile', message => {
 });
 
 // set the method used by user
-newCommand(['setmethod'], '`[method]` sets your solving method in your profile', async message => {
-  const msg = message.content.trim().substring(config.prefix.length).trim();
-  const method = msg.split(' ').slice(1).join(' ');
+newCommand('setmethod', '`[method]` sets your solving method in your profile', async message => {
+  const args = parseCommand(message.content);
+  const method = args.slice(1).join(' ');
+  // console.log(method);
   if (method.length == 0) {
     message.channel.send('You must provide a solving method, e.g. `cube setmethod CFOP`.');
     return;
@@ -138,7 +146,7 @@ newCommand(['setmethod'], '`[method]` sets your solving method in your profile',
   }
 });
 
-newCommand(['remove', 'pop'], 'removes your last solve', message => {
+newCommand('remove', 'removes your last solve', message => {
   if (db.popSolve(message.author.id)) {
     message.channel.send(`Last solve of ${message.author.username} removed.`);
   } else {
@@ -146,7 +154,7 @@ newCommand(['remove', 'pop'], 'removes your last solve', message => {
   }
 });
 
-newCommand(['+2'], 'changes whether your last solve was a +2', message => {
+newCommand('+2', 'changes whether your last solve was a +2', message => {
   const solver = solves.getSolver(message.author.id);
   if (db.togglePlusTwo(message.author.id)) {
     let se = solver.getLastSolve();
@@ -176,7 +184,7 @@ function getPbEmbed() {
   // TODO: don't mention them, just use their username to avoid the
   // ugly snowflake if a viewer is not friends
   // e.g. https://cdn.discordapp.com/attachments/701904186081804320/772957988763074570/unknown.png
-  for (let i = 0; i < pbs.length; i++) {
+  for (let i = 0; i < pbs.length; ++i) {
     strings.push(`${i + 1}) ${`<@${pbs[i].userId}>: ${pbs[i]}`}`)
   }
   if (strings.length == 0) {
@@ -204,9 +212,13 @@ function getPbEmbed() {
 }
 
 // show personal bests
-newCommand(['pbs', 'pb'], 'shows the personal bests of all members', message => {
+newCommand('pbs', 'shows the personal bests of all members', message => {
   message.channel.send({ embed: getPbEmbed() });
 });
+
+// ========== END COMMAND DEFINITIONS ==========
+
+const COMMANDS_STRING = Array.from(COMMANDS.values()).map(cmd => cmd.helpString).join('\n');
 
 /**
  * Returns a MessageEmbed containing the help strings for each command.
@@ -227,8 +239,8 @@ function getHelpEmbed() {
     fields: [
       {
         name: 'Commands (no space required directly after `cube`)',
-        value: COMMANDS.map(cmd => cmd.helpString).join('\n'),
-      }
+        value: COMMANDS_STRING,
+      },
     ],
     timestamp: new Date(),
     footer: {

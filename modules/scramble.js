@@ -14,13 +14,13 @@ function _getScramble(moves) {
   let ok = Array(SIDES.length);
   ok.fill(true);
   let res = Array(moves);
-  for (let i = 0; i < moves; i++) {
+  for (let i = 0; i < moves; ++i) {
     let x;
     do {
       x = randInt(0, SIDES.length - 1);
     } while (!ok[x]);
     ok[x] = false;
-    for (let j = 0; j < SIDES.length; j++) {
+    for (let j = 0; j < SIDES.length; ++j) {
       if (j != x && j != (x ^ 1)) {
         ok[j] = true;
       }

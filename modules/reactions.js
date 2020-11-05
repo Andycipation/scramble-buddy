@@ -154,7 +154,7 @@ const FUNCTIONS = [
   (userId, x) => solves.getSolver(userId).numPages - 1,
 ]
 
-for (let i = 0; i < PROFILE_EMOJIS.length; i++) {
+for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
   const emoji = PROFILE_EMOJIS[i];
   const func = FUNCTIONS[i];
   // add the reaction action that changes the profile page
