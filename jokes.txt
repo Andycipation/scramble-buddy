@@ -65,7 +65,7 @@ Who was the roundest knight at King Arthur's table? Sir Cumference. How did he g
 What's the official animal of Pi day? The Pi-thon!
 
 What do you call two friends who love math? Algebros.
-Why can't the number 4 get into the nightclub? Because he's 22.
+Why can't the number 4 get into the nightclub? Because he's 2^2.
 In the expression x^3, what do you call 3? An x-ponent. In the expression y^2, what do you call the 2? A y-ponent.
 I poured root beer into a square cup. Now I have beer.
 Do you know why seven eight nine? Because you're supposed to eat three squared meals a day!
