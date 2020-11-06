@@ -44,7 +44,7 @@ class Command {
 const COMMANDS = new Map();
 
 /**
- * Adds a new Command to the COMMANDS array, which is exported to the bot.js file.
+ * Adds a new Command to the COMMANDS Map, which is exported to the bot.js file.
  * @param {string} name the token that will trigger this command
  * @param {string} helpMsg the message shown in the help embed
  * @param {Function} callback the function that executes when the command is called

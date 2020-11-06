@@ -23,14 +23,14 @@ class Stack {
     this.stk = [];
     this.monostk = [];
   }
-  
+
   get best() {
     if (this.monostk.length == 0) {
       return null;
     }
     return this.monostk[this.monostk.length - 1];
   }
-  
+
   /**
    * Adds an element to the top of this Stack.
    * @param {any} x the element to push to the Stack
@@ -41,7 +41,7 @@ class Stack {
       this.monostk.push(x);
     }
   }
-  
+
   /**
    * Removes the element at the top of this stack.
    */
@@ -55,7 +55,7 @@ class Stack {
     }
     this.stk.pop();
   }
-  
+
   /**
    * Returns the element at the top of this Stack.
    * @returns {any} the element at the top of this Stack
@@ -67,15 +67,15 @@ class Stack {
     }
     return this.stk[this.stk.length - 1];
   }
-  
+
   /**
    * Returns the size of this Stack.
-   * @returns {Number} the size of this Stack
+   * @returns {number} the size of this Stack
    */
   size() {
     return this.stk.length;
   }
-  
+
   /**
    * Returns whether or not this Stack is empty.
    * @returns {boolean} whether or not this Stack is empty

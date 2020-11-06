@@ -54,7 +54,7 @@ async function loadSolves(_channel) {
 /**
  * Logs the solve in the data channel, where +2 is false by default.
  * @param {string} userId the user id to log the solve under
- * @param {Number} time the number of milliseconds the solve took
+ * @param {number} time the number of milliseconds the solve took
  * @param {string} scramble the scramble used
  */
 async function logSolve(userId, time, scramble) {

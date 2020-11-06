@@ -16,7 +16,7 @@ class Node {
 
   /**
    * Applies an update to this Node.
-   * @param {Number} v the value to assign to this Node
+   * @param {number} v the value to assign to this Node
    */
   apply(v) {
     this.mn = Math.min(this.mn, v);
@@ -42,8 +42,8 @@ class _SegTree {
 
   /**
    * Pulls data from the two children nodes.
-   * @param {Number} x the index of the new Node
-   * @param {Number} z the index of the right child
+   * @param {number} x the index of the new Node
+   * @param {number} z the index of the right child
    */
   pull(x, z) {
     this.tree[x] = this.unite(this.tree[x + 1], this.tree[z]);

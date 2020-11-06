@@ -10,7 +10,7 @@ const db = require('./database.js');
 
 /**
  * Returns a formatted string for the given solve result.
- * @param {Number} milliseconds the time to format in milliseconds
+ * @param {number} milliseconds the time to format in milliseconds
  * @param {boolean} plusTwo whether the solve was a +2
  * @returns {string} the formatted time
  */
@@ -74,7 +74,7 @@ function hasTimer(userId, channelId) {
  * selected, logs the solve in the database.
  * @param {Discord.User} user the user to check
  * @param {Discord.Channel} channel the channel to check
- * @returns {Promise<Number>} the solve time, or its negative if no scramble was selected
+ * @returns {Promise<number>} the solve time, or its negative if no scramble was selected
  */
 async function _stopTimer(user, channel) {
   if (!hasTimer(user.id, channel.id)) {
@@ -94,7 +94,7 @@ async function _stopTimer(user, channel) {
  * Stops the timer and returns the solve time of the user. If a scramble was
  * selected, logs the solve in the database.
  * @param {Discord.Message} message the message to check
- * @returns {Promise<Number>} the solve time, or its negative if no scramble was selected
+ * @returns {Promise<number>} the solve time, or its negative if no scramble was selected
  */
 async function stopTimer(message) {
   return _stopTimer(message.author, message.channel);

@@ -21,7 +21,7 @@ class SolveEntry {
    * The constructor of a SolveEntry.
    * @param {string} id the id of the message that logged this solve
    * @param {string} userId the id of the user who did this solve
-   * @param {Number} time the number of milliseconds the solve took
+   * @param {number} time the number of milliseconds the solve took
    * @param {boolean} plusTwo whether or not the solve got a +2
    * @param {string} scramble the scramble of the solve
    */
@@ -221,8 +221,8 @@ class Solver {
   /**
    * Returns the average over a given number of solves, with the fastest
    * and slowest solves ignored.
-   * @param {Number} cnt the number of solves to compute the average over
-   * @returns {Number} the average number of milliseconds a solve took,
+   * @param {number} cnt the number of solves to compute the average over
+   * @returns {number} the average number of milliseconds a solve took,
    * or -1 if cnt is less than 3
    */
   getAverage(cnt) {
@@ -293,8 +293,8 @@ class Solver {
   /**
    * Returns the string representing the solves in the given range,
    * in reverse order as on https://cstimer.net/.
-   * @param {Number} from the starting index, inclusive
-   * @param {Number} to the ending index, inclusive
+   * @param {number} from the starting index, inclusive
+   * @param {number} to the ending index, inclusive
    * @returns {string} the string showing all solves in the given range
    */
   _getSolvesString(from, to) {
@@ -314,7 +314,7 @@ class Solver {
 
   /**
    * Returns the number of pages the profile would require.
-   * @returns {Number} the number of pages the profile would require
+   * @returns {number} the number of pages the profile would require
    */
   get numPages() {
     return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
@@ -371,7 +371,7 @@ class Solver {
 
   /**
    * Returns the embed for the given page.
-   * @param {Number} page the page number to return
+   * @param {number} page the page number to return
    * @returns {Discord.MessageEmbed} the message embed for the given page
    */
   getSolvesEmbed(page) {
@@ -414,7 +414,7 @@ const solvers = new Map();  // map<userId, Solver>
 
 /**
  * Returns all current personal bests.
- * @returns {Array<SolveEntry>} all personal best SolveEntry objects
+ * @returns {SolveEntry[]} all personal best SolveEntry objects
  */
 function getCurrentPbs() {
   let res = [];
@@ -447,7 +447,7 @@ function getSolver(userId) {
 /**
  * Returns the requested profile embed.
  * @param {string} userId the user's id
- * @param {Number} page the page number to get
+ * @param {number} page the page number to get
  * @returns {Discord.MessageEmbed} the corresponding MessageEmbed
  */
 function getSolverEmbed(userId, page) {

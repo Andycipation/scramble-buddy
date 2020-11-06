@@ -9,6 +9,7 @@ const { prefix } = require('../config.js');
 /**
  * Returns the arguments of the given command.
  * @param {string} s the command to parse
+ * @returns {string[]} the arguments, split by space
  */
 function parseCommand(s) {
   s = s.trim();
@@ -30,8 +31,9 @@ function parseMention(s) {
 
 /**
  * Returns a random integer in the range [low, high].
- * @param {Number} low the lower bound
- * @param {Number} high the upper bound
+ * @param {number} low the lower bound
+ * @param {number} high the upper bound
+ * @returns {number} a random number in the range [low, high]
  */
 function randInt(low, high) {
   return low + Math.floor(Math.random() * (high - low + 1));
