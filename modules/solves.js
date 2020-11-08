@@ -77,7 +77,7 @@ class Solver {
     this.method = 'unspecified';
     this.methodLogId = null;
 
-    // Stack<SolveEntry>
+    // stack<SolveEntry>
     this.solves = new Stack(
       (se1, se2) => (se1.time <= se2.time),  // comparison; <= to make stack work
       (se1, se2) => (se1.id == se2.id)       // equality of two SolveEntry objects

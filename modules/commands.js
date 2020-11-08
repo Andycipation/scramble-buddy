@@ -61,9 +61,6 @@ newCommand('help', 'shows this help message', message => {
 });
 
 const inSolveMode = new Set();
-
-// solve mode
-// TODO: automatically exit solve mode after a certain period of inactivity
 newCommand('solvemode', 'enters solve mode (no prefix required to call commands)', message => {
   inSolveMode.add(message.author.id);
   message.channel.send(`${message.author.username}, you no longer need `

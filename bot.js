@@ -17,8 +17,8 @@ const {
 } = require('./config.js');
 
 const commands = require('./modules/commands.js');
-const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const db = require('./modules/database.js');
+const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
 const solves = require('./modules/solves.js');
 const timer = require('./modules/timer.js');
 const { parseCommand, randInt } = require('./modules/util.js');
@@ -51,7 +51,7 @@ bot.on('ready', async () => {
 
   // load jokes
   fs.readFile(JOKE_FILE, (error, data) => {
-    let lines = data.toString().split('\n');
+    const lines = data.toString().split('\n');
     for (const line of lines) {
       if (line.length > 0) {
         JOKES.push(line);
@@ -102,6 +102,29 @@ async function handleTroll(message) {
   }
 }
 
+/**
+ * Checks if this message stops a timer.
+ * @param {Discord.Message} message the message to check
+ */
+async function checkTimer(message) {
+  if (timer.hasTimer(message.author.id, message.channel.id)) {
+    let time = await timer.stopTimer(message);
+    let hadScramble = true;
+    if (time < 0) { // kind of a hack
+      time = -time;
+      hadScramble = false;
+    }
+    let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time)}**`;
+    if (!hadScramble) {
+      s += '\nTo track your solves, generate a scramble using `cube get` and'
+          + ' react to it. Then, your next time will be logged on your profile.';
+    } else if (solves.getSolver(message.author.id).lastSolveWasPb()) {
+      s += `\nThat is a new personal best. Congratulations!`;
+    }
+    message.channel.send(s);
+  }
+}
+
 const solveMode = new Set();
 
 // when a message is sent
@@ -111,25 +134,8 @@ bot.on('message', async message => {
   if (userId == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
     return;
   }
-  await handleTroll(message);  // do troll responses
-
-  // check timer
-  if (timer.hasTimer(userId, message.channel.id)) {
-    let time = await timer.stopTimer(message);
-    let hadScramble = true;
-    if (time < 0) {
-      time = -time;
-      hadScramble = false;
-    }
-    let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time)}**`;
-    if (!hadScramble) {
-      s += '\nTo track your solves, generate a scramble using `cube get` and'
-          + ' react to it. Then, your next time will be logged on your profile.';
-    } else if (solves.getSolver(userId).lastSolveWasPb()) {
-      s += `\nThat is a new personal best. Congratulations!`;
-    }
-    message.channel.send(s);
-  }
+  await handleTroll(message); // do troll responses
+  await checkTimer(message);
 
   // check if message was a valid command and not "spammed" too quickly
   let msg = message.content.trim();
@@ -158,7 +164,7 @@ bot.on('message', async message => {
 });
 
 // when a reaction is added to an existing message
-bot.on('messageReactionAdd', (messageReaction, user) => {
+bot.on('messageReactionAdd', async (messageReaction, user) => {
   // console.log('someone reacted to: ' + messageReaction.message.content);
   if (messageReaction.message.author.id != bot.user.id) {
     return;  // only handle reactions to messages sent by this bot
@@ -174,7 +180,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => {
 });
 
 // when a reaction is removed from an existing message
-bot.on('messageReactionRemove', (messageReaction, user) => {
+bot.on('messageReactionRemove', async (messageReaction, user) => {
   if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
     return;
   }
@@ -189,9 +195,9 @@ bot.on('messageReactionRemove', (messageReaction, user) => {
 })
 
 // this is too slow to start/stop the timer accurately
-// bot.on('typingStart', function(channel, user) {
+// also, the checkTimer function doesn't work for this
+// bot.on('typingStart', async (channel, user) => {
 //   console.log(user);
-//   timer._stopTimer(channel, user);  // this is currently private
 // });
 
 // log in using environment variable!
