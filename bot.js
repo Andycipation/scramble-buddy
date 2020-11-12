@@ -125,13 +125,16 @@ async function checkTimer(message) {
   }
 }
 
-const solveMode = new Set();
-
 // when a message is sent
 bot.on('message', async message => {
   const userId = message.author.id;
-  // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
   if (userId == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
+    // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
+    return;
+  }
+  if (message.channel.id == DATA_CHANNEL_ID) {
+    // delete messages sent in the logs to avoid parsing errors
+    message.delete({ reason: 'not supposed to send messages in the data channel' });
     return;
   }
   await handleTroll(message); // do troll responses

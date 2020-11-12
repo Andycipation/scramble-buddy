@@ -3,8 +3,7 @@ Loads data for users, using a certain text channel as the "database".
 */
 
 
-const { DATA_CHANNEL_ID } = require('../config.js');
-
+const { LOGS_TO_LOAD } = require('../config.js');
 const solves = require('./solves.js');
 
 
@@ -17,8 +16,11 @@ async function loadSolves(_channel) {
   channel = _channel;
   let lastId = null;
   let logMessages = [];
-  while (true) {
-    let messages = await channel.messages.fetch({ limit: 100, before: lastId });
+  while (logMessages.length < LOGS_TO_LOAD) {
+    let messages = await channel.messages.fetch({
+      limit: Math.min(LOGS_TO_LOAD - logMessages.length, 100),
+      before: lastId,
+    });
     if (messages.size == 0) {
       break;
     }
@@ -27,21 +29,21 @@ async function loadSolves(_channel) {
       lastId = message.id;
     }
   }
-  logMessages.reverse();  // push the entries in the correct order
+  logMessages.reverse(); // push the entries in the correct order
   let solveLogs = 0;
   let methodLogs = 0;
   for (const message of logMessages) {
     let data = message.content.split('|');
     const userId = data[0];
     const solver = solves.getSolver(userId);
-    if (data.length == 3) {  // solve log
+    if (data.length == 3) { // solve log
       let time = parseInt(data[1], 10);  // radix 10; it is okay for data[1] to end with '+'
       let plusTwo = data[1].endsWith('+');
       let scramble = data[2];
       const se = new solves.SolveEntry(message.id, userId, time, plusTwo, scramble);
       solver.pushSolve(se);
       ++solveLogs;
-    } else if (data.length == 2) {  // method-setting log
+    } else if (data.length == 2) { // method-setting log
       let method = data[1];
       solver.setMethod(method);
       solver.setMethodLogId(message.id);
@@ -60,8 +62,7 @@ async function loadSolves(_channel) {
 async function logSolve(userId, time, scramble) {
   const solver = solves.getSolver(userId);
   const se = new solves.SolveEntry(null, userId, time, false, scramble);
-  // async stuff is required, or else solves.lastSolveWasPb(user.id) (line 60
-  // in timer.js) will be called before the solve is pushed to the solves module
+  // async stuff is required here
   const id = await sendLog(se.logString());
   se.id = id;
   solver.pushSolve(se);

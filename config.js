@@ -12,6 +12,9 @@ module.exports = {
   DATA_CHANNEL_ID: '739940657010835506',
   CCG_GUILD_ID: '694345248163233832',
 
+  // the number of messages to fetch from the data channel
+  LOGS_TO_LOAD: 100000,
+
   LEADERBOARD_LENGTH: 10,
 
   prefix: 'cube',
@@ -28,7 +31,7 @@ module.exports = {
   REFRESH_EMOJI: '🔄',
   RIGHT_EMOJI: '▶️',
   LAST_EMOJI: '⏭️',
-  SOLVES_PER_PAGE: 10,  // number of solves per page for profile embeds
+  SOLVES_PER_PAGE: 10, // number of solves per page for profile embeds
 
   FOOTER_STRING: `ScrambleBuddy, v${pkg.version} | Trademark ${pkg.author}™`,
 };

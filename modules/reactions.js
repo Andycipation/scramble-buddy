@@ -162,7 +162,7 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
     const message = reaction.message;
     removeReaction(message, user.id, emoji);
     if (!message.editable) {
-      console.error('cannot scroll right on profile');
+      console.error("why can't the bot edit its own message? :(");
       return false;
     }
     const embed = message.embeds[0];
