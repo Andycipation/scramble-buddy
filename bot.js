@@ -83,16 +83,16 @@ async function handleTroll(message) {
     return;
   }
   if (message.content == 'Hi!') {
-    message.channel.send('Hi!');
+    message.reply('Hi!');
   }
   if (message.content == 'gn') {
-    message.channel.send('Good night!');
+    message.reply('Good night!');
   }
   if (message.content.toLowerCase().startsWith('vc tmr?')) {
-    message.channel.send('vc tmr.');
+    message.reply('vc tmr.');
   }
   if (message.content.toLowerCase().startsWith('vc tn?')) {
-    message.channel.send('vc tn.');
+    message.reply('vc tn.');
   }
   if (message.guild.id == CCG_GUILD_ID) {
     if (message.content.includes('joke')) {
@@ -114,14 +114,14 @@ async function checkTimer(message) {
       time = -time;
       hadScramble = false;
     }
-    let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time)}**`;
+    let s = `Timer stopped. **${timer.formatTime(time)}**`;
     if (!hadScramble) {
       s += '\nTo track your solves, generate a scramble using `cube get` and'
           + ' react to it. Then, your next time will be logged on your profile.';
     } else if (solves.getSolver(message.author.id).lastSolveWasPb()) {
       s += `\nThat is a new personal best. Congratulations!`;
     }
-    message.channel.send(s);
+    message.reply(s);
   }
 }
 
@@ -157,7 +157,7 @@ bot.on('message', async message => {
   // check if troll should be toggled
   if (message.author.id == MY_DISCORD_ID && op == 'toggletroll') {
     troll ^= 1;
-    message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
+    message.reply(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
   }
 
   // do the actual command
