@@ -59,18 +59,20 @@ function newCommand(name, helpMsg, callback) {
 
 // help
 newCommand('help', 'shows this help message', message => {
-  message.reply({ embed: getHelpEmbed() });
+  // message.reply({ embed: getHelpEmbed() });
+  message.channel.send({ embed: getHelpEmbed() });
 });
 
 const inSolveMode = new Set();
 newCommand('solvemode', 'enters solve mode (no prefix required to call commands)', message => {
   inSolveMode.add(message.author.id);
-  message.reply(`${message.author.username}, you no longer need `
+  // TODO: change these to reply?
+  message.channel.send(`${message.author.username}, you no longer need `
       + `the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
 });
 newCommand('exitsolvemode', 'exits solve mode', message => {
   inSolveMode.delete(message.author.id);
-  message.reply(`${message.author.username}, you now need `
+  message.channel.send(`${message.author.username}, you now need `
       + `the prefix \`${config.prefix}\` to call ${config.BOT_NAME} commands.`);
 });
 
@@ -89,7 +91,7 @@ newCommand('get', 'generates a new scramble', message => {
 // start timer
 newCommand('go', 'starts a timer for you', message => {
   timer.startTimer(message.author.id, message.channel.id);
-  message.reply(`${message.author.username}, your timer has started. `
+  message.channel.send(`${message.author.username}, your timer has started. `
     + 'Send anything to stop.');
 });
 
@@ -97,7 +99,7 @@ newCommand('go', 'starts a timer for you', message => {
 newCommand('view', '`[user mention] [page]` shows user profile', message => {
   let user = message.mentions.users.first();
   if (user != null && user.bot) {
-    message.reply("You cannot request to view a bot's solves.");
+    message.channel.send("You cannot request to view a bot's solves.");
     return;
   }
   if (user == null) {
@@ -115,7 +117,7 @@ newCommand('view', '`[user mention] [page]` shows user profile', message => {
   }
   const embed = solves.getSolverEmbed(user.id, page);
   if (embed === null) {
-    message.reply('Invalid page number.');
+    message.channel.send(`Invalid page number provided.`);
     return;
   }
   message.channel.send({ embed: embed }).then(async sent => {
@@ -134,14 +136,14 @@ newCommand('setmethod', '`[method]` sets your solving method in your profile', a
   const method = args.slice(1).join(' ');
   // console.log(method);
   if (method.length == 0) {
-    message.reply(message.author.username
+    message.channel.send(message.author.username
         + ', you must provide a solving method, e.g. `cube setmethod CFOP`.');
     return;
   }
   if (await db.setMethod(message.author.id, method)) {
-    message.reply(`${message.author.username}, your solving method has been set to ${method}.`);
+    message.channel.send(`${message.author.username}, your solving method has been set to ${method}.`);
   } else {
-    message.reply('Invalid method provided; solving method unchanged.');
+    message.channel.send('Invalid method provided; solving method unchanged.');
   }
 });
 
@@ -150,11 +152,11 @@ newCommand('remove', 'removes your last solve', message => {
   if (!solver.solves.empty()) {
     const lastSolve = solver.getLastSolve();
     assert(db.popSolve(message.author.id));
-    message.reply(message.author.username + ', your last solve has been removed.\n'
+    message.channel.send(message.author.username + ', your last solve has been removed.\n'
         + 'The removed solve is shown below:\n'
         + lastSolve.toString());
   } else {
-    message.reply(`${message.author.username}, you do not have an existing solve.`);
+    message.channel.send(`${message.author.username}, you do not have an existing solve.`);
   }
 });
 
@@ -162,10 +164,11 @@ newCommand('+2', 'changes whether your last solve was a +2', message => {
   const solver = solves.getSolver(message.author.id);
   if (db.togglePlusTwo(message.author.id)) {
     let se = solver.getLastSolve();
-    message.reply(`${message.author.username}, `
+    message.channel.send(`${message.author.username}, `
         + `+2 was ${se.plusTwo ? 'added to' : 'removed from'} your last solve.`);
   } else {
-    message.reply(`${message.author.username}, you do not have an existing solve.`);
+    message.channel.send(`${message.author.username}, `
+        + `you do not have an existing solve.`);
   }
 });
 
