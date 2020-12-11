@@ -245,7 +245,7 @@ function getHelpEmbed() {
     // },
     fields: [
       {
-        name: 'Commands (no space required directly after `cube`)',
+        name: `Commands (no space required directly after \`${config.prefix}\`)`,
         value: COMMANDS_STRING,
       },
     ],
