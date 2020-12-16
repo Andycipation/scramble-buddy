@@ -40,7 +40,7 @@ async function loadSolves(_channel) {
       let time = parseInt(data[1], 10);  // radix 10; it is okay for data[1] to end with '+'
       let plusTwo = data[1].endsWith('+');
       let scramble = data[2];
-      const se = new solves.SolveEntry(message.id, userId, time, plusTwo, scramble);
+      const se = new solves.SolveEntry(message.id, userId, time, plusTwo, scramble, message.createdAt);
       solver.pushSolve(se);
       ++solveLogs;
     } else if (data.length == 2) { // method-setting log

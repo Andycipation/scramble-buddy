@@ -72,7 +72,84 @@ const CYCLES = [
 
 const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
 
-async function _getScramble(numMoves, filename) {
+/**
+ * Makes an image showing the cube net for this scramble.
+ * @param {string} scramble the scramble string
+ * @param {string} filename the output file, which should end in .png
+ */
+async function makeImage(scramble, filename) {
+  // initialize the cube
+  // console.log(scramble);
+  const moves = scramble.split(' ');
+  const cube = new Array(48);
+  for (let c = 0; c < 6; c++) {
+    for (let i = 8 * c; i < 8 * (c + 1); i++) {
+      cube[i] = c;
+    }
+  }
+  // do the turns
+  for (const move of moves) {
+    const f = SIDES.indexOf(move[0]);
+    const turns = DIR.indexOf(move.slice(1)) + 1;
+    for (const cycle of CYCLES[f]) {
+      const newColors = new Array(4);
+      for (let i = 0; i < 4; i++) {
+        newColors[(i + turns) % 4] = cube[cycle[i]];
+      }
+      for (let i = 0; i < 4; i++) {
+        cube[cycle[i]] = newColors[i];
+      }
+    }
+  }
+  const height = 9 * S + 4 * HEAVY + 6 * LIGHT;
+  const width = 12 * S + 5 * HEAVY + 8 * LIGHT;
+  let fd = fs.openSync(filename, 'w');
+  fs.closeSync(fd);
+  new Jimp(width, height, 0x000000ff, (error, image) => {
+    for (let f = 0; f < 6; f++) {
+      for (let i = 0; i < 9; i++) {
+        let p = -1;
+        if (i < 3) {
+          p = i;
+        } else if (i >= 6) {
+          p = 12 - i;
+        } else if (i == 3) {
+          p = 7;
+        } else if (i == 5) {
+          p = 3;
+        }
+        let color = (p != -1 ? cube[8 * f + p] : f);
+        let row = Math.floor(i / 3);
+        if (f == 5) {
+          row += 6;
+        } else if (f >= 1) {
+          row += 3;
+        }
+        let col = i % 3;
+        if (row < 3 || row >= 6) {
+          col += 3;
+        } else {
+          col += 3 * (f - 1);
+        }
+        let y1 = (row + 1) * LIGHT + Math.ceil((row + 1) / 3) * (HEAVY - LIGHT) + row * S;
+        let x1 = (col + 1) * LIGHT + Math.ceil((col + 1) / 3) * (HEAVY - LIGHT) + col * S;
+        for (let x = x1; x < x1 + S; x++) {
+          for (let y = y1; y < y1 + S; y++) {
+            image.setPixelColor(COLORS[color], x, y);
+          }
+        }
+      }
+    }
+    image.write(filename);
+  });
+}
+
+/**
+ * Returns a non-redundant scramble string (e.g. no "F B F").
+ * @param {number} numMoves the desired length of the scramble
+ * @return {string} a scramble with the specified number of moves
+ */
+async function _getScramble(numMoves) {
   let x = -1, y = -1; // last 2 moves
   let moves = new Array(numMoves);
   for (let i = 0; i < numMoves; ++i) {
@@ -88,76 +165,17 @@ async function _getScramble(numMoves, filename) {
     }
     y = z;
   }
-  if (MAKE_SCRAMBLE_IMAGES) {
-    // initialize the cube
-    const cube = new Array(48);
-    for (let c = 0; c < 6; c++) {
-      for (let i = 8 * c; i < 8 * (c + 1); i++) {
-        cube[i] = c;
-      }
-    }
-    // do the turns
-    for (const move of moves) {
-      const f = SIDES.indexOf(move[0]);
-      const turns = DIR.indexOf(move.slice(1)) + 1;
-      for (const cycle of CYCLES[f]) {
-        const newColors = new Array(4);
-        for (let i = 0; i < 4; i++) {
-          newColors[(i + turns) % 4] = cube[cycle[i]];
-        }
-        for (let i = 0; i < 4; i++) {
-          cube[cycle[i]] = newColors[i];
-        }
-      }
-    }
-    const height = 9 * S + 4 * HEAVY + 6 * LIGHT;
-    const width = 12 * S + 5 * HEAVY + 8 * LIGHT;
-    let fd = fs.openSync(filename, 'w');
-    fs.closeSync(fd);
-    new Jimp(width, height, 0x000000ff, (error, image) => {
-      for (let f = 0; f < 6; f++) {
-        for (let i = 0; i < 9; i++) {
-          let p = -1;
-          if (i < 3) {
-            p = i;
-          } else if (i >= 6) {
-            p = 12 - i;
-          } else if (i == 3) {
-            p = 7;
-          } else if (i == 5) {
-            p = 3;
-          }
-          let color = (p != -1 ? cube[8 * f + p] : f);
-          let row = Math.floor(i / 3);
-          if (f == 5) {
-            row += 6;
-          } else if (f >= 1) {
-            row += 3;
-          }
-          let col = i % 3;
-          if (row < 3 || row >= 6) {
-            col += 3;
-          } else {
-            col += 3 * (f - 1);
-          }
-          let y1 = (row + 1) * LIGHT + Math.ceil((row + 1) / 3) * (HEAVY - LIGHT) + row * S;
-          let x1 = (col + 1) * LIGHT + Math.ceil((col + 1) / 3) * (HEAVY - LIGHT) + col * S;
-          for (let x = x1; x < x1 + S; x++) {
-            for (let y = y1; y < y1 + S; y++) {
-              image.setPixelColor(COLORS[color], x, y);
-            }
-          }
-        }
-      }
-      image.write(filename);
-    });
-  }
   return moves.join(' ');
 }
 
 async function getScramble(filename) {
-  return _getScramble(randInt(17, 20), filename);
+  const scramble = await _getScramble(randInt(17, 20));
+  if (MAKE_SCRAMBLE_IMAGES) {
+    makeImage(scramble, filename);
+  }
+  return scramble;
 }
 
 
 exports.getScramble = getScramble;
+exports.makeImage = makeImage;

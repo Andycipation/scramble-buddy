@@ -83,6 +83,14 @@ class Stack {
   empty() {
     return (this.stk.length == 0);
   }
+
+  at(index) {
+    if (index < 0 || index >= this.stk.length) {
+      // console.error('tried to access an out-of-range index of a Stack');
+      return null;
+    }
+    return this.stk[index];
+  }
 }
 
 

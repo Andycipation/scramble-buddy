@@ -8,14 +8,15 @@ const config = require('../config.js');
 const fs = require('fs');
 
 const db = require('./database.js');
-const { getScramble } = require('./scramble.js');
+const { getScramble, makeImage } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
 const { parseCommand } = require('./util.js');
 
 const { MessageEmbed } = require('discord.js');
 
-const assert = require('assert')
+const assert = require('assert');
+const { MAKE_SCRAMBLE_IMAGES } = require('../config.js');
 
 
 /**
@@ -82,14 +83,18 @@ newCommand('get', 'generates a new scramble', async message => {
   const scramble = await getScramble(filename);
   timer.setScramble(message.author.id, scramble);
   // add the sender automatically
+  const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
+  const options = {};
+  if (MAKE_SCRAMBLE_IMAGES) {
+    options.files = [filename];
+  }
   setTimeout(() => {
-    const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
-    message.channel.send(str, {
-      files: [filename]
-    }).then(async sent => {
+    message.channel.send(str, options).then(async sent => {
       await sent.react(config.CONFIRM_EMOJI);
       await sent.react(config.REMOVE_EMOJI);
-      fs.unlinkSync(filename);
+      if (MAKE_SCRAMBLE_IMAGES) {
+        fs.unlinkSync(filename);
+      }
     });
   }, 100);
 });
@@ -134,6 +139,54 @@ newCommand('view', '`[user mention] [page]` shows user profile', message => {
     await sent.react(config.RIGHT_EMOJI);
     await sent.react(config.LAST_EMOJI);
   });
+});
+
+newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", async message => {
+  // massive copy-paste from "cube view" command but whatever
+  let user = message.mentions.users.first();
+  if (user != null && user.bot) {
+    message.channel.send("You cannot request to view a bot's solves.");
+    return;
+  }
+  if (user == null) {
+    user = message.author;
+  }
+  const solver = solves.getSolver(user.id);
+  if (solver.solves.empty()) {
+    message.channel.send(`${user.username} does not yet have an existing solve.`);
+    return;
+  }
+  let solve = solver.solves.size() - 1;
+  let args = parseCommand(message.content);
+  for (let j = 1; j <= 2; ++j) {
+    // check all possible optional command arguments
+    let x = parseInt(args[j], 10);
+    if (!isNaN(x)) {
+      solve = x - 1;
+      break;
+    }
+  }
+  if (solve < 0 || solve >= solver.solves.size()) {
+    message.channel.send(`Invalid solve number provided: ${solve + 1}`);
+    return;
+  }
+  const se = solver.solves.at(solve);
+  const str = `**Details for solve ${solve + 1} of ${user.username}**\n`
+      + `${se.toString()}\n`
+      + `Time the solve was completed: ${se.completed}`;
+  const filename = `./assets/${message.id}.png`;
+  makeImage(se.scramble, filename);
+  const options = {};
+  if (MAKE_SCRAMBLE_IMAGES) {
+    options.files = [filename];
+  }
+  setTimeout(() => {
+    message.channel.send(str, options).then(async sent => {
+      if (MAKE_SCRAMBLE_IMAGES) {
+        fs.unlinkSync(filename);
+      }
+    });
+  }, 100);
 });
 
 // set the method used by user

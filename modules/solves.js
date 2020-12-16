@@ -16,6 +16,8 @@ const timer = require('./timer.js');
 /**
  * The class representing a solve.
  */
+// TODO: store only indices in the stack; this way we can report
+// the index of the user's PB!
 class SolveEntry {
   /**
    * The constructor of a SolveEntry.
@@ -24,13 +26,15 @@ class SolveEntry {
    * @param {number} time the number of milliseconds the solve took
    * @param {boolean} plusTwo whether or not the solve got a +2
    * @param {string} scramble the scramble of the solve
+   * @param {Date} completed the time the scramble was completed
    */
-  constructor(id, userId, time, plusTwo, scramble) {
+  constructor(id, userId, time, plusTwo, scramble, completed) {
     this.id = id;  // id of this solveEntry; the id of the log message
     this.userId = userId;
     this.time = time;
     this.plusTwo = plusTwo;  // if plusTwo, time has already been increased by 2000
     this.scramble = scramble;
+    this.completed = completed;
   }
 
   toString() {
