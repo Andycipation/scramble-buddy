@@ -9,9 +9,9 @@ const { randInt } = require('./util.js');
 
 // image-related stuff
 const { MAKE_SCRAMBLE_IMAGES } = require('../config.js');
-const S = 16; // square side length of a sticker
-const LIGHT = 2; // weight of a light line
-const HEAVY = 4; // weight of a heavy line
+const S = 32; // side length of a sticker
+const LIGHT = 3; // weight of a light line
+const HEAVY = 7; // weight of a heavy line
 
 const SIDES = ['U', 'L', 'F', 'R', 'B', 'D'];
 const DIR = ['', '2', "'"];
@@ -73,24 +73,22 @@ const CYCLES = [
 const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
 
 async function _getScramble(numMoves, filename) {
-  // ok[i]: whether it is ok to add the move SIDES[i] next
-  const ok = new Array(SIDES.length);
-  ok.fill(true);
+  let x = -1, y = -1; // last 2 moves
   let moves = new Array(numMoves);
   for (let i = 0; i < numMoves; ++i) {
-    let x;
+    let z;
     do {
-      x = randInt(0, SIDES.length - 1);
-    } while (!ok[x]);
-    ok[x] = false;
-    for (let j = 0; j < SIDES.length; ++j) {
-      if (j != x && j != OPPOSITE_FACE[x]) {
-        ok[j] = true;
-      }
+      z = randInt(0, SIDES.length - 1);
+    } while (z == x || z == y);
+    moves[i] = SIDES[z] + DIR[randInt(0, 2)];
+    if (OPPOSITE_FACE[z] == y) {
+      x = y;
+    } else {
+      x = -1;
     }
-    moves[i] = SIDES[x] + DIR[randInt(0, 2)];
+    y = z;
   }
-  if (MAKE_SCRAMBLE_IMAGES) { // generate the image with the given id
+  if (MAKE_SCRAMBLE_IMAGES) {
     // initialize the cube
     const cube = new Array(48);
     for (let c = 0; c < 6; c++) {
@@ -114,7 +112,8 @@ async function _getScramble(numMoves, filename) {
     }
     const height = 9 * S + 4 * HEAVY + 6 * LIGHT;
     const width = 12 * S + 5 * HEAVY + 8 * LIGHT;
-    fs.openSync(filename, 'w');
+    let fd = fs.openSync(filename, 'w');
+    fs.closeSync(fd);
     new Jimp(width, height, 0x000000ff, (error, image) => {
       for (let f = 0; f < 6; f++) {
         for (let i = 0; i < 9; i++) {
@@ -152,26 +151,6 @@ async function _getScramble(numMoves, filename) {
       }
       image.write(filename);
     });
-    // new Jimp({
-    //   data: b.buffer,
-    //   width: width,
-    //   height: height,
-    // }, (error, image) => {
-    //   image.write(filename);
-    // });
-
-    // let image = new Jimp()
-    // image.write(filename);
-    // const b = new Uint8Array(height * width * 4);
-    // let ptr = 0;
-    // for (let i = 0; i < height; i++) {
-    //   for (let j = 0; j < width; j++) {
-    //     for (let k = 0; k < 4; k++) {
-    //     // for (let k = 3; k >= 0; k--) {
-    //       b[ptr++] = a[i][j][k];
-    //     }
-    //   }
-    // }
   }
   return moves.join(' ');
 }

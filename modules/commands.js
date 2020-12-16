@@ -80,16 +80,18 @@ newCommand('exitsolvemode', 'exits solve mode', message => {
 newCommand('get', 'generates a new scramble', async message => {
   const filename = `./assets/${message.id}.png`;
   const scramble = await getScramble(filename);
-  // add the sender automatically
   timer.setScramble(message.author.id, scramble);
-  const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
-  message.channel.send(str, {
-    files: [filename]
-  }).then(async sent => {
-    await sent.react(config.CONFIRM_EMOJI);
-    await sent.react(config.REMOVE_EMOJI);
-    fs.unlinkSync(filename, console.error);
-  });
+  // add the sender automatically
+  setTimeout(() => {
+    const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
+    message.channel.send(str, {
+      files: [filename]
+    }).then(async sent => {
+      await sent.react(config.CONFIRM_EMOJI);
+      await sent.react(config.REMOVE_EMOJI);
+      fs.unlinkSync(filename);
+    });
+  }, 100);
 });
 
 // start timer

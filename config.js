@@ -22,6 +22,7 @@ module.exports = {
   IGNORE_BOTS: true,
   COOLDOWN: 0, // in milliseconds
 
+  // whether or not to attach images of the scramble net
   MAKE_SCRAMBLE_IMAGES: true,
 
   CONFIRM_EMOJI: '✅',
