@@ -7,6 +7,15 @@ const { prefix } = require('../config.js');
 
 
 /**
+ * Converts a Date to a string.
+ * @param {Date} date the date to convert to a string
+ * @return {string} the formatted date
+ */
+function getDateString(date) {
+  return date.toLocaleString('en-CA', { timeZone: 'EST' });
+}
+
+/**
  * Returns the arguments of the given command.
  * @param {string} s the command to parse
  * @returns {string[]} the arguments, split by space
@@ -40,6 +49,7 @@ function randInt(low, high) {
 }
 
 
+exports.getDateString = getDateString;
 exports.parseCommand = parseCommand;
 exports.parseMention = parseMention;
 exports.randInt = randInt;

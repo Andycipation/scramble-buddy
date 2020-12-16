@@ -11,7 +11,7 @@ const db = require('./database.js');
 const { getScramble, makeImage } = require('./scramble.js');
 const solves = require('./solves.js');
 const timer = require('./timer.js');
-const { parseCommand } = require('./util.js');
+const { getDateString, parseCommand } = require('./util.js');
 
 const { MessageEmbed } = require('discord.js');
 
@@ -173,7 +173,7 @@ newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", asy
   const se = solver.solves.at(solve);
   const str = `**Details for solve ${solve + 1} of ${user.username}**\n`
       + `${se.toString()}\n`
-      + `Time the solve was completed: ${se.completed}`;
+      + `Time the solve was completed: ${getDateString(se.completed)}`;
   const filename = `./assets/${message.id}.png`;
   makeImage(se.scramble, filename);
   const options = {};
