@@ -18,7 +18,7 @@ const DIR = ['', '2', "'"];
 const COLORS = [ // taken from https://colorhunt.co/palettes/white, etc.
   0xf9f6f7ff, // white
   0xfc8621ff, // orange
-  0x54e346ff, // green
+  0x4fa54cff, // green
   0xec0101ff, // red
   0x0e49b5ff, // blue
   0xcad315ff, // yellow

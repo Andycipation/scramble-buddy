@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /*
 The commands that the bot responds to.
 */
