@@ -1,6 +1,6 @@
 {
   "name": "scramble-buddy",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "a Discord bot for cubers",
   "main": "bot.js",
   "repository": {
@@ -10,9 +10,10 @@
   "author": "ADMathNoob",
   "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
   "dependencies": {
-    "discord.js": "^12.4.1",
+    "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "pg": "^8.4.2"
+    "jimp": "^0.16.1",
+    "pg": "^8.5.1"
   },
   "license": "UNLICENSED",
   "private": true

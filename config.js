@@ -13,14 +13,16 @@ module.exports = {
   CCG_GUILD_ID: '694345248163233832',
 
   // the number of messages to fetch from the data channel
-  LOGS_TO_LOAD: 100000,
+  LOGS_TO_LOAD: 100,
 
   LEADERBOARD_LENGTH: 10,
 
   prefix: 'cube',
   troll: true,
   IGNORE_BOTS: true,
-  COOLDOWN: 0,
+  COOLDOWN: 0, // in milliseconds
+
+  MAKE_SCRAMBLE_IMAGES: true,
 
   CONFIRM_EMOJI: '✅',
   REMOVE_EMOJI: '❌',

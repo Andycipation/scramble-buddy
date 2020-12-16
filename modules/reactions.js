@@ -104,6 +104,7 @@ newReactionAddAction(CONFIRM_EMOJI, isScramble, (reaction, user) => {
 newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
   const message = reaction.message;
   removeReaction(message, user.id, CONFIRM_EMOJI);
+  removeReaction(message, user.id, REMOVE_EMOJI);
   let lines = message.content.split('\n');
   let scrambleString = lines[0];
   let instructions = lines[1];

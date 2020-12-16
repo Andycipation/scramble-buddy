@@ -5,6 +5,7 @@ The commands that the bot responds to.
 
 const pkg = require('../package.json');
 const config = require('../config.js');
+const fs = require('fs');
 
 const db = require('./database.js');
 const { getScramble } = require('./scramble.js');
@@ -59,11 +60,10 @@ function newCommand(name, helpMsg, callback) {
 
 // help
 newCommand('help', 'shows this help message', message => {
-  // message.reply({ embed: getHelpEmbed() });
   message.channel.send({ embed: getHelpEmbed() });
 });
 
-const inSolveMode = new Set();
+const inSolveMode = new Set([config.MY_DISCORD_ID]);
 newCommand('solvemode', 'enters solve mode (no prefix required to call commands)', message => {
   inSolveMode.add(message.author.id);
   // TODO: change these to reply?
@@ -77,14 +77,18 @@ newCommand('exitsolvemode', 'exits solve mode', message => {
 });
 
 // get a scramble
-newCommand('get', 'generates a new scramble', message => {
-  let scramble = getScramble();
+newCommand('get', 'generates a new scramble', async message => {
+  const filename = `./assets/${message.id}.png`;
+  const scramble = await getScramble(filename);
   // add the sender automatically
   timer.setScramble(message.author.id, scramble);
-  let str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
-  message.channel.send(str).then(async sent => {
+  const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
+  message.channel.send(str, {
+    files: [filename]
+  }).then(async sent => {
     await sent.react(config.CONFIRM_EMOJI);
     await sent.react(config.REMOVE_EMOJI);
+    fs.unlinkSync(filename, console.error);
   });
 });
 
@@ -134,7 +138,6 @@ newCommand('view', '`[user mention] [page]` shows user profile', message => {
 newCommand('setmethod', '`[method]` sets your solving method in your profile', async message => {
   const args = parseCommand(message.content);
   const method = args.slice(1).join(' ');
-  // console.log(method);
   if (method.length == 0) {
     message.channel.send(message.author.username
         + ', you must provide a solving method, e.g. `cube setmethod CFOP`.');
@@ -165,7 +168,8 @@ newCommand('+2', 'changes whether your last solve was a +2', message => {
   if (db.togglePlusTwo(message.author.id)) {
     let se = solver.getLastSolve();
     message.channel.send(`${message.author.username}, `
-        + `+2 was ${se.plusTwo ? 'added to' : 'removed from'} your last solve.`);
+        + `+2 was ${se.plusTwo ? 'added to' : 'removed from'} your last solve.\n`
+        + `The modified solve entry is shown below:\n${se.toString()}`);
   } else {
     message.channel.send(`${message.author.username}, `
         + `you do not have an existing solve.`);
@@ -225,6 +229,7 @@ newCommand('pbs', 'shows the personal bests of all members', message => {
 
 // ========== END COMMAND DEFINITIONS ==========
 
+// string with all commands and their descriptions
 const COMMANDS_STRING = Array.from(COMMANDS.values()).map(cmd => cmd.helpString).join('\n');
 
 /**
@@ -257,5 +262,33 @@ function getHelpEmbed() {
 }
 
 
-exports.COMMANDS = COMMANDS;
-exports.inSolveMode = inSolveMode;
+const lastRequest = new Map();
+
+/**
+ * Checks if the user with the given id can make a request to the bot.
+ * @param {string} userId the id of the user to check
+ * @returns {boolean} whether or not the user can make a request at this time
+ */
+function canRequest(userId) {
+  return (!lastRequest.has(userId) || Date.now() - lastRequest.get(userId) >= config.COOLDOWN);
+}
+
+async function handleCommand(message) {
+  const userId = message.author.id;
+  if (!canRequest(userId)) {
+    return; // message was "spammed" too quickly
+  }
+  if (!message.content.startsWith(config.prefix) && !inSolveMode.has(userId)) {
+    return; // not a command
+  }
+  lastRequest.set(userId, Date.now()); // reset cooldown
+
+  // do the actual command if applicable
+  const op = parseCommand(message.content)[0];
+  if (COMMANDS.has(op)) {
+    COMMANDS.get(op).do(message);
+  }
+}
+
+
+exports.handleCommand = handleCommand;
