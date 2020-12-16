@@ -61,8 +61,7 @@ async function loadSolves(_channel) {
  */
 async function logSolve(userId, time, scramble) {
   const solver = solves.getSolver(userId);
-  const se = new solves.SolveEntry(null, userId, time, false, scramble);
-  // async stuff is required here
+  const se = new solves.SolveEntry(null, userId, time, false, scramble, new Date(Date.now()));
   const id = await sendLog(se.logString());
   se.id = id;
   solver.pushSolve(se);
