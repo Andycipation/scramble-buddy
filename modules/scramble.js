@@ -70,6 +70,8 @@ const CYCLES = [
   ],
 ];
 
+const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
+
 async function _getScramble(numMoves, filename) {
   // ok[i]: whether it is ok to add the move SIDES[i] next
   const ok = new Array(SIDES.length);
@@ -82,7 +84,7 @@ async function _getScramble(numMoves, filename) {
     } while (!ok[x]);
     ok[x] = false;
     for (let j = 0; j < SIDES.length; ++j) {
-      if (j != x && j != (x ^ 1)) {
+      if (j != x && j != OPPOSITE_FACE[x]) {
         ok[j] = true;
       }
     }
