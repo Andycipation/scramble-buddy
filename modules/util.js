@@ -12,7 +12,7 @@ const { prefix } = require('../config.js');
  * @return {string} the formatted date
  */
 function getDateString(date) {
-  return date.toLocaleString('en-CA', { timeZone: 'EST' });
+  return date.toLocaleString('en-CA', { timeZone: 'America/Toronto' });
 }
 
 /**
