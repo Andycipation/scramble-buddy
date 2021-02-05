@@ -7,7 +7,7 @@ const {
   MY_DISCORD_ID,
 } = require('../config.js');
 var { troll } = require('../config.js');
-const { parseCommand } = require('./util.js');
+const { parseCommand, randInt } = require('./util.js');
 
 // joke stuff
 const fs = require('fs');

@@ -63,12 +63,6 @@ async function checkTimer(message) {
 
 // when a message is sent
 bot.on('message', async message => {
-  // message.channel.send({
-  //   files: [
-  //     'https://api-assets.clashroyale.com/cards/300/0p0gd0XaVRu1Hb1iSG1hTYbz2AN6aEiZnhaAib5O8Z8.png',
-  //     'https://api-assets.clashroyale.com/cards/300/U2KZ3g0wyufcuA5P2Xrn3Z3lr1WiJmc5S0IWOZHgizQ.png',
-  //   ]
-  // });
   const userId = message.author.id;
   if (userId == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
     // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
