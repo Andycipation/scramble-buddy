@@ -2,6 +2,7 @@
 All of the troll stuff. LOL
 */
 
+
 const {
   CCG_GUILD_ID,
   MY_DISCORD_ID,
@@ -64,7 +65,7 @@ async function handleTroll(message) {
     message.channel.send('vc rn.');
   }
   if (message.guild.id == CCG_GUILD_ID) {
-    if (message.content.includes('joke')) {
+    if (message.content.toLowerCase().includes('joke')) {
       const joke = JOKES[randInt(0, JOKES.length - 1)];
       message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');
     }
