@@ -83,7 +83,10 @@ newCommand('get', 'generates a new scramble', async message => {
   const scramble = await getScramble(filename);
   timer.setScramble(message.author.id, scramble);
   // add the sender automatically
-  const str = `${scramble}\n${config.SCRAMBLE_REACT_PROMPT}\nContenders:\n<@${message.author.id}>`;
+  const str = `${scramble}\n`
+      + `${config.SCRAMBLE_REACT_PROMPT}\n`
+      + `Contenders:\n`
+      + `<@${message.author.id}>`;
   const options = {};
   if (MAKE_SCRAMBLE_IMAGES) {
     options.files = [filename];
@@ -99,11 +102,57 @@ newCommand('get', 'generates a new scramble', async message => {
   }, 100);
 });
 
+const inspecting = new Map();
+
+const NOTIFICATIONS = [8, 12];  // notify when 8 and 12 seconds have passed
+const WARNINGS = [15, 17];  // warn at 15 and 17 seconds (> 17 seconds is a DNF)
+
+// start inspection
+newCommand('inspect', 'begins your inspection timer', async message => {
+  const userId = message.author.id;
+  const username = message.author.username;
+  if (inspecting.has(userId)) {
+    message.reply('You currently have an inspecting timer running.');
+    return;
+  }
+  const startTime = Date.now();
+  inspecting.set(userId, startTime);  // set the start time
+  message.reply('Your inspection timer has begun. You have 15 seconds.');
+
+  // prepare warning replies
+  for (const s of NOTIFICATIONS) {
+    setTimeout(() => {
+      // Map#get returns undefined if the key is not present
+      if (inspecting.get(userId) == startTime) {
+        message.channel.send(`${username}, ${s} seconds have gone by.`);
+      }
+    }, s * 1000);  // times 1000 because in milliseconds
+  }
+  
+  // notify if the user is "getting penalized" (according to WCA regulations:
+  // https://www.worldcubeassociation.org/regulations/)
+  for (const s of WARNINGS) {
+    setTimeout(() => {
+      if (inspecting.get(userId) == startTime) {
+        message.channel.send(`${username}, you have used ${s} seconds of inspection!`);
+      }
+    }, s * 1000);
+  }
+});
+
 // start timer
 newCommand('go', 'starts a timer for you', message => {
+  const userId = message.author.id;
+  let reply = '';
+  if (inspecting.has(userId)) {
+    const startTime = inspecting.get(userId);
+    inspecting.delete(userId);
+    const inspectionTime = Date.now() - startTime;
+    reply += `Your inspection time was ${timer.formatTime(inspectionTime)}. `;
+  }
+  reply += 'Your timer has started. Send anything to stop.';
   timer.startTimer(message.author.id, message.channel.id);
-  message.channel.send(`${message.author.username}, your timer has started. `
-    + 'Send anything to stop.');
+  message.reply(reply);
 });
 
 // view user's current records
