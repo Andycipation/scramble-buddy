@@ -332,12 +332,16 @@ class Solver {
     return {
       color: 0x0099ff,
       title: `User Profile`,
+
+      // show a picture of the avatar in the embed
       // files: ['./assets/avatar.png'],
       // thumbnail: {
       //   url: 'attachment://avatar.png'
       // },
 
-      // this description mention is how page changing works
+      // this description mention is how page changing works;
+      // thus, if changing this description format,
+      // update the page-changing code in reactions.js
       description: `Discord User: <@${this.userId}>`,
       fields: [
         {

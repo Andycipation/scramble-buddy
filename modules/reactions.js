@@ -139,7 +139,14 @@ function isProfilePage(message) {
   return (embeds[0].footer.text.includes('/'));
 }
 
-
+/*
+Map each reaction to a formula to update the page:
+when PROFILE_EMOJIS[i] is clicked, the embed should change to page
+  FUNCTIONS[i](userId, x)
+where
+- userId is the id of the user that the embed is profiling, and
+- x is the number of the page that is currently displayed.
+*/
 const PROFILE_EMOJIS = [
   FIRST_EMOJI,
   LEFT_EMOJI,
@@ -157,7 +164,6 @@ const FUNCTIONS = [
 
 for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
   const emoji = PROFILE_EMOJIS[i];
-  const func = FUNCTIONS[i];
   // add the reaction action that changes the profile page
   newReactionAddAction(emoji, isProfilePage, (reaction, user) => {
     const message = reaction.message;
@@ -166,13 +172,15 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
       console.error("why can't the bot edit its own message? :(");
       return false;
     }
+    // get the user and current page from the embed's footer text content
     const embed = message.embeds[0];
+    // description is "Discord User: <@(user id)>"
     const userId = parseMention(embed.description.split(' ')[2]);
-    const strs = embed.footer.text.split(' ');
+    const strs = embed.footer.text.split(' ');  // footer strings
     const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
-    const newEmbed = solves.getSolverEmbed(userId, func(userId, currentPage));
+    const newEmbed = solves.getSolverEmbed(userId, FUNCTIONS[i](userId, currentPage));
     if (newEmbed === null) {
-      return false;
+      return false;  // invalid request
     }
     message.edit({ embed: newEmbed });
     return true;

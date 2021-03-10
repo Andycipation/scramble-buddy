@@ -25,10 +25,12 @@ module.exports = {
   // whether or not to attach images of the scramble net
   MAKE_SCRAMBLE_IMAGES: true,
 
+  // for getting a scramble
   CONFIRM_EMOJI: '✅',
   REMOVE_EMOJI: '❌',
   SCRAMBLE_REACT_PROMPT: `React with ✅ to use this scramble.`,
 
+  // profile embed information
   FIRST_EMOJI: '⏮️',
   LEFT_EMOJI: '◀️',
   REFRESH_EMOJI: '🔃',
