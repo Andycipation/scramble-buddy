@@ -31,7 +31,7 @@ module.exports = {
 
   FIRST_EMOJI: '⏮️',
   LEFT_EMOJI: '◀️',
-  REFRESH_EMOJI: '🔄',
+  REFRESH_EMOJI: '🔃',
   RIGHT_EMOJI: '▶️',
   LAST_EMOJI: '⏭️',
   SOLVES_PER_PAGE: 10, // number of solves per page for profile embeds

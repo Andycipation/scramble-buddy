@@ -302,7 +302,7 @@ class Solver {
    * @returns {string} the string showing all solves in the given range
    */
   _getSolvesString(from, to) {
-    if (from < 0 || from > to || to >= this.solves.size()) {
+    if (!(0 <= from && from <= to && to < this.solves.size())) {
       console.error('tried to get solves in an invalid range');
       return null;
     }
