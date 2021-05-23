@@ -1,55 +1,26 @@
-/*
-A bunch of utility methods.
-*/
-
-
-const { prefix } = require('../config.js');
-
-
-/**
- * Converts a Date to a string.
- * @param {Date} date the date to convert to a string
- * @return {string} the formatted date
- */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.randInt = exports.parseMention = exports.parseCommand = exports.getDateString = void 0;
+const config_1 = require("../config");
+const { prefix } = config_1.default;
 function getDateString(date) {
-  return date.toLocaleString('en-CA', { timeZone: 'America/Toronto' });
+    return date.toLocaleString('en-CA', { timeZone: 'America/Toronto' });
 }
-
-/**
- * Returns the arguments of the given command.
- * @param {string} s the command to parse
- * @returns {string[]} the arguments, split by space
- */
-function parseCommand(s) {
-  s = s.trim();
-  if (s.startsWith(prefix)) {
-    s = s.substring(prefix.length).trim();
-  }
-  return s.split(' ');
-}
-
-/**
- * Converts a string of the form <@(id)> to id, e.g.
- * <@199904392504147968> becomes 199904392504147968.
- * @param {string} s the mention string to convert
- * @returns {string} the user id in the given string
- */
-function parseMention(s) {
-  return s.substring(2, s.length - 1);
-}
-
-/**
- * Returns a random integer in the range [low, high].
- * @param {number} low the lower bound
- * @param {number} high the upper bound
- * @returns {number} a random number in the range [low, high]
- */
-function randInt(low, high) {
-  return low + Math.floor(Math.random() * (high - low + 1));
-}
-
-
 exports.getDateString = getDateString;
+function parseCommand(s) {
+    s = s.trim();
+    if (s.startsWith(prefix)) {
+        s = s.substring(prefix.length).trim();
+    }
+    return s.split(' ');
+}
 exports.parseCommand = parseCommand;
+function parseMention(s) {
+    return s.substring(2, s.length - 1);
+}
 exports.parseMention = parseMention;
+function randInt(low, high) {
+    return low + Math.floor(Math.random() * (high - low + 1));
+}
 exports.randInt = randInt;
+//# sourceMappingURL=util.js.map

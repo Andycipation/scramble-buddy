@@ -1,112 +1,60 @@
-/*
-Data structure for querying minimums in stack. Using the C++ stack as a
-template.
-
-Link: http://www.cplusplus.com/reference/stack/stack/
-*/
-
-
-/**
- * A Stack that maintains the best value it contains.
- */
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MinStack = exports.Stack = void 0;
 class Stack {
-  /**
-   * The constructor for a Stack.
-   * @param {Function} cmp the comparison to use; cmp(a, b) is true if a is
-   * considered to be better than b; cmp should be transitive,
-   * i.e. cmp(a, b) && cmp(b, c) implies cmp(a, c)
-   * @param {Function} equals the equality operator to use
-   */
-  constructor(cmp, equals) {
-    this.cmp = cmp;
-    this.equals = equals;
-    this.stk = [];
-    this.monostk = [];
-  }
-
-  get best() {
-    if (this.monostk.length == 0) {
-      return null;
+    constructor(cmp, equals) {
+        this.cmp = cmp;
+        this.equals = equals;
+        this.stk = [];
+        this.monostk = [];
     }
-    return this.monostk[this.monostk.length - 1];
-  }
-
-  /**
-   * Adds an element to the top of this Stack.
-   * @param {any} x the element to push to the Stack
-   */
-  push(x) {
-    this.stk.push(x);
-    if (this.best == null || this.cmp(x, this.best)) {
-      this.monostk.push(x);
+    get best() {
+        if (this.monostk.length == 0) {
+            return null;
+        }
+        return this.monostk[this.monostk.length - 1];
     }
-  }
-
-  /**
-   * Removes the element at the top of this stack.
-   */
-  pop() {
-    if (this.best == null) {
-      console.error('tried to pop from an empty Stack');
-      return;
+    push(x) {
+        this.stk.push(x);
+        if (this.best == null || this.cmp(x, this.best)) {
+            this.monostk.push(x);
+        }
     }
-    if (this.equals(this.stk[this.stk.length - 1], this.best)) {
-      this.monostk.pop();
+    pop() {
+        if (this.best == null) {
+            console.error('tried to pop from an empty Stack');
+            return;
+        }
+        if (this.equals(this.stk[this.stk.length - 1], this.best)) {
+            this.monostk.pop();
+        }
+        this.stk.pop();
     }
-    this.stk.pop();
-  }
-
-  /**
-   * Returns the element at the top of this Stack.
-   * @returns {any} the element at the top of this Stack
-   */
-  top() {
-    if (this.stk.length == 0) {
-      console.error('tried to get element from an empty Stack');
-      return null;
+    top() {
+        if (this.stk.length == 0) {
+            console.error('tried to get element from an empty Stack');
+            return null;
+        }
+        return this.stk[this.stk.length - 1];
     }
-    return this.stk[this.stk.length - 1];
-  }
-
-  /**
-   * Returns the size of this Stack.
-   * @returns {number} the size of this Stack
-   */
-  size() {
-    return this.stk.length;
-  }
-
-  /**
-   * Returns whether or not this Stack is empty.
-   * @returns {boolean} whether or not this Stack is empty
-   */
-  empty() {
-    return (this.stk.length == 0);
-  }
-
-  at(index) {
-    if (index < 0 || index >= this.stk.length) {
-      // console.error('tried to access an out-of-range index of a Stack');
-      return null;
+    size() {
+        return this.stk.length;
     }
-    return this.stk[index];
-  }
+    empty() {
+        return (this.stk.length == 0);
+    }
+    at(index) {
+        if (index < 0 || index >= this.stk.length) {
+            return null;
+        }
+        return this.stk[index];
+    }
 }
-
-
-/**
- * A specialization of the above class, with comparison <= and
- * equality operator ==.
- */
-class MinStack extends Stack {
-  constructor() {
-    super(
-      (a, b) => (a <= b),  // comparison
-      (a, b) => (a == b)   // equality
-    );
-  }
-}
-
-
 exports.Stack = Stack;
+class MinStack extends Stack {
+    constructor() {
+        super((a, b) => (a <= b), (a, b) => (a == b));
+    }
+}
 exports.MinStack = MinStack;
+//# sourceMappingURL=stack.js.map

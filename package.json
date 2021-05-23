@@ -16,5 +16,8 @@
     "pg": "^8.5.1"
   },
   "license": "UNLICENSED",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@types/node": "^15.6.0"
+  }
 }

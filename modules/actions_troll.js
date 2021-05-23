@@ -1,76 +1,71 @@
-/*
-All of the troll stuff. LOL
-*/
-
-
-const {
-  CCG_GUILD_ID,
-  MY_DISCORD_ID,
-} = require('../config.js');
-var { troll } = require('../config.js');
-const { parseCommand, randInt } = require('./util.js');
-
-// joke stuff
-const fs = require('fs');
-const JOKE_FILE = './jokes.txt'; // path relative to the bot.js file
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.handleTroll = exports.loadJokes = void 0;
+const config_1 = require("../config");
+const { CCG_GUILD_ID, MY_DISCORD_ID, } = config_1.default;
+var { troll } = config_1.default;
+const util_js_1 = require("./util.js");
+const fs = require("fs");
+const JOKE_FILE = './jokes.txt';
 const JOKES = [];
-
-async function loadJokes() {
-  console.log('loading jokes');
-  fs.readFile(JOKE_FILE, (error, data) => {
-    const lines = data.toString().split('\n');
-    for (const line of lines) {
-      if (line.length > 0) {
-        JOKES.push(line);
-      }
-    }
-  });
+function loadJokes() {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log('loading jokes');
+        fs.readFile(JOKE_FILE, (error, data) => {
+            const lines = data.toString().split('\n');
+            for (const line of lines) {
+                if (line.length > 0) {
+                    JOKES.push(line);
+                }
+            }
+        });
+    });
 }
-
-/**
- * Handles all troll features of this bot.
- * @param {Discord.Message} message the message for which to handle troll actions
- */
-async function handleTroll(message) {
-  if (message.author.id == MY_DISCORD_ID) {
-    const args = parseCommand(message.content);
-    const op = args[0];
-    if (op == 'toggletroll') {
-      troll ^= 1;
-      // message.reply(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
-      message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
-    }
-  }
-  if (!troll) {
-    return;
-  }
-  if (message.content == 'Hi!') {
-    // message.reply('Hi!');
-    message.channel.send('Hi!');
-  }
-  if (message.content == 'gn') {
-    // message.reply('Good night!');
-    message.channel.send('Good night!');
-  }
-  if (message.content.toLowerCase().startsWith('vc tmr?')) {
-    // message.reply('vc tmr.');
-    message.channel.send('vc tmr.');
-  }
-  if (message.content.toLowerCase().startsWith('vc tn?')) {
-    // message.reply('vc tn.');
-    message.channel.send('vc tn.');
-  }
-  if (message.content.toLowerCase().startsWith('vc rn?')) {
-    // message.reply('vc rn.');
-    message.channel.send('vc rn.');
-  }
-  if (message.guild.id == CCG_GUILD_ID) {
-    if (message.content.toLowerCase().includes('joke')) {
-      const joke = JOKES[randInt(0, JOKES.length - 1)];
-      message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');
-    }
-  }
-}
-
 exports.loadJokes = loadJokes;
+function handleTroll(message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (message.author.id == MY_DISCORD_ID) {
+            const args = util_js_1.parseCommand(message.content);
+            const op = args[0];
+            if (op == 'toggletroll') {
+                troll = !troll;
+                message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
+            }
+        }
+        if (!troll) {
+            return;
+        }
+        if (message.content == 'Hi!') {
+            message.channel.send('Hi!');
+        }
+        if (message.content == 'gn') {
+            message.channel.send('Good night!');
+        }
+        if (message.content.toLowerCase().startsWith('vc tmr?')) {
+            message.channel.send('vc tmr.');
+        }
+        if (message.content.toLowerCase().startsWith('vc tn?')) {
+            message.channel.send('vc tn.');
+        }
+        if (message.content.toLowerCase().startsWith('vc rn?')) {
+            message.channel.send('vc rn.');
+        }
+        if (message.guild.id == CCG_GUILD_ID) {
+            if (message.content.toLowerCase().includes('joke')) {
+                const joke = JOKES[util_js_1.randInt(0, JOKES.length - 1)];
+                message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');
+            }
+        }
+    });
+}
 exports.handleTroll = handleTroll;
+//# sourceMappingURL=actions_troll.js.map
