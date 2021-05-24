@@ -1,5 +1,8 @@
 /*
 The driver for the bot.
+
+lol note about package.json:
+https://stackoverflow.com/questions/48972663/how-do-i-compile-typescript-at-heroku-postinstall
 */
 
 
