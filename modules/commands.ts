@@ -3,7 +3,6 @@ The commands that the bot responds to.
 */
 
 import config from '../config';
-const { MAKE_SCRAMBLE_IMAGES } = config;
 
 import pkg = require('../package.json');
 import fs = require('fs');
@@ -89,7 +88,7 @@ newCommand('get', 'generates a new scramble', async message => {
       + `Contenders:\n`
       + `<@${message.author.id}>`;
   const options: MessageOptions = {};
-  if (MAKE_SCRAMBLE_IMAGES) {
+  if (config.MAKE_SCRAMBLE_IMAGES) {
     options.files = [filename];
   }
   setTimeout(() => {
@@ -97,7 +96,7 @@ newCommand('get', 'generates a new scramble', async message => {
       assert(sent instanceof Message);
       await sent.react(config.CONFIRM_EMOJI);
       await sent.react(config.REMOVE_EMOJI);
-      if (MAKE_SCRAMBLE_IMAGES) {
+      if (config.MAKE_SCRAMBLE_IMAGES) {
         fs.unlinkSync(filename);
       }
     });
@@ -160,7 +159,7 @@ newCommand('go', 'starts a timer for you', message => {
 // view user's current records
 newCommand('view', '`[user mention] [page]` shows user profile', message => {
   let user = message.mentions.users.first();
-  if (user != null && user.bot) {
+  if (user != null && (user.bot && config.IGNORE_BOTS)) {
     message.channel.send("You cannot request to view a bot's solves.");
     return;
   }
@@ -195,7 +194,7 @@ newCommand('view', '`[user mention] [page]` shows user profile', message => {
 newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", async message => {
   // massive copy-paste from "cube view" command but whatever
   let user = message.mentions.users.first();
-  if (user != null && user.bot) {
+  if (user != null && (user.bot && config.IGNORE_BOTS)) {
     message.channel.send("You cannot request to view a bot's solves.");
     return;
   }
@@ -228,12 +227,12 @@ newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", asy
   const filename = `./assets/${message.id}.png`;
   makeImage(se.scramble, filename);
   const options: MessageOptions = {};
-  if (MAKE_SCRAMBLE_IMAGES) {
+  if (config.MAKE_SCRAMBLE_IMAGES) {
     options.files = [filename];
   }
   setTimeout(() => {
     message.channel.send(str, options).then(async sent => {
-      if (MAKE_SCRAMBLE_IMAGES) {
+      if (config.MAKE_SCRAMBLE_IMAGES) {
         fs.unlinkSync(filename);
       }
     });

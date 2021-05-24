@@ -14,7 +14,6 @@ const Jimp = require("jimp");
 const fs = require("fs");
 const util_js_1 = require("./util.js");
 const config_js_1 = require("../config.js");
-const { MAKE_SCRAMBLE_IMAGES } = config_js_1.default;
 const S = 32;
 const LIGHT = 3;
 const HEAVY = 7;
@@ -168,7 +167,7 @@ function _getScramble(numMoves) {
 function getScramble(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         const scramble = yield _getScramble(util_js_1.randInt(17, 20));
-        if (MAKE_SCRAMBLE_IMAGES) {
+        if (config_js_1.default.MAKE_SCRAMBLE_IMAGES) {
             makeImage(scramble, filename);
         }
         return scramble;

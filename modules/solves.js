@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSolverEmbed = exports.getSolver = exports.getCurrentPbs = exports.SolveEntry = void 0;
 const config_1 = require("../config");
-const { FOOTER_STRING, SOLVES_PER_PAGE } = config_1.default;
 const stack_js_1 = require("./stack.js");
 const timer = require("./timer.js");
 class SolveEntry {
@@ -178,7 +177,7 @@ class Solver {
         return strings.join('\n');
     }
     get numPages() {
-        return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
+        return 1 + Math.ceil(this.solves.size() / config_1.default.SOLVES_PER_PAGE);
     }
     getProfileEmbed() {
         return {
@@ -213,7 +212,7 @@ class Solver {
             ],
             timestamp: new Date(),
             footer: {
-                text: `${FOOTER_STRING} | Page 1/${this.numPages}`
+                text: `${config_1.default.FOOTER_STRING} | Page 1/${this.numPages}`
             },
         };
     }
@@ -221,8 +220,8 @@ class Solver {
         if (page < 0 || page >= this.numPages - 1) {
             return null;
         }
-        let to = this.solves.size() - 1 - page * SOLVES_PER_PAGE;
-        let from = Math.max(to - SOLVES_PER_PAGE + 1, 0);
+        let to = this.solves.size() - 1 - page * config_1.default.SOLVES_PER_PAGE;
+        let from = Math.max(to - config_1.default.SOLVES_PER_PAGE + 1, 0);
         return {
             color: 0x0099ff,
             title: `User Profile`,
@@ -235,7 +234,7 @@ class Solver {
             ],
             timestamp: new Date(),
             footer: {
-                text: `${FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
+                text: `${config_1.default.FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
             },
         };
     }

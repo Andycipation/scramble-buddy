@@ -10,7 +10,7 @@ const config = {
     LEADERBOARD_LENGTH: 10,
     prefix: 'cube',
     troll: true,
-    IGNORE_BOTS: true,
+    IGNORE_BOTS: false,
     COOLDOWN: 0,
     MAKE_SCRAMBLE_IMAGES: true,
     CONFIRM_EMOJI: '✅',

@@ -11,8 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleTroll = exports.loadJokes = void 0;
 const config_1 = require("../config");
-const { CCG_GUILD_ID, MY_DISCORD_ID, } = config_1.default;
-var { troll } = config_1.default;
 const util_js_1 = require("./util.js");
 const fs = require("fs");
 const JOKE_FILE = './jokes.txt';
@@ -34,15 +32,15 @@ exports.loadJokes = loadJokes;
 function handleTroll(message) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        if (message.author.id == MY_DISCORD_ID) {
+        if (message.author.id == config_1.default.MY_DISCORD_ID) {
             const args = util_js_1.parseCommand(message.content);
             const op = args[0];
             if (op == 'toggletroll') {
-                troll = !troll;
-                message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
+                config_1.default.troll = !config_1.default.troll;
+                message.channel.send(`Troll messages ${config_1.default.troll ? 'enabled' : 'disabled'}.`);
             }
         }
-        if (!troll) {
+        if (!config_1.default.troll) {
             return;
         }
         if (message.content == 'Hi!') {
@@ -60,7 +58,7 @@ function handleTroll(message) {
         if (message.content.toLowerCase().startsWith('vc rn?')) {
             message.channel.send('vc rn.');
         }
-        if (((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id) == CCG_GUILD_ID) {
+        if (((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id) == config_1.default.CCG_GUILD_ID) {
             if (message.content.toLowerCase().includes('joke')) {
                 const joke = JOKES[util_js_1.randInt(0, JOKES.length - 1)];
                 message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');

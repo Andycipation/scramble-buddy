@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.popSolve = exports.togglePlusTwo = exports.deleteLog = exports.setMethod = exports.logSolve = exports.loadSolves = void 0;
 const config_js_1 = require("../config.js");
-const { LOGS_TO_LOAD } = config_js_1.default;
 const solves = require("./solves.js");
 var channel;
 function loadSolves(_channel) {
@@ -20,9 +19,9 @@ function loadSolves(_channel) {
         channel = _channel;
         let lastId = undefined;
         let logMessages = [];
-        while (logMessages.length < LOGS_TO_LOAD) {
+        while (logMessages.length < config_js_1.default.LOGS_TO_LOAD) {
             let messages = yield channel.messages.fetch({
-                limit: Math.min(LOGS_TO_LOAD - logMessages.length, 100),
+                limit: Math.min(config_js_1.default.LOGS_TO_LOAD - logMessages.length, 100),
                 before: lastId,
             });
             if (messages.size == 0) {

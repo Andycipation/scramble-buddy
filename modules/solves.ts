@@ -6,9 +6,8 @@ averages faster using PSA and segment tree queries?
 */
 
 
-import { MessageEmbed, Snowflake } from 'discord.js';
+import { Snowflake } from 'discord.js';
 import config from '../config';
-const { FOOTER_STRING, SOLVES_PER_PAGE } = config;
 
 import Discord = require('discord.js');
 
@@ -319,7 +318,7 @@ class Solver {
    * @returns {number} the number of pages the profile would require
    */
   get numPages(): number {
-    return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
+    return 1 + Math.ceil(this.solves.size() / config.SOLVES_PER_PAGE);
   }
 
   /**
@@ -371,7 +370,7 @@ class Solver {
       timestamp: new Date(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
-        text: `${FOOTER_STRING} | Page 1/${this.numPages}`
+        text: `${config.FOOTER_STRING} | Page 1/${this.numPages}`
       },
     };
   }
@@ -382,14 +381,14 @@ class Solver {
    * @returns the message embed for the given page
    */
   getSolvesEmbed(page: number) {
-    // page - the solve page id, from 0 to ceil(# solves / SOLVES_PER_PAGE) - 1
+    // page - the solve page id, from 0 to ceil(# solves / config.SOLVES_PER_PAGE) - 1
     if (page < 0 || page >= this.numPages - 1) {
       // not an error
       // console.log('tried to get an embed page out of range');
       return null;
     }
-    let to = this.solves.size() - 1 - page * SOLVES_PER_PAGE;
-    let from = Math.max(to - SOLVES_PER_PAGE + 1, 0);
+    let to = this.solves.size() - 1 - page * config.SOLVES_PER_PAGE;
+    let from = Math.max(to - config.SOLVES_PER_PAGE + 1, 0);
     return {
       color: 0x0099ff,
       // below: the title starting with 'Profile of' is what is used
@@ -408,7 +407,7 @@ class Solver {
       timestamp: new Date(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
-        text: `${FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
+        text: `${config.FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
       },
     };
   }

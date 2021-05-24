@@ -4,7 +4,6 @@ A bunch of utility methods.
 
 
 import config from '../config';
-const { prefix } = config;
 
 /**
  * Converts a Date to a string.
@@ -22,8 +21,8 @@ export function getDateString(date: Date): string {
  */
 export function parseCommand(s: string): string[] {
   s = s.trim();
-  if (s.startsWith(prefix)) {
-    s = s.substring(prefix.length).trim();
+  if (s.startsWith(config.prefix)) {
+    s = s.substring(config.prefix.length).trim();
   }
   return s.split(' ');
 }

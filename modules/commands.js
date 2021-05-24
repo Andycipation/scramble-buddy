@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handleCommand = void 0;
 const config_1 = require("../config");
-const { MAKE_SCRAMBLE_IMAGES } = config_1.default;
 const pkg = require("../package.json");
 const fs = require("fs");
 const db = require("./database.js");
@@ -58,7 +57,7 @@ newCommand('get', 'generates a new scramble', (message) => __awaiter(void 0, voi
         + `Contenders:\n`
         + `<@${message.author.id}>`;
     const options = {};
-    if (MAKE_SCRAMBLE_IMAGES) {
+    if (config_1.default.MAKE_SCRAMBLE_IMAGES) {
         options.files = [filename];
     }
     setTimeout(() => {
@@ -66,7 +65,7 @@ newCommand('get', 'generates a new scramble', (message) => __awaiter(void 0, voi
             assert(sent instanceof discord_js_1.Message);
             yield sent.react(config_1.default.CONFIRM_EMOJI);
             yield sent.react(config_1.default.REMOVE_EMOJI);
-            if (MAKE_SCRAMBLE_IMAGES) {
+            if (config_1.default.MAKE_SCRAMBLE_IMAGES) {
                 fs.unlinkSync(filename);
             }
         }));
@@ -115,7 +114,7 @@ newCommand('go', 'starts a timer for you', message => {
 });
 newCommand('view', '`[user mention] [page]` shows user profile', message => {
     let user = message.mentions.users.first();
-    if (user != null && user.bot) {
+    if (user != null && (user.bot && config_1.default.IGNORE_BOTS)) {
         message.channel.send("You cannot request to view a bot's solves.");
         return;
     }
@@ -146,7 +145,7 @@ newCommand('view', '`[user mention] [page]` shows user profile', message => {
 });
 newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", (message) => __awaiter(void 0, void 0, void 0, function* () {
     let user = message.mentions.users.first();
-    if (user != null && user.bot) {
+    if (user != null && (user.bot && config_1.default.IGNORE_BOTS)) {
         message.channel.send("You cannot request to view a bot's solves.");
         return;
     }
@@ -178,12 +177,12 @@ newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", (me
     const filename = `./assets/${message.id}.png`;
     scramble_js_1.makeImage(se.scramble, filename);
     const options = {};
-    if (MAKE_SCRAMBLE_IMAGES) {
+    if (config_1.default.MAKE_SCRAMBLE_IMAGES) {
         options.files = [filename];
     }
     setTimeout(() => {
         message.channel.send(str, options).then((sent) => __awaiter(void 0, void 0, void 0, function* () {
-            if (MAKE_SCRAMBLE_IMAGES) {
+            if (config_1.default.MAKE_SCRAMBLE_IMAGES) {
                 fs.unlinkSync(filename);
             }
         }));

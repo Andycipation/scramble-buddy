@@ -3,9 +3,8 @@ Loads data for users, using a certain text channel as the "database".
 */
 
 
-import { Channel, Collection, Message, Snowflake, TextChannel } from 'discord.js';
+import { Collection, Message, Snowflake, TextChannel } from 'discord.js';
 import config from '../config.js';
-const { LOGS_TO_LOAD } = config;
 
 import solves = require('./solves.js');
 
@@ -19,9 +18,9 @@ export async function loadSolves(_channel: TextChannel) {
   channel = _channel;
   let lastId = undefined;
   let logMessages = [];
-  while (logMessages.length < LOGS_TO_LOAD) {
+  while (logMessages.length < config.LOGS_TO_LOAD) {
     let messages: Collection<string, Message> = await channel.messages.fetch({
-      limit: Math.min(LOGS_TO_LOAD - logMessages.length, 100),
+      limit: Math.min(config.LOGS_TO_LOAD - logMessages.length, 100),
       before: lastId,
     });
     if (messages.size == 0) {

@@ -3,11 +3,6 @@ All of the troll stuff. LOL
 */
 
 import config from '../config';
-const {
-  CCG_GUILD_ID,
-  MY_DISCORD_ID,
-} = config;
-var { troll } = config;
 
 import { parseCommand, randInt } from './util.js';
 
@@ -35,16 +30,16 @@ export async function loadJokes(): Promise<void> {
  * @param message the message for which to handle troll actions
  */
 export async function handleTroll(message: Message) {
-  if (message.author.id == MY_DISCORD_ID) {
+  if (message.author.id == config.MY_DISCORD_ID) {
     const args = parseCommand(message.content);
     const op = args[0];
     if (op == 'toggletroll') {
-      troll = !troll;
+      config.troll = !config.troll;
       // message.reply(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
-      message.channel.send(`Troll messages ${troll ? 'enabled' : 'disabled'}.`);
+      message.channel.send(`Troll messages ${config.troll ? 'enabled' : 'disabled'}.`);
     }
   }
-  if (!troll) {
+  if (!config.troll) {
     return;
   }
   if (message.content == 'Hi!') {
@@ -67,7 +62,7 @@ export async function handleTroll(message: Message) {
     // message.reply('vc rn.');
     message.channel.send('vc rn.');
   }
-  if (message.guild?.id == CCG_GUILD_ID) {
+  if (message.guild?.id == config.CCG_GUILD_ID) {
     if (message.content.toLowerCase().includes('joke')) {
       const joke = JOKES[randInt(0, JOKES.length - 1)];
       message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');

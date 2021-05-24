@@ -7,10 +7,9 @@ import Jimp = require('jimp');
 import fs = require('fs');
 import { randInt } from './util.js';
 
-// image-related stuff
 import config from '../config.js';
-const { MAKE_SCRAMBLE_IMAGES } = config;
 
+// image-related stuff
 const S = 32; // side length of a sticker
 const LIGHT = 3; // weight of a light line
 const HEAVY = 7; // weight of a heavy line
@@ -172,7 +171,7 @@ async function _getScramble(numMoves: number): Promise<string> {
 
 export async function getScramble(filename: string) {
   const scramble = await _getScramble(randInt(17, 20));
-  if (MAKE_SCRAMBLE_IMAGES) {
+  if (config.MAKE_SCRAMBLE_IMAGES) {
     makeImage(scramble, filename);
   }
   return scramble;

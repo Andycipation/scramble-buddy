@@ -18,7 +18,7 @@ const config = {
 
   prefix: 'cube',
   troll: true,
-  IGNORE_BOTS: true,
+  IGNORE_BOTS: false,
   COOLDOWN: 0, // in milliseconds
 
   // whether or not to attach images of the scramble net

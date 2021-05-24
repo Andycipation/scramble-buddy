@@ -2,15 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.randInt = exports.parseMention = exports.parseCommand = exports.getDateString = void 0;
 const config_1 = require("../config");
-const { prefix } = config_1.default;
 function getDateString(date) {
     return date.toLocaleString('en-CA', { timeZone: 'America/Toronto' });
 }
 exports.getDateString = getDateString;
 function parseCommand(s) {
     s = s.trim();
-    if (s.startsWith(prefix)) {
-        s = s.substring(prefix.length).trim();
+    if (s.startsWith(config_1.default.prefix)) {
+        s = s.substring(config_1.default.prefix.length).trim();
     }
     return s.split(' ');
 }
