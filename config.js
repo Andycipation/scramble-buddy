@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const pkg = require('./package.json');
+const pkg = require("./package.json");
 const config = {
     BOT_NAME: 'ScrambleBuddy',
     MY_DISCORD_ID: '199904392504147968',
@@ -10,7 +10,7 @@ const config = {
     LEADERBOARD_LENGTH: 10,
     prefix: 'cube',
     troll: true,
-    IGNORE_BOTS: false,
+    IGNORE_BOTS: true,
     COOLDOWN: 0,
     MAKE_SCRAMBLE_IMAGES: true,
     CONFIRM_EMOJI: '✅',

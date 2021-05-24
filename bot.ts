@@ -9,11 +9,6 @@ import pkg = require('./package.json');
 
 // config and parameters
 import config from './config.js';
-const {
-  DATA_CHANNEL_ID,
-  prefix,
-  IGNORE_BOTS,
-} = config;
 
 import actionsTroll = require('./modules/actions_troll.js');
 import commands = require('./modules/commands.js');
@@ -21,18 +16,16 @@ import db = require('./modules/database.js');
 import { REACTION_ADD_ACTIONS } from './modules/reactions.js';
 import solves = require('./modules/solves.js');
 import timer = require('./modules/timer.js');
-import { assert } from 'console';
-// import { parseCommand, randInt } from './modules/util.js';
 
 const bot = new Discord.Client();
 
 bot.on('ready', async () => {
-  bot.user!.setActivity(`type '${prefix} help' for help`); // set bot status
+  bot.user!.setActivity(`type '${config.prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   await actionsTroll.loadJokes();
 
   // load past solves
-  let dataChannel = (await bot.channels.fetch(DATA_CHANNEL_ID)) as TextChannel;
+  let dataChannel = (await bot.channels.fetch(config.DATA_CHANNEL_ID)) as TextChannel;
   await db.loadSolves(dataChannel);
 
   // ready to go
@@ -66,11 +59,11 @@ async function checkTimer(message: Message) {
 // when a message is sent
 bot.on('message', async message => {
   const userId = message.author.id;
-  if (userId == bot.user!.id || (message.author.bot && IGNORE_BOTS)) {
+  if (userId == bot.user!.id || (message.author.bot && config.IGNORE_BOTS)) {
     // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
     return;
   }
-  if (message.channel.id == DATA_CHANNEL_ID) {
+  if (message.channel.id == config.DATA_CHANNEL_ID) {
     // delete messages sent in the logs to avoid parsing errors
     message.delete({ reason: 'not supposed to send messages in the data channel' });
     return;
@@ -86,7 +79,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
   if (messageReaction.message.author.id != bot.user!.id) {
     return; // only handle reactions to messages sent by this bot
   }
-  if (user.id == bot.user!.id || (user.bot && IGNORE_BOTS)) {
+  if (user.id == bot.user!.id || (user.bot && config.IGNORE_BOTS)) {
     return; // ignore reacts by irrelevant users
   }
   for (const raa of REACTION_ADD_ACTIONS) {
@@ -98,7 +91,7 @@ bot.on('messageReactionAdd', async (messageReaction, user) => {
 
 // when a reaction is removed from an existing message
 bot.on('messageReactionRemove', async (messageReaction, user) => {
-  if (user.id == bot.user!.id || (user.bot && IGNORE_BOTS)) {
+  if (user.id == bot.user!.id || (user.bot && config.IGNORE_BOTS)) {
     return;
   }
   if (messageReaction.emoji.name == REACTION_ADD_ACTIONS[0].emoji) {

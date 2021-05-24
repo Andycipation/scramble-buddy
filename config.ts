@@ -2,7 +2,7 @@
 Settings and parameters for the bot.
 */
 
-const pkg = require('./package.json');
+import pkg = require('./package.json');
 
 const config = {
   BOT_NAME: 'ScrambleBuddy',
@@ -18,7 +18,7 @@ const config = {
 
   prefix: 'cube',
   troll: true,
-  IGNORE_BOTS: false,
+  IGNORE_BOTS: true,
   COOLDOWN: 0, // in milliseconds
 
   // whether or not to attach images of the scramble net

@@ -12,7 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Discord = require("discord.js");
 const pkg = require("./package.json");
 const config_js_1 = require("./config.js");
-const { DATA_CHANNEL_ID, prefix, IGNORE_BOTS, } = config_js_1.default;
 const actionsTroll = require("./modules/actions_troll.js");
 const commands = require("./modules/commands.js");
 const db = require("./modules/database.js");
@@ -21,9 +20,9 @@ const solves = require("./modules/solves.js");
 const timer = require("./modules/timer.js");
 const bot = new Discord.Client();
 bot.on('ready', () => __awaiter(void 0, void 0, void 0, function* () {
-    bot.user.setActivity(`type '${prefix} help' for help`);
+    bot.user.setActivity(`type '${config_js_1.default.prefix} help' for help`);
     yield actionsTroll.loadJokes();
-    let dataChannel = (yield bot.channels.fetch(DATA_CHANNEL_ID));
+    let dataChannel = (yield bot.channels.fetch(config_js_1.default.DATA_CHANNEL_ID));
     yield db.loadSolves(dataChannel);
     console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
 }));
@@ -50,10 +49,10 @@ function checkTimer(message) {
 }
 bot.on('message', (message) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = message.author.id;
-    if (userId == bot.user.id || (message.author.bot && IGNORE_BOTS)) {
+    if (userId == bot.user.id || (message.author.bot && config_js_1.default.IGNORE_BOTS)) {
         return;
     }
-    if (message.channel.id == DATA_CHANNEL_ID) {
+    if (message.channel.id == config_js_1.default.DATA_CHANNEL_ID) {
         message.delete({ reason: 'not supposed to send messages in the data channel' });
         return;
     }
@@ -65,7 +64,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => __awaiter(void 0, void 0
     if (messageReaction.message.author.id != bot.user.id) {
         return;
     }
-    if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
+    if (user.id == bot.user.id || (user.bot && config_js_1.default.IGNORE_BOTS)) {
         return;
     }
     for (const raa of reactions_js_1.REACTION_ADD_ACTIONS) {
@@ -75,7 +74,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => __awaiter(void 0, void 0
     }
 }));
 bot.on('messageReactionRemove', (messageReaction, user) => __awaiter(void 0, void 0, void 0, function* () {
-    if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
+    if (user.id == bot.user.id || (user.bot && config_js_1.default.IGNORE_BOTS)) {
         return;
     }
     if (messageReaction.emoji.name == reactions_js_1.REACTION_ADD_ACTIONS[0].emoji) {
