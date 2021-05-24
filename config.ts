@@ -2,6 +2,7 @@
 Settings and parameters for the bot.
 */
 
+
 import pkg = require('./package.json');
 
 const config = {

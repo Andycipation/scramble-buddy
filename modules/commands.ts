@@ -14,7 +14,7 @@ import timer = require('./timer');
 import { getDateString, parseCommand } from './util';
 
 import assert = require('assert');
-import { Message, MessageEmbed, MessageOptions, Snowflake } from 'discord.js';
+import { Message, MessageOptions, Snowflake } from 'discord.js';
 
 /**
  * A class representing a Command that can be called by the user.

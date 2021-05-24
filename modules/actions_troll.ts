@@ -2,6 +2,7 @@
 All of the troll stuff. LOL
 */
 
+
 import config from '../config';
 import { Message } from 'discord.js';
 

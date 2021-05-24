@@ -2,6 +2,7 @@
 Module to manage all actions related to timing.
 */
 
+
 import { Channel, Message, Snowflake, User } from 'discord.js';
 import db = require('./database');
 

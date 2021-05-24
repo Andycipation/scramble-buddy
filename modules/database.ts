@@ -8,7 +8,6 @@ import config from '../config';
 
 import solves = require('./solves');
 
-
 // TODO: find a cleaner way
 var channel: TextChannel;
 
