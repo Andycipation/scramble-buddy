@@ -4,7 +4,6 @@
   "description": "a Discord bot for cubers",
   "main": "dist/bot.js",
   "scripts": {
-    "prestart": "tsc",
     "start": "node dist/bot.js",
     "test": "ts-node bot"
   },
@@ -12,8 +11,8 @@
   "author": "ADMathNoob",
   "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
   "dependencies": {
-    "discord.js": "^12.5.1",
-    "dotenv": "^8.2.0",
+    "discord.js": "^12.5.3",
+    "dotenv": "^10.0.0",
     "jimp": "^0.16.1"
   },
   "license": "UNLICENSED",

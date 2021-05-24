@@ -1,0 +1,27 @@
+{
+    "name": "scramble-buddy",
+    "version": "1.5.0",
+    "description": "a Discord bot for cubers",
+    "main": "dist/bot.js",
+    "scripts": {
+        "start": "node dist/bot.js",
+        "test": "ts-node bot"
+    },
+    "repository": "git+https://github.com/AndrewDongAndy/scramble-buddy.git",
+    "author": "ADMathNoob",
+    "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
+    "dependencies": {
+        "discord.js": "^12.5.3",
+        "dotenv": "^10.0.0",
+        "jimp": "^0.16.1"
+    },
+    "license": "UNLICENSED",
+    "private": true,
+    "devDependencies": {
+        "@types/node": "^15.6.0",
+        "@types/ws": "^7.4.4",
+        "ts-node": "^10.0.0",
+        "tslib": "^2.2.0",
+        "typescript": "^4.2.4"
+    }
+}
