@@ -8,14 +8,14 @@ import { Message, TextChannel, User } from 'discord.js';
 import pkg = require('./package.json');
 
 // config and parameters
-import config from './config.js';
+import config from './config';
 
-import actionsTroll = require('./modules/actions_troll.js');
-import commands = require('./modules/commands.js');
-import db = require('./modules/database.js');
-import { REACTION_ADD_ACTIONS } from './modules/reactions.js';
-import solves = require('./modules/solves.js');
-import timer = require('./modules/timer.js');
+import actionsTroll = require('./modules/actions_troll');
+import commands = require('./modules/commands');
+import db = require('./modules/database');
+import { REACTION_ADD_ACTIONS } from './modules/reactions';
+import solves = require('./modules/solves');
+import timer = require('./modules/timer');
 
 const bot = new Discord.Client();
 

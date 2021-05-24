@@ -9,10 +9,8 @@ averages faster using PSA and segment tree queries?
 import { Snowflake } from 'discord.js';
 import config from '../config';
 
-import Discord = require('discord.js');
-
-import { Stack, MinStack } from './stack.js';
-import timer = require('./timer.js');
+import { Stack, MinStack } from './stack';
+import timer = require('./timer');
 
 
 /**
@@ -338,7 +336,7 @@ class Solver {
 
       // this description mention is how page changing works;
       // thus, if changing this description format,
-      // update the page-changing code in reactions.js
+      // update the page-changing code in the reactions.ts module
       description: `Discord User: <@${this.userId}>`,
       fields: [
         {

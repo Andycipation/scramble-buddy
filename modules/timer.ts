@@ -3,7 +3,7 @@ Module to manage all actions related to timing.
 */
 
 import { Channel, Message, Snowflake, User } from 'discord.js';
-import db = require('./database.js');
+import db = require('./database');
 
 /**
  * Returns a formatted string for the given solve result.

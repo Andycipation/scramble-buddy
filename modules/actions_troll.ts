@@ -3,11 +3,11 @@ All of the troll stuff. LOL
 */
 
 import config from '../config';
+import { Message } from 'discord.js';
 
-import { parseCommand, randInt } from './util.js';
+import { parseCommand, randInt } from './util';
 
 import fs = require('fs');
-import { Message } from 'discord.js';
 
 // joke stuff
 const JOKE_FILE = './jokes.txt'; // path relative to the bot.js file

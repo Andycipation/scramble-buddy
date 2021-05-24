@@ -4,9 +4,9 @@ Loads data for users, using a certain text channel as the "database".
 
 
 import { Collection, Message, Snowflake, TextChannel } from 'discord.js';
-import config from '../config.js';
+import config from '../config';
 
-import solves = require('./solves.js');
+import solves = require('./solves');
 
 
 // TODO: find a cleaner way

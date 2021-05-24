@@ -7,11 +7,11 @@ import config from '../config';
 import pkg = require('../package.json');
 import fs = require('fs');
 
-import db = require('./database.js');
-import { getScramble, makeImage } from './scramble.js';
-import solves = require('./solves.js');
-import timer = require('./timer.js');
-import { getDateString, parseCommand } from './util.js';
+import db = require('./database');
+import { getScramble, makeImage } from './scramble';
+import solves = require('./solves');
+import timer = require('./timer');
+import { getDateString, parseCommand } from './util';
 
 import assert = require('assert');
 import { Message, MessageEmbed, MessageOptions, Snowflake } from 'discord.js';

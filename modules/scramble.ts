@@ -5,9 +5,9 @@ Functions for generating scramble strings.
 
 import Jimp = require('jimp');
 import fs = require('fs');
-import { randInt } from './util.js';
+import { randInt } from './util';
 
-import config from '../config.js';
+import config from '../config';
 
 // image-related stuff
 const S = 32; // side length of a sticker

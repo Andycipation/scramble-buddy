@@ -2,7 +2,7 @@
   "name": "scramble-buddy",
   "version": "1.5.0",
   "description": "a Discord bot for cubers",
-  "main": "bot.js",
+  "main": "dist/bot.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AndrewDongAndy/scramble-buddy.git"

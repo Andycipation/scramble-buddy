@@ -3,7 +3,6 @@ Module for managing reactions.
 */
 
 
-import { assert } from 'console';
 import { Message, MessageReaction, Snowflake, User } from 'discord.js';
 import config from '../config';
 
@@ -19,9 +18,9 @@ const {
   REFRESH_EMOJI,
 } = config;
 
-import solves = require('./solves.js');
-import timer = require('./timer.js');
-import { parseMention } from './util.js';
+import solves = require('./solves');
+import timer = require('./timer');
+import { parseMention } from './util';
 
 
 // action to take when a reaction is added
