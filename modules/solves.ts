@@ -86,7 +86,7 @@ class Solver {
 
   public userId: Snowflake;
   public method: string;
-  public methodLogId: Snowflake;
+  public methodLogId: Snowflake | null;
   public solves: Stack<SolveEntry>;
 
   private psa: number[];  // currently unused
@@ -117,8 +117,8 @@ class Solver {
 
   /**
    * Sets the method of this Solver.
-   * @param {string} method the method to assign to this Solver
-   * @returns {boolean} whether the assignment was successful
+   * @param method the method to assign to this Solver
+   * @returns whether the assignment was successful
    */
   setMethod(method: string): boolean {
     if (method.includes('|')) {
@@ -130,15 +130,15 @@ class Solver {
 
   /**
    * Sets the method log id for this Solver.
-   * @param {string} methodLogId the id of the message that logged this change
+   * @param methodLogId the id of the message that logged this change
    */
-  setMethodLogId(methodLogId: string) {
+  setMethodLogId(methodLogId: Snowflake) {
     this.methodLogId = methodLogId;
   }
 
   /**
    * Returns the string that is sent in the log to record the SolveEntry.
-   * @returns {string} the log message
+   * @returns the log message
    */
   methodLogString(): string {
     return `${this.userId}|${this.method}`;
@@ -146,7 +146,7 @@ class Solver {
 
   /**
    * Pushes a solve to this user's logs.
-   * @param {SolveEntry} se the SolveEntry to add to the user's solves
+   * @param se the SolveEntry to add to the user's solves
    */
   pushSolve(se: SolveEntry) {
     this.psa.push(this.psa[this.solves.size()] + se.time);
@@ -162,19 +162,19 @@ class Solver {
   /**
    * Returns the last solve of this Solver, or null if this Solver has
    * no solves completed.
-   * @returns {SolveEntry} the last SolveEntry this user generated, or
+   * @returns the last SolveEntry this user generated, or
    * null if no solves have been completed
    */
-  getLastSolve(): SolveEntry {
+  getLastSolve(): SolveEntry | never {
     if (this.solves.empty()) {
-      return null;
+      throw "tried to get the last solve of a Solver with no SolveEntry";
     }
     return this.solves.top();
   }
 
   /**
    * Toggles whether or not the last solve was a +2.
-   * @returns {boolean} whether or not the toggle was successful
+   * @returns whether or not the toggle was successful
    */
   togglePlusTwo(): boolean {
     if (this.solves.empty()) {
@@ -194,11 +194,11 @@ class Solver {
 
   /**
    * Pops the last SolveEntry of this Solver.
-   * @returns {string} the id of the removed solve, or null if no solves existed
+   * @returns the id of the removed solve, or null if no solves existed
    */
-  popSolve(): string {
+  popSolve(): string | never {
     if (this.solves.empty()) {
-      return null;
+      throw "tried to pop a solve from a Solver with no SolveEntry";
     }
     const removedId = this.solves.top().id;
     this.solves.pop();
@@ -212,11 +212,11 @@ class Solver {
 
   /**
    * Returns the SolveEntry denoting this Solver's personal best.
-   * @returns {SolveEntry} this Solver's personal best
+   * @returns this Solver's personal best
    */
-  get pb(): SolveEntry {
+  get pb(): SolveEntry | never {
     if (this.solves.empty()) {
-      return null;
+      throw 'tried to get PB of a Solver with no SolveEntry';
     }
     return this.solves.best;
   }
@@ -225,28 +225,26 @@ class Solver {
    * Returns the string showing this Solver's personal best.
    * @returns the personal best string
    */
-  pbString() {
-    let pb = this.pb;
-    if (pb === null) {
+  pbString(): string {
+    if (this.solves.empty()) {
       return 'N/A';
     }
-    return pb.toString();
+    return this.pb.toString();
   }
 
   /**
    * Returns whether or not the last solve of this Solver was a personal best.
    * @returns whether the last solve was a personal best
    */
-  lastSolveWasPb() {
-    return (this.getLastSolve() !== null && this.getLastSolve().id == this.pb.id);
+  lastSolveWasPb(): boolean {
+    return (this.getLastSolve() && this.getLastSolve().id == this.pb?.id);
   }
 
   /**
    * Returns the average over a given number of solves, with the fastest
    * and slowest solves ignored.
-   * @param {number} cnt the number of solves to compute the average over
-   * @returns {number} the average number of milliseconds a solve took,
-   * or -1 if cnt is less than 3
+   * @param cnt the number of solves to compute the average over
+   * @returns the average number of milliseconds a solve took, or -1 if cnt is less than 3
    */
   getAverage(cnt: number): number {
     let n = this.solves.size();
@@ -262,22 +260,23 @@ class Solver {
       if (x > y) return 1;
       return 0;
     });
-    let s = 0;
+    let sum = 0;
     // disregard the fastest and slowest solves
     for (let i = 1; i < cnt - 1; ++i) {
-      s += a[i];
+      sum += a[i];
     }
-    return Math.round(s / (cnt - 2));
+    return Math.round(sum / (cnt - 2));
   }
 
-  _getBestAveragesString() {
-    let lines = [];
+  _getAveragesString(func: (avgStack: MinStack<number>) => number): string {
+    const lines: string[] = [];
     for (let i = 0; i < Solver.AVGS; ++i) {
       if (this.avg[i].empty()) {
         continue;
       }
-      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: `
-        + `${timer.formatTime(this.avg[i].best, false)}`);
+      const toAdd = func(this.avg[i]);
+      // "Over 12: 25.366"
+      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd, false)}`);
     }
     if (lines.length == 0) {
       lines.push('none');
@@ -285,54 +284,34 @@ class Solver {
     return lines.join('\n');
   }
 
-  _getCurrentAveragesString() {
-    let lines = [];
-    for (let i = 0; i < Solver.AVGS; ++i) {
-      if (this.avg[i].empty()) {
-        continue;
-      }
-      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: `
-        + `${timer.formatTime(this.avg[i].top(), false)}`);
-    }
-    if (lines.length == 0) {
-      lines.push('none');
-    }
-    return lines.join('\n');
+  _getBestAveragesString(): string {
+    return this._getAveragesString((avgStack: MinStack<number>) => {
+      return avgStack.best;
+    });
   }
 
-  // _getLastSolvesString(cnt) {  // most recent solve last
-  //   cnt = Math.min(cnt, this.solves.size());
-  //   let entries = [];
-  //   for (let i = 0; i < cnt; ++i) {
-  //     let se = this.solves.stk[this.solves.size() - cnt + i];
-  //     entries.push(`${se.toString()}`);
-  //   }
-  //   if (entries.length == 0) {
-  //     entries.push('none');
-  //   }
-  //   return entries.join('\n');
-  // }
+  _getCurrentAveragesString(): string {
+    return this._getAveragesString((avgStack: MinStack<number>) => {
+      return avgStack.top();
+    });
+  }
 
   /**
    * Returns the string representing the solves in the given range,
    * in reverse order as on https://cstimer.net/.
-   * @param {number} from the starting index, inclusive
-   * @param {number} to the ending index, inclusive
-   * @returns {string} the string showing all solves in the given range
+   * @param from the starting index, inclusive
+   * @param to the ending index, inclusive
+   * @returns the string showing all solves in the given range
    */
-  _getSolvesString(from: number, to: number): string {
+  _getSolvesString(from: number, to: number): string | never {
     if (!(0 <= from && from <= to && to < this.solves.size())) {
-      console.error('tried to get solves in an invalid range');
-      return null;
+      throw 'tried to get solves in an invalid range';
     }
-    let res = '';
+    const strings: string[] = [];
     for (let i = to; i >= from; i--) {
-      if (i != to) {
-        res += '\n';
-      }
-      res += `${i + 1}) ${this.solves.stk[i].toString()}`;
+      strings.push(`${i + 1}) ${this.solves.stk[i].toString()}`);
     }
-    return res;
+    return strings.join('\n');
   }
 
   /**
@@ -376,6 +355,7 @@ class Solver {
         {
           name: 'Personal Best',
           value: this.pbString(),
+          // inline: false,
         },
         {
           name: 'Best Averages',
@@ -422,7 +402,7 @@ class Solver {
         {
           name: 'Solves (most recent solve first)',
           value: this._getSolvesString(from, to),
-          inline: false,
+          // inline: false,
         },
       ],
       timestamp: new Date(),
@@ -435,7 +415,7 @@ class Solver {
 }
 
 
-const solvers = new Map();  // map<userId, Solver>
+const solvers = new Map<Snowflake, Solver>();  // map<userId, Solver>
 
 
 // public functions
@@ -447,12 +427,11 @@ const solvers = new Map();  // map<userId, Solver>
 export function getCurrentPbs(): SolveEntry[] {
   let res = [];
   for (let solver of solvers.values()) {
-    let pb = solver.pb;
-    if (pb !== null) {
+    if (!solver.solves.empty()) {
       // this is an important check because it is still possible to
       // have Solver objects with no SolveEntry, e.g. if someone
       // chooses to view someone's profile before they have done a solve
-      res.push(pb);
+      res.push(solver.pb);
     }
   }
   return res;
@@ -461,15 +440,15 @@ export function getCurrentPbs(): SolveEntry[] {
 /**
  * Returns the Solver for the given User object, making a new Solver
  * if one does not already exist.
- * @param {string} userId the id of the user to retrieve a Solver for
- * @returns {Solver} the Solver object of this user
+ * @param userId the id of the user to retrieve a Solver for
+ * @returns the Solver object of this user
  */
-export function getSolver(userId: string): Solver {
+export function getSolver(userId: Snowflake): Solver {
   if (!solvers.has(userId)) {
-    console.log(`creating a Solver for the user with id ${userId}`);
+    // console.log(`creating a Solver for the user with id ${userId}`);
     solvers.set(userId, new Solver(userId));
   }
-  return solvers.get(userId);
+  return solvers.get(userId)!;
 }
 
 /**

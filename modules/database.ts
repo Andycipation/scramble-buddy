@@ -3,7 +3,7 @@ Loads data for users, using a certain text channel as the "database".
 */
 
 
-import { Snowflake } from 'discord.js';
+import { Channel, Collection, Message, Snowflake, TextChannel } from 'discord.js';
 import config from '../config.js';
 const { LOGS_TO_LOAD } = config;
 
@@ -11,16 +11,16 @@ import solves = require('./solves.js');
 
 
 // TODO: find a cleaner way
-var channel;
+var channel: TextChannel;
 
-export async function loadSolves(_channel) {
+export async function loadSolves(_channel: TextChannel) {
   // only called once for each time the bot starts up
   console.log('loading solve logs');
   channel = _channel;
-  let lastId = null;
+  let lastId = undefined;
   let logMessages = [];
   while (logMessages.length < LOGS_TO_LOAD) {
-    let messages = await channel.messages.fetch({
+    let messages: Collection<string, Message> = await channel.messages.fetch({
       limit: Math.min(LOGS_TO_LOAD - logMessages.length, 100),
       before: lastId,
     });
@@ -64,7 +64,8 @@ export async function loadSolves(_channel) {
  */
 export async function logSolve(userId: Snowflake, time: number, scramble: string): Promise<void> {
   const solver = solves.getSolver(userId);
-  const se = new solves.SolveEntry(null, userId, time, false, scramble, new Date(Date.now()));
+  // kind of a hack
+  const se = new solves.SolveEntry('', userId, time, false, scramble, new Date(Date.now()));
   const id = await _sendLog(se.logString());
   se.id = id;
   solver.pushSolve(se);
@@ -101,10 +102,10 @@ async function _sendLog(logString: string): Promise<Snowflake>{
 
 /**
  * Removes the message with the given id from the log channel.
- * @param {string} messageId the id of the message to remove
- * @returns {Promise<boolean>} whether the deletion was successful
+ * @param messageId the id of the message to remove
+ * @returns whether the deletion was successful
  */
-export async function deleteLog(messageId) {
+export async function deleteLog(messageId: Snowflake): Promise<boolean> {
   const message = await channel.messages.fetch(messageId);
   if (!message.deletable) {
     console.error(`why is this message in the bot log not deletable? id: ${message.id}`);
@@ -116,10 +117,10 @@ export async function deleteLog(messageId) {
 
 /**
  * Toggles whether the last solve of a user was a +2.
- * @param {string} userId the id of the user to toggle +2
- * @returns {Promise<boolean>} whether the toggle was successful
+ * @param userId the id of the user to toggle +2
+ * @returns whether the toggle was successful
  */
-export async function togglePlusTwo(userId) {
+export async function togglePlusTwo(userId: Snowflake): Promise<boolean> {
   const solver = solves.getSolver(userId);
   if (!solver.togglePlusTwo()) {
     return false;
@@ -137,10 +138,10 @@ export async function togglePlusTwo(userId) {
 
 /**
  * Removes the last solve for the given user.
- * @param {string} userId the user id to pop a solve from
- * @returns {Promise<boolean>} whether the removal succeeded
+ * @param userId the user id to pop a solve from
+ * @returns whether the removal succeeded
  */
-export async function popSolve(userId) {
+export async function popSolve(userId: Snowflake): Promise<boolean> {
   const solver = solves.getSolver(userId);
   const id = solver.popSolve();
   if (id === null) {

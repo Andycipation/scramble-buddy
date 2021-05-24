@@ -3,7 +3,8 @@ Module for managing reactions.
 */
 
 
-import { Message, MessageReaction, User } from 'discord.js';
+import { assert } from 'console';
+import { Message, MessageReaction, Snowflake, User } from 'discord.js';
 import config from '../config';
 
 const {
@@ -57,11 +58,11 @@ function newReactionAddAction(emoji: string,
 
 /**
  * Removes the reaction from the given message made by the user.
- * @param {Message} message message to remove reaction from
- * @param {string} userId the user id of the user who reacted
- * @param {string} emojiChar the emoji to remove
+ * @param message message to remove reaction from
+ * @param userId the user id of the user who reacted
+ * @param emojiChar the emoji to remove
  */
-function removeReaction(message, userId, emojiChar) {
+function removeReaction(message: Message, userId: Snowflake, emojiChar: string) {
   // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
   const userReactions = message.reactions.cache.filter(
     reaction => reaction.users.cache.has(userId)
@@ -139,15 +140,13 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
 /**
  * Checks if the given message is a profile embed message, called by
  * the message 'cube view [user mention]'.
- * @param {Message} message the message to verify
- * @returns {boolean} whether or not the given message is a profile embed
+ * @param message the message to verify
+ * @returns whether or not the given message is a profile embed
  */
-function isProfilePage(message) {
-  let embeds = message.embeds;
-  if (embeds.length != 1) {
-    return false;
-  }
-  return (embeds[0].footer.text.includes('/'));
+function isProfilePage(message: Message): boolean {
+  const embeds = message.embeds;
+  // too many type assertions
+  return (embeds.length == 1 && embeds[0]!.footer!.text!.includes('/'));
 }
 
 /*
@@ -164,8 +163,9 @@ const PROFILE_EMOJIS = [
   REFRESH_EMOJI,
   RIGHT_EMOJI,
   LAST_EMOJI,
-];
-const FUNCTIONS = [
+] as const;
+// TODO: make this `as const` or something
+const FUNCTIONS: Array<(userId: Snowflake, x: number) => number> = [
   (userId, x) => 0,
   (userId, x) => x - 1,
   (userId, x) => x,
@@ -186,8 +186,10 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
     // get the user and current page from the embed's footer text content
     const embed = message.embeds[0];
     // description is "Discord User: <@(user id)>"
-    const userId = parseMention(embed.description.split(' ')[2]);
-    const strs = embed.footer.text.split(' ');  // footer strings
+    // assert(embed.description !== null);
+    // assert(embed.description && embed.footer);
+    const userId = parseMention(embed.description!.split(' ')[2]);
+    const strs = embed.footer!.text!.split(' ');  // footer strings
     const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
     const newEmbed = solves.getSolverEmbed(userId, FUNCTIONS[i](userId, currentPage));
     if (newEmbed === null) {

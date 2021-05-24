@@ -32,6 +32,7 @@ function loadJokes() {
 }
 exports.loadJokes = loadJokes;
 function handleTroll(message) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         if (message.author.id == MY_DISCORD_ID) {
             const args = util_js_1.parseCommand(message.content);
@@ -59,7 +60,7 @@ function handleTroll(message) {
         if (message.content.toLowerCase().startsWith('vc rn?')) {
             message.channel.send('vc rn.');
         }
-        if (message.guild.id == CCG_GUILD_ID) {
+        if (((_a = message.guild) === null || _a === void 0 ? void 0 : _a.id) == CCG_GUILD_ID) {
             if (message.content.toLowerCase().includes('joke')) {
                 const joke = JOKES[util_js_1.randInt(0, JOKES.length - 1)];
                 message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');

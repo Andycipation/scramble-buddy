@@ -71,7 +71,7 @@ class _SegTree {
     this.pull(x, z);
   }
 
-  get(x: number, l: number, r: number, ll: number, rr: number) {
+  get(x: number, l: number, r: number, ll: number, rr: number): Node {
     if (ll <= l && r <= rr) {
       return this.tree[x];
     }
@@ -86,7 +86,7 @@ class _SegTree {
     return this.unite(this.get(x + 1, l, y, ll, rr), this.get(z, y + 1, r, ll, rr));
   }
 
-  modify(x, l, r, p, v) {
+  modify(x: number, l: number, r: number, p: number, v: number): void {
     if (l == r) {
       this.tree[x].apply(v);
       return;
@@ -109,7 +109,7 @@ export class SegTree extends _SegTree {
   }
 
   get(ll: number, rr: number) {
-    super.get(0, 0, super.n - 1, ll, rr);
+    return super.get(0, 0, super.n - 1, ll, rr);
   }
 
   modify(p: number, v: number) {

@@ -73,7 +73,7 @@ class SegTree extends _SegTree {
         super(n);
     }
     get(ll, rr) {
-        super.get(0, 0, super.n - 1, ll, rr);
+        return super.get(0, 0, super.n - 1, ll, rr);
     }
     modify(p, v) {
         super.modify(0, 0, super.n - 1, p, v);

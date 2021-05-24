@@ -15,7 +15,7 @@ import timer = require('./timer.js');
 import { getDateString, parseCommand } from './util.js';
 
 import assert = require('assert');
-import { Message, MessageEmbed, Snowflake } from 'discord.js';
+import { Message, MessageEmbed, MessageOptions, Snowflake } from 'discord.js';
 
 /**
  * A class representing a Command that can be called by the user.
@@ -88,12 +88,13 @@ newCommand('get', 'generates a new scramble', async message => {
       + `${config.SCRAMBLE_REACT_PROMPT}\n`
       + `Contenders:\n`
       + `<@${message.author.id}>`;
-  const options = {};
+  const options: MessageOptions = {};
   if (MAKE_SCRAMBLE_IMAGES) {
-    options['files'] = [filename];
+    options.files = [filename];
   }
   setTimeout(() => {
     message.channel.send(str, options).then(async sent => {
+      assert(sent instanceof Message);
       await sent.react(config.CONFIRM_EMOJI);
       await sent.react(config.REMOVE_EMOJI);
       if (MAKE_SCRAMBLE_IMAGES) {
@@ -226,9 +227,9 @@ newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", asy
       + `Time the solve was completed: ${getDateString(se.completed)}`;
   const filename = `./assets/${message.id}.png`;
   makeImage(se.scramble, filename);
-  const options = {};
+  const options: MessageOptions = {};
   if (MAKE_SCRAMBLE_IMAGES) {
-    options['files'] = [filename];
+    options.files = [filename];
   }
   setTimeout(() => {
     message.channel.send(str, options).then(async sent => {
@@ -380,7 +381,7 @@ function canRequest(userId: string): boolean {
   return (!lastRequest.has(userId) || Date.now() - lastRequest.get(userId) >= config.COOLDOWN);
 }
 
-export async function handleCommand(message) {
+export async function handleCommand(message: Message) {
   const userId = message.author.id;
   if (!canRequest(userId)) {
     return; // message was "spammed" too quickly
@@ -392,7 +393,5 @@ export async function handleCommand(message) {
 
   // do the actual command if applicable
   const op = parseCommand(message.content)[0];
-  if (COMMANDS.has(op)) {
-    COMMANDS.get(op).do(message);
-  }
+  COMMANDS.get(op)?.do(message);
 }

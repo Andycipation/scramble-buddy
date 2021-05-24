@@ -11,10 +11,10 @@ var { troll } = config;
 
 import { parseCommand, randInt } from './util.js';
 
-// joke stuff
 import fs = require('fs');
 import { Message } from 'discord.js';
 
+// joke stuff
 const JOKE_FILE = './jokes.txt'; // path relative to the bot.js file
 const JOKES: string[] = [];
 
@@ -67,7 +67,7 @@ export async function handleTroll(message: Message) {
     // message.reply('vc rn.');
     message.channel.send('vc rn.');
   }
-  if (message.guild.id == CCG_GUILD_ID) {
+  if (message.guild?.id == CCG_GUILD_ID) {
     if (message.content.toLowerCase().includes('joke')) {
       const joke = JOKES[randInt(0, JOKES.length - 1)];
       message.channel.send('Did someone say "joke"? Well, here\'s one: ```' + joke + '```');

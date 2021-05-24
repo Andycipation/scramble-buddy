@@ -20,6 +20,7 @@ const solves = require("./solves.js");
 const timer = require("./timer.js");
 const util_js_1 = require("./util.js");
 const assert = require("assert");
+const discord_js_1 = require("discord.js");
 class Command {
     constructor(name, helpMsg, callback) {
         this.name = name;
@@ -58,10 +59,11 @@ newCommand('get', 'generates a new scramble', (message) => __awaiter(void 0, voi
         + `<@${message.author.id}>`;
     const options = {};
     if (MAKE_SCRAMBLE_IMAGES) {
-        options['files'] = [filename];
+        options.files = [filename];
     }
     setTimeout(() => {
         message.channel.send(str, options).then((sent) => __awaiter(void 0, void 0, void 0, function* () {
+            assert(sent instanceof discord_js_1.Message);
             yield sent.react(config_1.default.CONFIRM_EMOJI);
             yield sent.react(config_1.default.REMOVE_EMOJI);
             if (MAKE_SCRAMBLE_IMAGES) {
@@ -177,7 +179,7 @@ newCommand('viewsolve', "`[user mention] [solve number]` view user's solve", (me
     scramble_js_1.makeImage(se.scramble, filename);
     const options = {};
     if (MAKE_SCRAMBLE_IMAGES) {
-        options['files'] = [filename];
+        options.files = [filename];
     }
     setTimeout(() => {
         message.channel.send(str, options).then((sent) => __awaiter(void 0, void 0, void 0, function* () {
@@ -289,6 +291,7 @@ function canRequest(userId) {
     return (!lastRequest.has(userId) || Date.now() - lastRequest.get(userId) >= config_1.default.COOLDOWN);
 }
 function handleCommand(message) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const userId = message.author.id;
         if (!canRequest(userId)) {
@@ -299,9 +302,7 @@ function handleCommand(message) {
         }
         lastRequest.set(userId, Date.now());
         const op = util_js_1.parseCommand(message.content)[0];
-        if (COMMANDS.has(op)) {
-            COMMANDS.get(op).do(message);
-        }
+        (_a = COMMANDS.get(op)) === null || _a === void 0 ? void 0 : _a.do(message);
     });
 }
 exports.handleCommand = handleCommand;

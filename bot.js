@@ -9,22 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Discord = require('discord.js');
-const pkg = require('./package.json');
+const Discord = require("discord.js");
+const pkg = require("./package.json");
 const config_js_1 = require("./config.js");
 const { DATA_CHANNEL_ID, prefix, IGNORE_BOTS, } = config_js_1.default;
-const actionsTroll = require('./modules/actions_troll.js');
-const commands = require('./modules/commands.js');
-const db = require('./modules/database.js');
-const { REACTION_ADD_ACTIONS } = require('./modules/reactions.js');
-const solves = require('./modules/solves.js');
-const timer = require('./modules/timer.js');
-const { parseCommand, randInt } = require('./modules/util.js');
+const actionsTroll = require("./modules/actions_troll.js");
+const commands = require("./modules/commands.js");
+const db = require("./modules/database.js");
+const reactions_js_1 = require("./modules/reactions.js");
+const solves = require("./modules/solves.js");
+const timer = require("./modules/timer.js");
 const bot = new Discord.Client();
 bot.on('ready', () => __awaiter(void 0, void 0, void 0, function* () {
     bot.user.setActivity(`type '${prefix} help' for help`);
     yield actionsTroll.loadJokes();
-    let dataChannel = yield bot.channels.fetch(DATA_CHANNEL_ID);
+    let dataChannel = (yield bot.channels.fetch(DATA_CHANNEL_ID));
     yield db.loadSolves(dataChannel);
     console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
 }));
@@ -37,7 +36,7 @@ function checkTimer(message) {
                 time = -time;
                 hadScramble = false;
             }
-            let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time)}**`;
+            let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(time, false)}**`;
             if (!hadScramble) {
                 s += '\nTo track your solves, generate a scramble using `cube get` and'
                     + ' react to it. Then, your next time will be logged on your profile.';
@@ -69,7 +68,7 @@ bot.on('messageReactionAdd', (messageReaction, user) => __awaiter(void 0, void 0
     if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
         return;
     }
-    for (const raa of REACTION_ADD_ACTIONS) {
+    for (const raa of reactions_js_1.REACTION_ADD_ACTIONS) {
         if (messageReaction.emoji.name == raa.emoji && raa.appliesTo(messageReaction.message)) {
             raa.do(messageReaction, user);
         }
@@ -79,8 +78,8 @@ bot.on('messageReactionRemove', (messageReaction, user) => __awaiter(void 0, voi
     if (user.id == bot.user.id || (user.bot && IGNORE_BOTS)) {
         return;
     }
-    if (messageReaction.emoji.name == REACTION_ADD_ACTIONS[0].emoji) {
-        REACTION_ADD_ACTIONS[1].do(messageReaction, user);
+    if (messageReaction.emoji.name == reactions_js_1.REACTION_ADD_ACTIONS[0].emoji) {
+        reactions_js_1.REACTION_ADD_ACTIONS[1].do(messageReaction, user);
     }
 }));
 require('dotenv').config();

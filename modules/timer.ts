@@ -2,7 +2,7 @@
 Module to manage all actions related to timing.
 */
 
-import Discord = require('discord.js');
+import { Channel, Message, Snowflake, User } from 'discord.js';
 import db = require('./database.js');
 
 /**
@@ -41,17 +41,17 @@ export function formatTime(milliseconds: number, plusTwo: boolean): string {
 }
 
 // map<userId, map<channelId, startTime>>
-const startTimes = new Map<Discord.Snowflake, Map<Discord.Snowflake, number>>();
+const startTimes = new Map<Snowflake, Map<Snowflake, number>>();
 
 // map from user id to scramble string
-const curScramble = new Map<Discord.Snowflake, string>();
+const curScramble = new Map<Snowflake, string>();
 
 /**
  * Starts a timer for a user in a channel.
  * @param userId the id of the user to start a timer for
  * @param channelId the channel the timer is bound to
  */
-export function startTimer(userId: Discord.Snowflake, channelId: Discord.Snowflake) {
+export function startTimer(userId: Snowflake, channelId: Snowflake) {
   if (!startTimes.has(userId)) {
     startTimes.set(userId, new Map());
   }
@@ -64,8 +64,16 @@ export function startTimer(userId: Discord.Snowflake, channelId: Discord.Snowfla
  * @param channelId the id of the channel to check
  * @returns whether there is a timer with the given parameters
  */
-export function hasTimer(userId: Discord.Snowflake, channelId: Discord.Snowflake): boolean {
+export function hasTimer(userId: Snowflake, channelId: Snowflake): boolean {
   return (startTimes.has(userId) && startTimes.get(userId)!.has(channelId));
+}
+
+function _getStartTime(userId: Snowflake, channelId: Snowflake): number | never {
+  const res = startTimes.get(userId)?.get(channelId);
+  if (res === undefined) {
+    throw 'tried to get the start time of a non-existent timer';
+  }
+  return res;
 }
 
 /**
@@ -75,16 +83,17 @@ export function hasTimer(userId: Discord.Snowflake, channelId: Discord.Snowflake
  * @param channel the channel to check
  * @returns the solve time, or its negative if no scramble was selected
  */
-export async function _stopTimer(user: Discord.User, channel: Discord.Channel): Promise<number> | null {
+export async function _stopTimer(user: User, channel: Channel): Promise<number> | never {
   if (!hasTimer(user.id, channel.id)) {
-    return null;
+    throw 'tried to stop a timer for a user without an ongoing timer';
   }
-  const time = Date.now() - startTimes.get(user.id).get(channel.id);
-  startTimes.get(user.id).delete(channel.id);
-  if (!curScramble.has(user.id)) {
+  const time = Date.now() - _getStartTime(user.id, channel.id);
+  startTimes.get(user.id)!.delete(channel.id);
+  const scramble = curScramble.get(user.id);
+  if (scramble === undefined) {
     return -time;  // nothing to log or delete
   }
-  await db.logSolve(user.id, time, curScramble.get(user.id));
+  await db.logSolve(user.id, time, scramble);
   curScramble.delete(user.id);
   return time;
 }
@@ -95,14 +104,14 @@ export async function _stopTimer(user: Discord.User, channel: Discord.Channel): 
  * @param message the message to check
  * @returns the solve time, or its negative if no scramble was selected
  */
-export async function stopTimer(message: Discord.Message): Promise<number> | null {
+export async function stopTimer(message: Message): Promise<number> {
   return _stopTimer(message.author, message.channel);
 }
 
-export function setScramble(userId: Discord.Snowflake, scrambleString: string): void {
+export function setScramble(userId: Snowflake, scrambleString: string): void {
   curScramble.set(userId, scrambleString);
 }
 
-export function deleteScramble(userId: Discord.Snowflake) {
+export function deleteScramble(userId: Snowflake) {
   return curScramble.delete(userId);
 }

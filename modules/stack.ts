@@ -29,9 +29,9 @@ export class Stack<T> {
     this.monostk = [];
   }
 
-  get best(): T | null {
+  get best(): T | never {
     if (this.monostk.length == 0) {
-      return null;
+      throw 'tried to get best on an empty Stack';
     }
     return this.monostk[this.monostk.length - 1];
   }
@@ -42,7 +42,7 @@ export class Stack<T> {
    */
   push(x: T): void {
     this.stk.push(x);
-    if (this.best == null || this.cmp(x, this.best)) {
+    if (this.monostk.length == 0 || this.cmp(x, this.best)) {
       this.monostk.push(x);
     }
   }
@@ -65,10 +65,9 @@ export class Stack<T> {
    * Returns the element at the top of this Stack.
    * @returns the element at the top of this Stack
    */
-  top(): T {
+  top(): T | never {
     if (this.stk.length == 0) {
-      console.error('tried to get element from an empty Stack');
-      return null;
+      throw 'tried to get top element from an empty Stack';
     }
     return this.stk[this.stk.length - 1];
   }
@@ -89,10 +88,9 @@ export class Stack<T> {
     return (this.stk.length == 0);
   }
 
-  at(index: number): T | null {
+  at(index: number): T | never {
     if (index < 0 || index >= this.stk.length) {
-      // console.error('tried to access an out-of-range index of a Stack');
-      return null;
+      throw 'tried to access an out-of-range index of a Stack';
     }
     return this.stk[index];
   }

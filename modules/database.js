@@ -18,7 +18,7 @@ function loadSolves(_channel) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('loading solve logs');
         channel = _channel;
-        let lastId = null;
+        let lastId = undefined;
         let logMessages = [];
         while (logMessages.length < LOGS_TO_LOAD) {
             let messages = yield channel.messages.fetch({
@@ -62,7 +62,7 @@ exports.loadSolves = loadSolves;
 function logSolve(userId, time, scramble) {
     return __awaiter(this, void 0, void 0, function* () {
         const solver = solves.getSolver(userId);
-        const se = new solves.SolveEntry(null, userId, time, false, scramble, new Date(Date.now()));
+        const se = new solves.SolveEntry('', userId, time, false, scramble, new Date(Date.now()));
         const id = yield _sendLog(se.logString());
         se.id = id;
         solver.pushSolve(se);

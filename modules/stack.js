@@ -10,13 +10,13 @@ class Stack {
     }
     get best() {
         if (this.monostk.length == 0) {
-            return null;
+            throw 'tried to get best on an empty Stack';
         }
         return this.monostk[this.monostk.length - 1];
     }
     push(x) {
         this.stk.push(x);
-        if (this.best == null || this.cmp(x, this.best)) {
+        if (this.monostk.length == 0 || this.cmp(x, this.best)) {
             this.monostk.push(x);
         }
     }
@@ -32,8 +32,7 @@ class Stack {
     }
     top() {
         if (this.stk.length == 0) {
-            console.error('tried to get element from an empty Stack');
-            return null;
+            throw 'tried to get top element from an empty Stack';
         }
         return this.stk[this.stk.length - 1];
     }
@@ -45,7 +44,7 @@ class Stack {
     }
     at(index) {
         if (index < 0 || index >= this.stk.length) {
-            return null;
+            throw 'tried to access an out-of-range index of a Stack';
         }
         return this.stk[index];
     }

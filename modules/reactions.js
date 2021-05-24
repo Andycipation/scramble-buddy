@@ -76,11 +76,8 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
     message.edit(edited);
 });
 function isProfilePage(message) {
-    let embeds = message.embeds;
-    if (embeds.length != 1) {
-        return false;
-    }
-    return (embeds[0].footer.text.includes('/'));
+    const embeds = message.embeds;
+    return (embeds.length == 1 && embeds[0].footer.text.includes('/'));
 }
 const PROFILE_EMOJIS = [
     FIRST_EMOJI,

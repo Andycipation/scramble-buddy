@@ -73,7 +73,7 @@ class Solver {
     }
     getLastSolve() {
         if (this.solves.empty()) {
-            return null;
+            throw "tried to get the last solve of a Solver with no SolveEntry";
         }
         return this.solves.top();
     }
@@ -94,7 +94,7 @@ class Solver {
     }
     popSolve() {
         if (this.solves.empty()) {
-            return null;
+            throw "tried to pop a solve from a Solver with no SolveEntry";
         }
         const removedId = this.solves.top().id;
         this.solves.pop();
@@ -107,19 +107,19 @@ class Solver {
     }
     get pb() {
         if (this.solves.empty()) {
-            return null;
+            throw 'tried to get PB of a Solver with no SolveEntry';
         }
         return this.solves.best;
     }
     pbString() {
-        let pb = this.pb;
-        if (pb === null) {
+        if (this.solves.empty()) {
             return 'N/A';
         }
-        return pb.toString();
+        return this.pb.toString();
     }
     lastSolveWasPb() {
-        return (this.getLastSolve() !== null && this.getLastSolve().id == this.pb.id);
+        var _a;
+        return (this.getLastSolve() && this.getLastSolve().id == ((_a = this.pb) === null || _a === void 0 ? void 0 : _a.id));
     }
     getAverage(cnt) {
         let n = this.solves.size();
@@ -137,53 +137,45 @@ class Solver {
                 return 1;
             return 0;
         });
-        let s = 0;
+        let sum = 0;
         for (let i = 1; i < cnt - 1; ++i) {
-            s += a[i];
+            sum += a[i];
         }
-        return Math.round(s / (cnt - 2));
+        return Math.round(sum / (cnt - 2));
+    }
+    _getAveragesString(func) {
+        const lines = [];
+        for (let i = 0; i < Solver.AVGS; ++i) {
+            if (this.avg[i].empty()) {
+                continue;
+            }
+            const toAdd = func(this.avg[i]);
+            lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd, false)}`);
+        }
+        if (lines.length == 0) {
+            lines.push('none');
+        }
+        return lines.join('\n');
     }
     _getBestAveragesString() {
-        let lines = [];
-        for (let i = 0; i < Solver.AVGS; ++i) {
-            if (this.avg[i].empty()) {
-                continue;
-            }
-            lines.push(`Over ${Solver.TRACKED_AVGS[i]}: `
-                + `${timer.formatTime(this.avg[i].best, false)}`);
-        }
-        if (lines.length == 0) {
-            lines.push('none');
-        }
-        return lines.join('\n');
+        return this._getAveragesString((avgStack) => {
+            return avgStack.best;
+        });
     }
     _getCurrentAveragesString() {
-        let lines = [];
-        for (let i = 0; i < Solver.AVGS; ++i) {
-            if (this.avg[i].empty()) {
-                continue;
-            }
-            lines.push(`Over ${Solver.TRACKED_AVGS[i]}: `
-                + `${timer.formatTime(this.avg[i].top(), false)}`);
-        }
-        if (lines.length == 0) {
-            lines.push('none');
-        }
-        return lines.join('\n');
+        return this._getAveragesString((avgStack) => {
+            return avgStack.top();
+        });
     }
     _getSolvesString(from, to) {
         if (!(0 <= from && from <= to && to < this.solves.size())) {
-            console.error('tried to get solves in an invalid range');
-            return null;
+            throw 'tried to get solves in an invalid range';
         }
-        let res = '';
+        const strings = [];
         for (let i = to; i >= from; i--) {
-            if (i != to) {
-                res += '\n';
-            }
-            res += `${i + 1}) ${this.solves.stk[i].toString()}`;
+            strings.push(`${i + 1}) ${this.solves.stk[i].toString()}`);
         }
-        return res;
+        return strings.join('\n');
     }
     get numPages() {
         return 1 + Math.ceil(this.solves.size() / SOLVES_PER_PAGE);
@@ -239,7 +231,6 @@ class Solver {
                 {
                     name: 'Solves (most recent solve first)',
                     value: this._getSolvesString(from, to),
-                    inline: false,
                 },
             ],
             timestamp: new Date(),
@@ -255,9 +246,8 @@ const solvers = new Map();
 function getCurrentPbs() {
     let res = [];
     for (let solver of solvers.values()) {
-        let pb = solver.pb;
-        if (pb !== null) {
-            res.push(pb);
+        if (!solver.solves.empty()) {
+            res.push(solver.pb);
         }
     }
     return res;
@@ -265,7 +255,6 @@ function getCurrentPbs() {
 exports.getCurrentPbs = getCurrentPbs;
 function getSolver(userId) {
     if (!solvers.has(userId)) {
-        console.log(`creating a Solver for the user with id ${userId}`);
         solvers.set(userId, new Solver(userId));
     }
     return solvers.get(userId);

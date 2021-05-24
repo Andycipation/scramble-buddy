@@ -53,17 +53,26 @@ function hasTimer(userId, channelId) {
     return (startTimes.has(userId) && startTimes.get(userId).has(channelId));
 }
 exports.hasTimer = hasTimer;
+function _getStartTime(userId, channelId) {
+    var _a;
+    const res = (_a = startTimes.get(userId)) === null || _a === void 0 ? void 0 : _a.get(channelId);
+    if (res === undefined) {
+        throw 'tried to get the start time of a non-existent timer';
+    }
+    return res;
+}
 function _stopTimer(user, channel) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!hasTimer(user.id, channel.id)) {
-            return null;
+            throw 'tried to stop a timer for a user without an ongoing timer';
         }
-        const time = Date.now() - startTimes.get(user.id).get(channel.id);
+        const time = Date.now() - _getStartTime(user.id, channel.id);
         startTimes.get(user.id).delete(channel.id);
-        if (!curScramble.has(user.id)) {
+        const scramble = curScramble.get(user.id);
+        if (scramble === undefined) {
             return -time;
         }
-        yield db.logSolve(user.id, time, curScramble.get(user.id));
+        yield db.logSolve(user.id, time, scramble);
         curScramble.delete(user.id);
         return time;
     });
