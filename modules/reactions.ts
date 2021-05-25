@@ -2,9 +2,8 @@
 Module for managing reactions.
 */
 
-
-import { Message, MessageReaction, Snowflake, User } from 'discord.js';
-import config from '../config';
+import { Message, MessageReaction, Snowflake, User } from "discord.js";
+import config from "../config";
 
 const {
   REMOVE_EMOJI,
@@ -18,10 +17,9 @@ const {
   REFRESH_EMOJI,
 } = config;
 
-import solves = require('./solves');
-import timer = require('./timer');
-import { parseMention } from './util';
-
+import solves = require("./solves");
+import timer = require("./timer");
+import { parseMention } from "./util";
 
 // action to take when a reaction is added
 class ReactionAddAction {
@@ -29,16 +27,17 @@ class ReactionAddAction {
   // appliesTo(message) - whether this emoji reaction does anything for this message
   public appliesTo: (message: Message) => void;
   public do: (reaction: MessageReaction, user: User) => void;
-  
-  constructor(emoji: string,
-              appliesTo: (message: Message) => boolean,
-              callback: (reaction: MessageReaction, user: User) => void) {
+
+  constructor(
+    emoji: string,
+    appliesTo: (message: Message) => boolean,
+    callback: (reaction: MessageReaction, user: User) => void
+  ) {
     this.emoji = emoji;
     this.appliesTo = appliesTo;
     this.do = callback;
   }
 }
-
 
 export const REACTION_ADD_ACTIONS: ReactionAddAction[] = [];
 
@@ -48,12 +47,13 @@ export const REACTION_ADD_ACTIONS: ReactionAddAction[] = [];
  * @param verifier the function that confirms validity of the reaction
  * @param callback the action taken when the reaction is made
  */
-function newReactionAddAction(emoji: string,
-    verifier: (message: Message) => boolean,
-    callback: (reaction: MessageReaction, user: User) => void) {
+function newReactionAddAction(
+  emoji: string,
+  verifier: (message: Message) => boolean,
+  callback: (reaction: MessageReaction, user: User) => void
+) {
   REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, verifier, callback));
 }
-
 
 /**
  * Removes the reaction from the given message made by the user.
@@ -61,10 +61,14 @@ function newReactionAddAction(emoji: string,
  * @param userId the user id of the user who reacted
  * @param emojiChar the emoji to remove
  */
-function removeReaction(message: Message, userId: Snowflake, emojiChar: string) {
+function removeReaction(
+  message: Message,
+  userId: Snowflake,
+  emojiChar: string
+) {
   // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
-  const userReactions = message.reactions.cache.filter(
-    reaction => reaction.users.cache.has(userId)
+  const userReactions = message.reactions.cache.filter((reaction) =>
+    reaction.users.cache.has(userId)
   );
   for (const reaction of userReactions.values()) {
     if (reaction.emoji.name == emojiChar) {
@@ -73,7 +77,6 @@ function removeReaction(message: Message, userId: Snowflake, emojiChar: string) 
   }
 }
 
-
 /**
  * Returns whether or not the given message is a scramble, i.e. if it
  * was sent as a result of a call to `cube get`.
@@ -81,58 +84,63 @@ function removeReaction(message: Message, userId: Snowflake, emojiChar: string) 
  * @returns whether or not the given message shows a scramble
  */
 function isScramble(message: Message): boolean {
-  let lines = message.content.split('\n');
+  let lines = message.content.split("\n");
   if (lines.length <= 1) {
     return false;
   }
-  return (lines[1] == SCRAMBLE_REACT_PROMPT);
+  return lines[1] == SCRAMBLE_REACT_PROMPT;
 }
 
-newReactionAddAction(CONFIRM_EMOJI, isScramble, (reaction: MessageReaction, user: User) => {
-  const message = reaction.message;
-  removeReaction(message, user.id, REMOVE_EMOJI);
-  let lines = message.content.split('\n');
-  let scrambleString = lines[0];
-  let instructions = lines[1];
-  let users = lines.slice(3);
-  let addUser = true;
-  for (const str of users) {
-    if (parseMention(str) == user.id) {
-      addUser = false;
+newReactionAddAction(
+  CONFIRM_EMOJI,
+  isScramble,
+  (reaction: MessageReaction, user: User) => {
+    const message = reaction.message;
+    removeReaction(message, user.id, REMOVE_EMOJI);
+    let lines = message.content.split("\n");
+    let scrambleString = lines[0];
+    let instructions = lines[1];
+    let users = lines.slice(3);
+    let addUser = true;
+    for (const str of users) {
+      if (parseMention(str) == user.id) {
+        addUser = false;
+      }
     }
+    if (addUser) {
+      users.push(`<@${user.id}>`);
+    }
+    timer.setScramble(user.id, scrambleString);
+    if (!message.editable) {
+      console.error("cannot edit this message");
+      return;
+    }
+    message.edit(
+      `${scrambleString}\n${instructions}\nContenders:\n${users.join("\n")}`
+    );
   }
-  if (addUser) {
-    users.push(`<@${user.id}>`);
-  }
-  timer.setScramble(user.id, scrambleString);
-  if (!message.editable) {
-    console.error('cannot edit this message');
-    return;
-  }
-  message.edit(`${scrambleString}\n${instructions}\nContenders:\n${users.join('\n')}`);
-});
+);
 
 newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
   const message = reaction.message;
   removeReaction(message, user.id, CONFIRM_EMOJI);
   removeReaction(message, user.id, REMOVE_EMOJI);
-  let lines = message.content.split('\n');
+  let lines = message.content.split("\n");
   let scrambleString = lines[0];
   let instructions = lines[1];
   let tgt = `<@${user.id}>`;
-  let users = lines.slice(3).filter(u => (u != tgt));
-  timer.deleteScramble(user.id);  // could return true or false
+  let users = lines.slice(3).filter((u) => u != tgt);
+  timer.deleteScramble(user.id); // could return true or false
   if (!message.editable) {
-    console.error('cannot edit this message');
+    console.error("cannot edit this message");
     return;
   }
   let edited = `${scrambleString}\n${instructions}`;
   if (users.length != 0) {
-    edited += `\nContenders:\n${users.join('\n')}`;
+    edited += `\nContenders:\n${users.join("\n")}`;
   }
   message.edit(edited);
 });
-
 
 // left and right arrows for scrolling through a profile
 
@@ -145,7 +153,7 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
 function isProfilePage(message: Message): boolean {
   const embeds = message.embeds;
   // too many type assertions
-  return (embeds.length == 1 && embeds[0]!.footer!.text!.includes('/'));
+  return embeds.length == 1 && embeds[0]!.footer!.text!.includes("/");
 }
 
 /*
@@ -187,18 +195,20 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
     // description is "Discord User: <@(user id)>"
     // assert(embed.description !== null);
     // assert(embed.description && embed.footer);
-    const userId = parseMention(embed.description!.split(' ')[2]);
-    const strs = embed.footer!.text!.split(' ');  // footer strings
-    const currentPage = parseInt(strs[strs.length - 1].split('/')[0], 10) - 1;
-    const newEmbed = solves.getSolverEmbed(userId, FUNCTIONS[i](userId, currentPage));
+    const userId = parseMention(embed.description!.split(" ")[2]);
+    const strs = embed.footer!.text!.split(" "); // footer strings
+    const currentPage = parseInt(strs[strs.length - 1].split("/")[0], 10) - 1;
+    const newEmbed = solves.getSolverEmbed(
+      userId,
+      FUNCTIONS[i](userId, currentPage)
+    );
     if (newEmbed === null) {
-      return false;  // invalid request
+      return false; // invalid request
     }
     message.edit({ embed: newEmbed });
     return true;
   });
 }
-
 
 // class ReactionRemoveAction {
 //   constructor(emoji, callback) {

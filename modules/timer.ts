@@ -2,9 +2,8 @@
 Module to manage all actions related to timing.
 */
 
-
-import { Channel, Message, Snowflake, User } from 'discord.js';
-import db = require('./database');
+import { Channel, Message, Snowflake, User } from "discord.js";
+import db = require("./database");
 
 /**
  * Returns a formatted string for the given solve result.
@@ -16,7 +15,7 @@ export function formatTime(milliseconds: number, plusTwo: boolean): string {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);
-  let res = '';
+  let res = "";
   if (hours > 0) {
     res += hours + ":";
   }
@@ -24,19 +23,19 @@ export function formatTime(milliseconds: number, plusTwo: boolean): string {
     minutes %= 60;
     let minString = minutes.toString();
     if (hours > 0) {
-      minString = minString.padStart(2, '0');
+      minString = minString.padStart(2, "0");
     }
-    res += minString + ':';
+    res += minString + ":";
   }
   seconds %= 60;
   let secString = seconds.toString();
   if (minutes > 0) {
-    secString = secString.padStart(2, '0');
+    secString = secString.padStart(2, "0");
   }
   milliseconds %= 1000;
-  res += secString + '.' + milliseconds.toString().padStart(3, '0');
+  res += secString + "." + milliseconds.toString().padStart(3, "0");
   if (plusTwo) {
-    res += '+';
+    res += "+";
   }
   return res;
 }
@@ -66,13 +65,16 @@ export function startTimer(userId: Snowflake, channelId: Snowflake) {
  * @returns whether there is a timer with the given parameters
  */
 export function hasTimer(userId: Snowflake, channelId: Snowflake): boolean {
-  return (startTimes.has(userId) && startTimes.get(userId)!.has(channelId));
+  return startTimes.has(userId) && startTimes.get(userId)!.has(channelId);
 }
 
-function _getStartTime(userId: Snowflake, channelId: Snowflake): number | never {
+function _getStartTime(
+  userId: Snowflake,
+  channelId: Snowflake
+): number | never {
   const res = startTimes.get(userId)?.get(channelId);
   if (res === undefined) {
-    throw 'tried to get the start time of a non-existent timer';
+    throw "tried to get the start time of a non-existent timer";
   }
   return res;
 }
@@ -84,15 +86,18 @@ function _getStartTime(userId: Snowflake, channelId: Snowflake): number | never 
  * @param channel the channel to check
  * @returns the solve time, or its negative if no scramble was selected
  */
-export async function _stopTimer(user: User, channel: Channel): Promise<number> | never {
+export async function _stopTimer(
+  user: User,
+  channel: Channel
+): Promise<number> | never {
   if (!hasTimer(user.id, channel.id)) {
-    throw 'tried to stop a timer for a user without an ongoing timer';
+    throw "tried to stop a timer for a user without an ongoing timer";
   }
   const time = Date.now() - _getStartTime(user.id, channel.id);
   startTimes.get(user.id)!.delete(channel.id);
   const scramble = curScramble.get(user.id);
   if (scramble === undefined) {
-    return -time;  // nothing to log or delete
+    return -time; // nothing to log or delete
   }
   await db.logSolve(user.id, time, scramble);
   curScramble.delete(user.id);

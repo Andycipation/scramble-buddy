@@ -2,8 +2,7 @@
 A bunch of utility methods.
 */
 
-
-import config from '../config';
+import config from "../config";
 
 /**
  * Converts a Date to a string.
@@ -11,7 +10,7 @@ import config from '../config';
  * @return the formatted date
  */
 export function getDateString(date: Date): string {
-  return date.toLocaleString('en-CA', { timeZone: 'America/Toronto' });
+  return date.toLocaleString("en-CA", { timeZone: "America/Toronto" });
 }
 
 /**
@@ -24,7 +23,7 @@ export function parseCommand(s: string): string[] {
   if (s.startsWith(config.prefix)) {
     s = s.substring(config.prefix.length).trim();
   }
-  return s.split(' ');
+  return s.split(" ");
 }
 
 /**

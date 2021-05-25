@@ -12,13 +12,13 @@
   "repository": "git+https://github.com/AndrewDongAndy/scramble-buddy.git",
   "author": "ADMathNoob",
   "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
+  "license": "UNLICENSED",
+  "private": true,
   "dependencies": {
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "jimp": "^0.16.1"
   },
-  "license": "UNLICENSED",
-  "private": true,
   "devDependencies": {
     "@types/node": "^15.6.0",
     "@types/ws": "^7.4.4",

@@ -5,13 +5,11 @@ TODO: possibly implement segment tree to query min and max, then compute
 averages faster using PSA and segment tree queries?
 */
 
+import { Snowflake } from "discord.js";
+import config from "../config";
 
-import { Snowflake } from 'discord.js';
-import config from '../config';
-
-import { Stack, MinStack } from './stack';
-import timer = require('./timer');
-
+import { Stack, MinStack } from "./stack";
+import timer = require("./timer");
 
 /**
  * The class representing a solve.
@@ -35,17 +33,26 @@ export class SolveEntry {
    * @param scramble the scramble of the solve
    * @param completed the time the scramble was completed
    */
-  constructor(id: Snowflake, userId: Snowflake, time: number, plusTwo: boolean, scramble: string, completed: Date) {
-    this.id = id;  // id of this solveEntry; the id of the log message
+  constructor(
+    id: Snowflake,
+    userId: Snowflake,
+    time: number,
+    plusTwo: boolean,
+    scramble: string,
+    completed: Date
+  ) {
+    this.id = id; // id of this solveEntry; the id of the log message
     this.userId = userId;
     this.time = time;
-    this.plusTwo = plusTwo;  // if plusTwo, time has already been increased by 2000
+    this.plusTwo = plusTwo; // if plusTwo, time has already been increased by 2000
     this.scramble = scramble;
     this.completed = completed;
   }
 
   toString() {
-    return `${timer.formatTime(this.time, this.plusTwo)} **|** ${this.scramble}`
+    return `${timer.formatTime(this.time, this.plusTwo)} **|** ${
+      this.scramble
+    }`;
   }
 
   /**
@@ -54,7 +61,7 @@ export class SolveEntry {
   logString() {
     let timeString = `${this.time}`;
     if (this.plusTwo) {
-      timeString += '+';
+      timeString += "+";
     }
     return `${this.userId}|${timeString}|${this.scramble}`;
   }
@@ -73,7 +80,6 @@ export class SolveEntry {
   }
 }
 
-
 /**
  * The class for a user who does solves.
  */
@@ -86,7 +92,7 @@ class Solver {
   public methodLogId: Snowflake | null;
   public solves: Stack<SolveEntry>;
 
-  private psa: number[];  // currently unused
+  private psa: number[]; // currently unused
   public avg: MinStack<number>[];
 
   /**
@@ -96,15 +102,15 @@ class Solver {
   constructor(userId: Snowflake) {
     this.userId = userId;
 
-    this.method = 'unspecified';
+    this.method = "unspecified";
     this.methodLogId = null;
 
     // stack<SolveEntry>
     this.solves = new Stack(
-      (se1, se2) => (se1.time <= se2.time),  // comparison; <= to make stack work
-      (se1, se2) => (se1.id == se2.id)       // equality of two SolveEntry objects
+      (se1, se2) => se1.time <= se2.time, // comparison; <= to make stack work
+      (se1, se2) => se1.id == se2.id // equality of two SolveEntry objects
     );
-    this.psa = [0];  // prefix sum array of times
+    this.psa = [0]; // prefix sum array of times
 
     this.avg = Array(Solver.AVGS);
     for (let i = 0; i < Solver.AVGS; ++i) {
@@ -118,7 +124,7 @@ class Solver {
    * @returns whether the assignment was successful
    */
   setMethod(method: string): boolean {
-    if (method.includes('|')) {
+    if (method.includes("|")) {
       return false;
     }
     this.method = method;
@@ -175,7 +181,7 @@ class Solver {
    */
   togglePlusTwo(): boolean {
     if (this.solves.empty()) {
-      return false;  // no solve to toggle
+      return false; // no solve to toggle
     }
     let se = this.solves.top();
     this.solves.pop();
@@ -213,7 +219,7 @@ class Solver {
    */
   get pb(): SolveEntry | never {
     if (this.solves.empty()) {
-      throw 'tried to get PB of a Solver with no SolveEntry';
+      throw "tried to get PB of a Solver with no SolveEntry";
     }
     return this.solves.best;
   }
@@ -224,7 +230,7 @@ class Solver {
    */
   pbString(): string {
     if (this.solves.empty()) {
-      return 'N/A';
+      return "N/A";
     }
     return this.pb.toString();
   }
@@ -234,7 +240,7 @@ class Solver {
    * @returns whether the last solve was a personal best
    */
   lastSolveWasPb(): boolean {
-    return (this.getLastSolve() && this.getLastSolve().id == this.pb?.id);
+    return this.getLastSolve() && this.getLastSolve().id == this.pb?.id;
   }
 
   /**
@@ -273,12 +279,14 @@ class Solver {
       }
       const toAdd = func(this.avg[i]);
       // "Over 12: 25.366"
-      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd, false)}`);
+      lines.push(
+        `Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd, false)}`
+      );
     }
     if (lines.length == 0) {
-      lines.push('none');
+      lines.push("none");
     }
-    return lines.join('\n');
+    return lines.join("\n");
   }
 
   _getBestAveragesString(): string {
@@ -302,13 +310,13 @@ class Solver {
    */
   _getSolvesString(from: number, to: number): string | never {
     if (!(0 <= from && from <= to && to < this.solves.size())) {
-      throw 'tried to get solves in an invalid range';
+      throw "tried to get solves in an invalid range";
     }
     const strings: string[] = [];
     for (let i = to; i >= from; i--) {
       strings.push(`${i + 1}) ${this.solves.stk[i].toString()}`);
     }
-    return strings.join('\n');
+    return strings.join("\n");
   }
 
   /**
@@ -340,27 +348,27 @@ class Solver {
       description: `Discord User: <@${this.userId}>`,
       fields: [
         {
-          name: 'Solving Method',
+          name: "Solving Method",
           value: this.method,
           inline: true,
         },
         {
-          name: 'Number of Solves',
+          name: "Number of Solves",
           value: this.solves.size(),
           inline: true,
         },
         {
-          name: 'Personal Best',
+          name: "Personal Best",
           value: this.pbString(),
           // inline: false,
         },
         {
-          name: 'Best Averages',
+          name: "Best Averages",
           value: this._getBestAveragesString(),
           inline: true,
         },
         {
-          name: 'Current Averages',
+          name: "Current Averages",
           value: this._getCurrentAveragesString(),
           inline: true,
         },
@@ -368,7 +376,7 @@ class Solver {
       timestamp: new Date(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
-        text: `${config.FOOTER_STRING} | Page 1/${this.numPages}`
+        text: `${config.FOOTER_STRING} | Page 1/${this.numPages}`,
       },
     };
   }
@@ -397,7 +405,7 @@ class Solver {
       description: `Discord User: <@${this.userId}>`,
       fields: [
         {
-          name: 'Solves (most recent solve first)',
+          name: "Solves (most recent solve first)",
           value: this._getSolvesString(from, to),
           // inline: false,
         },
@@ -405,15 +413,13 @@ class Solver {
       timestamp: new Date(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
-        text: `${config.FOOTER_STRING} | Page ${page + 2}/${this.numPages}`
+        text: `${config.FOOTER_STRING} | Page ${page + 2}/${this.numPages}`,
       },
     };
   }
 }
 
-
-const solvers = new Map<Snowflake, Solver>();  // map<userId, Solver>
-
+const solvers = new Map<Snowflake, Solver>(); // map<userId, Solver>
 
 // public functions
 

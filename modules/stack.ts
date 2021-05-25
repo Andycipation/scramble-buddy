@@ -5,7 +5,6 @@ template.
 Link: http://www.cplusplus.com/reference/stack/stack/
 */
 
-
 /**
  * A Stack that maintains the best value it contains.
  */
@@ -31,7 +30,7 @@ export class Stack<T> {
 
   get best(): T | never {
     if (this.monostk.length == 0) {
-      throw 'tried to get best on an empty Stack';
+      throw "tried to get best on an empty Stack";
     }
     return this.monostk[this.monostk.length - 1];
   }
@@ -52,7 +51,7 @@ export class Stack<T> {
    */
   pop(): void {
     if (this.best == null) {
-      console.error('tried to pop from an empty Stack');
+      console.error("tried to pop from an empty Stack");
       return;
     }
     if (this.equals(this.stk[this.stk.length - 1], this.best)) {
@@ -67,7 +66,7 @@ export class Stack<T> {
    */
   top(): T | never {
     if (this.stk.length == 0) {
-      throw 'tried to get top element from an empty Stack';
+      throw "tried to get top element from an empty Stack";
     }
     return this.stk[this.stk.length - 1];
   }
@@ -85,17 +84,16 @@ export class Stack<T> {
    * @returns whether or not this Stack is empty
    */
   empty(): boolean {
-    return (this.stk.length == 0);
+    return this.stk.length == 0;
   }
 
   at(index: number): T | never {
     if (index < 0 || index >= this.stk.length) {
-      throw 'tried to access an out-of-range index of a Stack';
+      throw "tried to access an out-of-range index of a Stack";
     }
     return this.stk[index];
   }
 }
-
 
 /**
  * A specialization of the above class, with comparison <= and
@@ -104,8 +102,8 @@ export class Stack<T> {
 export class MinStack<T> extends Stack<T> {
   constructor() {
     super(
-      (a, b) => (a <= b),  // comparison
-      (a, b) => (a == b)   // equality
+      (a, b) => a <= b, // comparison
+      (a, b) => a == b // equality
     );
   }
 }

@@ -1,12 +1,12 @@
 {
-    "compilerOptions": {
-        "target": "ES6",
-        "module": "CommonJS",
-        "sourceMap": true,
-        "removeComments": true,
-        "resolveJsonModule": true,
-        "strict": true,
-        "noImplicitAny": true,
-        "outDir": "dist",
-    },
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "sourceMap": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "outDir": "dist"
+  }
 }

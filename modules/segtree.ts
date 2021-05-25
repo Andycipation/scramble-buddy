@@ -5,7 +5,6 @@ and range maximum.
 Not yet imported by any files.
 */
 
-
 const INF = 1000000000;
 
 class Node {
@@ -26,7 +25,6 @@ class Node {
     this.mx = Math.max(this.mx, v);
   }
 }
-
 
 class _SegTree {
   public n: number;
@@ -83,7 +81,10 @@ class _SegTree {
     if (ll > y) {
       return this.get(z, y + 1, r, ll, rr);
     }
-    return this.unite(this.get(x + 1, l, y, ll, rr), this.get(z, y + 1, r, ll, rr));
+    return this.unite(
+      this.get(x + 1, l, y, ll, rr),
+      this.get(z, y + 1, r, ll, rr)
+    );
   }
 
   modify(x: number, l: number, r: number, p: number, v: number): void {
@@ -101,7 +102,6 @@ class _SegTree {
     this.pull(x, z);
   }
 }
-
 
 export class SegTree extends _SegTree {
   constructor(n: number) {
