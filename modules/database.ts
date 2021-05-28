@@ -5,7 +5,7 @@ Loads data for users, using a certain text channel as the "database".
 import { Collection, Message, Snowflake, TextChannel } from "discord.js";
 import config from "../config";
 
-import solves = require("./solves");
+import * as solves from "./solves";
 
 // TODO: find a cleaner way
 var channel: TextChannel;

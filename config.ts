@@ -1,8 +1,11 @@
 /*
 Settings and parameters for the bot.
+
+Probably don't put in a json or yaml file since some of
+these values are dynamic?
 */
 
-import pkg = require("./package.json");
+import pkg from "./package.json";
 
 const config = {
   BOT_NAME: "ScrambleBuddy",

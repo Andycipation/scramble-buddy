@@ -4,16 +4,15 @@ The commands that the bot responds to.
 
 import config from "../config";
 
-import pkg = require("../package.json");
-import fs = require("fs");
+import pkg from "../package.json";
+import fs from "fs";
 
 import db = require("./database");
 import { getScramble, makeImage } from "./scramble";
 import solves = require("./solves");
 import timer = require("./timer");
 import { getDateString, parseCommand } from "./util";
-
-import assert = require("assert");
+import assert from "assert";
 import { Message, MessageOptions, Snowflake } from "discord.js";
 
 /**
@@ -167,10 +166,7 @@ newCommand("go", "starts a timer for you", (message) => {
     const startTime = inspecting.get(userId);
     inspecting.delete(userId);
     const inspectionTime = Date.now() - startTime;
-    reply += `Your inspection time was ${timer.formatTime(
-      inspectionTime,
-      false
-    )}. `;
+    reply += `Your inspection time was ${timer.formatTime(inspectionTime)}. `;
   }
   reply += "Your timer has started. Send anything to stop.";
   timer.startTimer(message.author.id, message.channel.id);

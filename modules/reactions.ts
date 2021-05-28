@@ -17,8 +17,8 @@ const {
   REFRESH_EMOJI,
 } = config;
 
-import solves = require("./solves");
-import timer = require("./timer");
+import * as solves from "./solves";
+import * as timer from "./timer";
 import { parseMention } from "./util";
 
 // action to take when a reaction is added

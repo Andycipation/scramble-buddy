@@ -11,7 +11,7 @@ import db = require("./database");
  * @param plusTwo whether the solve was a +2
  * @returns the formatted time
  */
-export function formatTime(milliseconds: number, plusTwo: boolean): string {
+export function formatTime(milliseconds: number, plusTwo = false): string {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
   let hours = Math.floor(minutes / 60);

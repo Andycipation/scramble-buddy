@@ -5,9 +5,9 @@ lol note about package.json:
 https://stackoverflow.com/questions/48972663/how-do-i-compile-typescript-at-heroku-postinstall
 */
 
-import Discord = require("discord.js");
+import Discord from "discord.js";
 import { Message, TextChannel, User } from "discord.js";
-import pkg = require("./package.json");
+import pkg from "./package.json";
 
 // config and parameters
 import config from "./config";
@@ -50,8 +50,7 @@ async function checkTimer(message: Message) {
       hadScramble = false;
     }
     let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(
-      time,
-      false
+      time
     )}**`;
     if (!hadScramble) {
       s +=

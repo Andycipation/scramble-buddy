@@ -279,9 +279,7 @@ class Solver {
       }
       const toAdd = func(this.avg[i]);
       // "Over 12: 25.366"
-      lines.push(
-        `Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd, false)}`
-      );
+      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd)}`);
     }
     if (lines.length == 0) {
       lines.push("none");

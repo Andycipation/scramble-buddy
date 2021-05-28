@@ -166,11 +166,12 @@ export async function makeImage(
  * @return a scramble with the specified number of moves
  */
 async function _getScramble(numMoves: number): Promise<string> {
-  let x = -1,
-    y = -1; // last 2 moves
+  // last 2 moves
+  let x = -1;
+  let y = -1;
   let moves = new Array(numMoves);
   for (let i = 0; i < numMoves; ++i) {
-    let z;
+    let z: number;
     do {
       z = randInt(0, SIDES.length - 1);
     } while (z == x || z == y);

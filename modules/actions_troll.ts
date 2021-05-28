@@ -7,7 +7,7 @@ import { Message } from "discord.js";
 
 import { parseCommand, randInt } from "./util";
 
-import fs = require("fs");
+import fs from "fs";
 
 // joke stuff
 const JOKE_FILE = "./jokes.txt"; // path relative to the bot.js file
