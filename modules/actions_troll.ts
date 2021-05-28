@@ -29,7 +29,7 @@ export async function loadJokes(): Promise<void> {
  * Handles all troll features of this bot.
  * @param message the message for which to handle troll actions
  */
-export async function handleTroll(message: Message) {
+export async function handleTroll(message: Message): Promise<void> {
   if (message.author.id == config.MY_DISCORD_ID) {
     const args = parseCommand(message.content);
     const op = args[0];

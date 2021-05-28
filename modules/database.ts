@@ -8,23 +8,23 @@ import config from "../config";
 import * as solves from "./solves";
 
 // TODO: find a cleaner way
-var channel: TextChannel;
+let channel: TextChannel;
 
-export async function loadSolves(_channel: TextChannel) {
+export async function loadSolves(_channel: TextChannel): Promise<void> {
   // only called once for each time the bot starts up
   console.log("loading solve logs");
   channel = _channel;
   let lastId = undefined;
-  let logMessages = [];
+  const logMessages = [];
   while (logMessages.length < config.LOGS_TO_LOAD) {
-    let messages: Collection<string, Message> = await channel.messages.fetch({
+    const messages: Collection<string, Message> = await channel.messages.fetch({
       limit: Math.min(config.LOGS_TO_LOAD - logMessages.length, 100),
       before: lastId,
     });
     if (messages.size == 0) {
       break;
     }
-    for (let message of messages.values()) {
+    for (const message of messages.values()) {
       logMessages.push(message);
       lastId = message.id;
     }
@@ -33,14 +33,14 @@ export async function loadSolves(_channel: TextChannel) {
   let solveLogs = 0;
   let methodLogs = 0;
   for (const message of logMessages) {
-    let data = message.content.split("|");
+    const data = message.content.split("|");
     const userId = data[0];
     const solver = solves.getSolver(userId);
     if (data.length == 3) {
       // solve log
-      let time = parseInt(data[1], 10); // radix 10; it is okay for data[1] to end with '+'
-      let plusTwo = data[1].endsWith("+");
-      let scramble = data[2];
+      const time = parseInt(data[1], 10); // radix 10; it is okay for data[1] to end with '+'
+      const plusTwo = data[1].endsWith("+");
+      const scramble = data[2];
       const se = new solves.SolveEntry(
         message.id,
         userId,
@@ -53,7 +53,7 @@ export async function loadSolves(_channel: TextChannel) {
       ++solveLogs;
     } else if (data.length == 2) {
       // method-setting log
-      let method = data[1];
+      const method = data[1];
       solver.setMethod(method);
       solver.setMethodLogId(message.id);
       ++methodLogs;

@@ -19,6 +19,9 @@ import { REACTION_ADD_ACTIONS } from "./modules/reactions";
 import solves = require("./modules/solves");
 import timer = require("./modules/timer");
 
+import dotenv from "dotenv";
+dotenv.config();
+
 const bot = new Discord.Client();
 
 bot.on("ready", async () => {
@@ -27,7 +30,7 @@ bot.on("ready", async () => {
   await actionsTroll.loadJokes();
 
   // load past solves
-  let dataChannel = (await bot.channels.fetch(
+  const dataChannel = (await bot.channels.fetch(
     config.DATA_CHANNEL_ID
   )) as TextChannel;
   await db.loadSolves(dataChannel);
@@ -117,5 +120,5 @@ bot.on("messageReactionRemove", async (messageReaction, user) => {
   // });
 });
 
-require("dotenv").config(); // log in using environment variable
+// log in using environment variable
 bot.login(process.env.TOKEN);

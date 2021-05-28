@@ -14,7 +14,7 @@ import db = require("./database");
 export function formatTime(milliseconds: number, plusTwo = false): string {
   let seconds = Math.floor(milliseconds / 1000);
   let minutes = Math.floor(seconds / 60);
-  let hours = Math.floor(minutes / 60);
+  const hours = Math.floor(minutes / 60);
   let res = "";
   if (hours > 0) {
     res += hours + ":";
@@ -51,7 +51,7 @@ const curScramble = new Map<Snowflake, string>();
  * @param userId the id of the user to start a timer for
  * @param channelId the channel the timer is bound to
  */
-export function startTimer(userId: Snowflake, channelId: Snowflake) {
+export function startTimer(userId: Snowflake, channelId: Snowflake): void {
   if (!startTimes.has(userId)) {
     startTimes.set(userId, new Map());
   }

@@ -3,7 +3,6 @@ Functions for generating scramble strings.
 */
 
 import Jimp from "jimp";
-import fs from "fs";
 import { randInt } from "./util";
 
 import config from "../config";
@@ -13,10 +12,10 @@ const S = 32; // side length of a sticker
 const LIGHT = 3; // weight of a light line
 const HEAVY = 7; // weight of a heavy line
 
-const FACES: string[] = ["U", "L", "F", "R", "B", "D"];
+const FACES = ["U", "L", "F", "R", "B", "D"];
 const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
-const DIR: string[] = ["", "2", "'"];
-const COLORS: number[] = [
+const DIR = ["", "2", "'"];
+const COLORS = [
   // taken from https://colorhunt.co/palettes/white, etc.
   0xf9f6f7ff, // white
   0xfc8621ff, // orange
@@ -88,9 +87,8 @@ export async function makeImage(
   filename: string
 ): Promise<void> {
   // initialize the cube
-  // console.log(scramble);
   const moves = scramble.split(" ");
-  const cube = new Array(48);
+  const cube = new Array<number>(48);
   for (let c = 0; c < 6; c++) {
     for (let i = 8 * c; i < 8 * (c + 1); i++) {
       cube[i] = c;
@@ -112,8 +110,6 @@ export async function makeImage(
   }
   const height = 9 * S + 4 * HEAVY + 6 * LIGHT;
   const width = 12 * S + 5 * HEAVY + 8 * LIGHT;
-  let fd = fs.openSync(filename, "w");
-  fs.closeSync(fd);
   new Jimp(width, height, 0x000000ff, (error, image) => {
     for (let f = 0; f < 6; f++) {
       for (let i = 0; i < 9; i++) {
@@ -127,7 +123,7 @@ export async function makeImage(
         } else if (i == 5) {
           p = 3;
         }
-        let color = p != -1 ? cube[8 * f + p] : f;
+        const color = p != -1 ? cube[8 * f + p] : f;
         let row = Math.floor(i / 3);
         if (f == 5) {
           row += 6;
@@ -140,11 +136,11 @@ export async function makeImage(
         } else {
           col += 3 * (f - 1);
         }
-        let y1 =
+        const y1 =
           (row + 1) * LIGHT +
           Math.ceil((row + 1) / 3) * (HEAVY - LIGHT) +
           row * S;
-        let x1 =
+        const x1 =
           (col + 1) * LIGHT +
           Math.ceil((col + 1) / 3) * (HEAVY - LIGHT) +
           col * S;
@@ -168,7 +164,7 @@ async function _getScramble(numMoves: number): Promise<string> {
   // last 2 moves
   let x = -1;
   let y = -1;
-  let moves = new Array(numMoves);
+  const moves = new Array<string>(numMoves);
   for (let i = 0; i < numMoves; ++i) {
     let z: number;
     do {
@@ -185,7 +181,7 @@ async function _getScramble(numMoves: number): Promise<string> {
   return moves.join(" ");
 }
 
-export async function getScramble(filename: string) {
+export async function getScramble(filename: string): Promise<string> {
   const scramble = await _getScramble(randInt(17, 20));
   if (config.MAKE_SCRAMBLE_IMAGES) {
     makeImage(scramble, filename);

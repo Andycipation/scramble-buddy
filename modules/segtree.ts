@@ -36,7 +36,7 @@ class _SegTree {
    * @returns the united Node for the two children
    */
   unite(a: Node, b: Node): Node {
-    let res = new Node(a.mn);
+    const res = new Node(a.mn);
     res.apply(a.mx);
     res.apply(b.mn);
     res.apply(b.mx);
@@ -108,11 +108,11 @@ export class SegTree extends _SegTree {
     super(n);
   }
 
-  get(ll: number, rr: number) {
+  get(ll: number, rr: number): Node {
     return super.get(0, 0, super.n - 1, ll, rr);
   }
 
-  modify(p: number, v: number) {
+  modify(p: number, v: number): void {
     super.modify(0, 0, super.n - 1, p, v);
   }
 }

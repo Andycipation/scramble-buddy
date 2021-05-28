@@ -84,7 +84,7 @@ function removeReaction(
  * @returns whether or not the given message shows a scramble
  */
 function isScramble(message: Message): boolean {
-  let lines = message.content.split("\n");
+  const lines = message.content.split("\n");
   if (lines.length <= 1) {
     return false;
   }
@@ -97,10 +97,10 @@ newReactionAddAction(
   (reaction: MessageReaction, user: User) => {
     const message = reaction.message;
     removeReaction(message, user.id, REMOVE_EMOJI);
-    let lines = message.content.split("\n");
-    let scrambleString = lines[0];
-    let instructions = lines[1];
-    let users = lines.slice(3);
+    const lines = message.content.split("\n");
+    const scrambleString = lines[0];
+    const instructions = lines[1];
+    const users = lines.slice(3);
     let addUser = true;
     for (const str of users) {
       if (parseMention(str) == user.id) {
@@ -125,11 +125,11 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
   const message = reaction.message;
   removeReaction(message, user.id, CONFIRM_EMOJI);
   removeReaction(message, user.id, REMOVE_EMOJI);
-  let lines = message.content.split("\n");
-  let scrambleString = lines[0];
-  let instructions = lines[1];
-  let tgt = `<@${user.id}>`;
-  let users = lines.slice(3).filter((u) => u != tgt);
+  const lines = message.content.split("\n");
+  const scrambleString = lines[0];
+  const instructions = lines[1];
+  const tgt = `<@${user.id}>`;
+  const users = lines.slice(3).filter((u) => u != tgt);
   timer.deleteScramble(user.id); // could return true or false
   if (!message.editable) {
     console.error("cannot edit this message");

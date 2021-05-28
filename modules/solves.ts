@@ -49,7 +49,7 @@ export class SolveEntry {
     this.completed = completed;
   }
 
-  toString() {
+  toString(): string {
     return `${timer.formatTime(this.time, this.plusTwo)} **|** ${
       this.scramble
     }`;
@@ -58,7 +58,7 @@ export class SolveEntry {
   /**
    * Returns the string that is sent in the log to record the SolveEntry.
    */
-  logString() {
+  logString(): string {
     let timeString = `${this.time}`;
     if (this.plusTwo) {
       timeString += "+";
@@ -69,7 +69,7 @@ export class SolveEntry {
   /**
    * Toggles whether or not this solve had a +2.
    */
-  togglePlusTwo() {
+  togglePlusTwo(): void {
     if (!this.plusTwo) {
       this.time += 2000;
       this.plusTwo = true;
@@ -155,7 +155,7 @@ class Solver {
     this.psa.push(this.psa[this.solves.size()] + se.time);
     this.solves.push(se);
     for (let i = 0; i < Solver.AVGS; ++i) {
-      let a = this.getAverage(Solver.TRACKED_AVGS[i]);
+      const a = this.getAverage(Solver.TRACKED_AVGS[i]);
       if (a != -1) {
         this.avg[i].push(a);
       }
@@ -183,7 +183,7 @@ class Solver {
     if (this.solves.empty()) {
       return false; // no solve to toggle
     }
-    let se = this.solves.top();
+    const se = this.solves.top();
     this.solves.pop();
     for (let i = 0; i < Solver.AVGS; ++i) {
       if (!this.avg[i].empty()) {
@@ -250,11 +250,11 @@ class Solver {
    * @returns the average number of milliseconds a solve took, or -1 if cnt is less than 3
    */
   getAverage(cnt: number): number {
-    let n = this.solves.size();
+    const n = this.solves.size();
     if (cnt <= 2 || cnt > n) {
       return -1;
     }
-    let a = [];
+    const a = [];
     for (let i = n - cnt; i < n; ++i) {
       a.push(this.solves.stk[i].time);
     }
@@ -391,8 +391,8 @@ class Solver {
       // console.log('tried to get an embed page out of range');
       return null;
     }
-    let to = this.solves.size() - 1 - page * config.SOLVES_PER_PAGE;
-    let from = Math.max(to - config.SOLVES_PER_PAGE + 1, 0);
+    const to = this.solves.size() - 1 - page * config.SOLVES_PER_PAGE;
+    const from = Math.max(to - config.SOLVES_PER_PAGE + 1, 0);
     return {
       color: 0x0099ff,
       // below: the title starting with 'Profile of' is what is used
@@ -426,8 +426,8 @@ const solvers = new Map<Snowflake, Solver>(); // map<userId, Solver>
  * @returns {SolveEntry[]} all personal best SolveEntry objects
  */
 export function getCurrentPbs(): SolveEntry[] {
-  let res = [];
-  for (let solver of solvers.values()) {
+  const res = [];
+  for (const solver of solvers.values()) {
     if (!solver.solves.empty()) {
       // this is an important check because it is still possible to
       // have Solver objects with no SolveEntry, e.g. if someone

@@ -183,11 +183,11 @@ newCommand("view", "`[user mention] [page]` shows user profile", (message) => {
   if (user == null) {
     user = message.author;
   }
-  let args = parseCommand(message.content);
+  const args = parseCommand(message.content);
   let page = 0;
   for (let j = 1; j <= 2; ++j) {
     // check all possible optional command arguments
-    let x = parseInt(args[j], 10);
+    const x = parseInt(args[j], 10);
     if (!isNaN(x)) {
       page = x - 1;
       break;
@@ -229,10 +229,10 @@ newCommand(
       return;
     }
     let solve = solver.solves.size() - 1;
-    let args = parseCommand(message.content);
+    const args = parseCommand(message.content);
     for (let j = 1; j <= 2; ++j) {
       // check all possible optional command arguments
-      let x = parseInt(args[j], 10);
+      const x = parseInt(args[j], 10);
       if (!isNaN(x)) {
         solve = x - 1;
         break;
@@ -310,7 +310,7 @@ newCommand("remove", "removes your last solve", (message) => {
 newCommand("+2", "changes whether your last solve was a +2", (message) => {
   const solver = solves.getSolver(message.author.id);
   if (db.togglePlusTwo(message.author.id)) {
-    let se = solver.getLastSolve();
+    const se = solver.getLastSolve();
     message.channel.send(
       `${message.author.username}, ` +
         `+2 was ${
@@ -332,14 +332,14 @@ newCommand("+2", "changes whether your last solve was a +2", (message) => {
  * @returns the leaderboard embed
  */
 function getPbEmbed() {
-  let pbs = solves.getCurrentPbs();
+  const pbs = solves.getCurrentPbs();
   pbs.sort((e1, e2) => {
     if (e1.time < e2.time) return -1;
     if (e1.time > e2.time) return 1;
     return 0;
   });
   pbs.length = Math.min(pbs.length, config.LEADERBOARD_LENGTH);
-  let strings = [];
+  const strings = [];
   // TODO: don't mention them, just use their username to avoid the
   // ugly snowflake if a viewer is not friends
   // e.g. https://cdn.discordapp.com/attachments/701904186081804320/772957988763074570/unknown.png
@@ -349,7 +349,7 @@ function getPbEmbed() {
   if (strings.length == 0) {
     strings.push("No one has a personal best yet. Be the first to have one!");
   }
-  let pbStr = strings.join("\n");
+  const pbStr = strings.join("\n");
   return {
     color: 0x0099ff,
     title: "Personal Bests",
@@ -427,7 +427,7 @@ function canRequest(userId: string): boolean {
   );
 }
 
-export async function handleCommand(message: Message) {
+export async function handleCommand(message: Message): Promise<void> {
   const userId = message.author.id;
   if (!canRequest(userId)) {
     return; // message was "spammed" too quickly
