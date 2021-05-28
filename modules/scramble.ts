@@ -2,8 +2,8 @@
 Functions for generating scramble strings.
 */
 
-import Jimp = require("jimp");
-import fs = require("fs");
+import Jimp from "jimp";
+import fs from "fs";
 import { randInt } from "./util";
 
 import config from "../config";
@@ -13,7 +13,8 @@ const S = 32; // side length of a sticker
 const LIGHT = 3; // weight of a light line
 const HEAVY = 7; // weight of a heavy line
 
-const SIDES: string[] = ["U", "L", "F", "R", "B", "D"];
+const FACES: string[] = ["U", "L", "F", "R", "B", "D"];
+const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
 const DIR: string[] = ["", "2", "'"];
 const COLORS: number[] = [
   // taken from https://colorhunt.co/palettes/white, etc.
@@ -77,8 +78,6 @@ const CYCLES: number[][][] = [
   ],
 ];
 
-const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
-
 /**
  * Makes an image showing the cube net for this scramble.
  * @param scramble the scramble string
@@ -99,7 +98,7 @@ export async function makeImage(
   }
   // do the turns
   for (const move of moves) {
-    const f = SIDES.indexOf(move[0]);
+    const f = FACES.indexOf(move[0]);
     const turns = DIR.indexOf(move.slice(1)) + 1;
     for (const cycle of CYCLES[f]) {
       const newColors = new Array(4);
@@ -173,9 +172,9 @@ async function _getScramble(numMoves: number): Promise<string> {
   for (let i = 0; i < numMoves; ++i) {
     let z: number;
     do {
-      z = randInt(0, SIDES.length - 1);
+      z = randInt(0, FACES.length - 1);
     } while (z == x || z == y);
-    moves[i] = SIDES[z] + DIR[randInt(0, 2)];
+    moves[i] = FACES[z] + DIR[randInt(0, 2)];
     if (OPPOSITE_FACE[z] == y) {
       x = y;
     } else {
