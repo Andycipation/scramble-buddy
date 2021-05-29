@@ -7,16 +7,22 @@ these values are dynamic?
 
 import pkg from "./package.json";
 
+import dotenv from "dotenv";
+dotenv.config();
+
+console.log("NODE_ENV: ", process.env.NODE_ENV);
+
 const config = {
   BOT_NAME: "ScrambleBuddy",
+  AUTH_TOKEN: process.env.TOKEN,
 
   MY_DISCORD_ID: "199904392504147968",
-  DATA_CHANNEL_ID: "739940657010835506",
-  CCG_GUILD_ID: "694345248163233832",
+  DATA_CHANNEL_ID: "739940657010835506", // #scramblebuddy-log
+  CCG_GUILD_ID: "694345248163233832", // Corona Cuber Gang server
 
   // the maximum number of messages to fetch from the data channel
-  // LOGS_TO_LOAD: 100000,
-  LOGS_TO_LOAD: 100,
+  // massive hack for debugging
+  LOGS_TO_LOAD: parseInt(process.env.DEBUG_LOGS_TO_LOAD || "1000000", 10),
 
   LEADERBOARD_LENGTH: 10,
 

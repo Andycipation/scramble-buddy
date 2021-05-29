@@ -5,7 +5,7 @@
   "main": "dist/bot.js",
   "scripts": {
     "tsc": "tsc",
-    "postinstall": "npm run tsc",
+    "postinstall": "yarn run tsc",
     "start": "node dist/bot.js",
     "dev": "ts-node-dev bot"
   },

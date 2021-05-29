@@ -5,11 +5,11 @@ lol note about package.json:
 https://stackoverflow.com/questions/48972663/how-do-i-compile-typescript-at-heroku-postinstall
 */
 
-import Discord, { Message, TextChannel, User } from "discord.js";
-import pkg from "./package.json";
-
 // config and parameters
+import pkg from "./package.json";
 import config from "./config";
+
+import Discord, { Message, TextChannel, User } from "discord.js";
 
 import actionsTroll = require("./modules/actions_troll");
 import commands = require("./modules/commands");
@@ -17,9 +17,6 @@ import db = require("./modules/database");
 import { REACTION_ADD_ACTIONS } from "./modules/reactions";
 import solves = require("./modules/solves");
 import timer = require("./modules/timer");
-
-import dotenv from "dotenv";
-dotenv.config();
 
 const bot = new Discord.Client({
   ws: {
@@ -130,4 +127,4 @@ bot.on("messageReactionRemove", async (messageReaction, user) => {
 });
 
 // log in using environment variable
-bot.login(process.env.TOKEN);
+bot.login(config.AUTH_TOKEN);
