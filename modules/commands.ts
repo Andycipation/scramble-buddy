@@ -29,7 +29,7 @@ class Command {
    * @param helpMsg the message shown in the help embed
    * @param callback the function that executes when the command is called
    */
-  constructor(
+  public constructor(
     name: string,
     helpMsg: string,
     callback: (message: Message) => void
@@ -42,7 +42,7 @@ class Command {
   /**
    * Returns the string that appears in the help embed for this command.
    */
-  get helpString() {
+  public get helpString() {
     // maybe config.prefix shouldn't even be in this file
     return `\`${config.prefix} ${this.name}\` ${this.helpMsg}`;
   }

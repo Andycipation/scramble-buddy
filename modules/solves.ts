@@ -84,8 +84,8 @@ export class SolveEntry {
  * The class for a user who does solves.
  */
 class Solver {
-  public static readonly AVGS = 3;
-  public static readonly TRACKED_AVGS = [5, 12, 100];
+  private static readonly AVGS = 3;
+  private static readonly TRACKED_AVGS = [5, 12, 100];
 
   public userId: Snowflake;
   public method: string;
@@ -93,13 +93,13 @@ class Solver {
   public solves: Stack<SolveEntry>;
 
   private psa: number[]; // currently unused
-  public avg: MinStack<number>[];
+  private avg: MinStack<number>[];
 
   /**
    * The constructor for the Solver class.
    * @param userId the id of this Discord user
    */
-  constructor(userId: Snowflake) {
+  public constructor(userId: Snowflake) {
     this.userId = userId;
 
     this.method = "unspecified";
@@ -155,7 +155,7 @@ class Solver {
     this.psa.push(this.psa[this.solves.size()] + se.time);
     this.solves.push(se);
     for (let i = 0; i < Solver.AVGS; ++i) {
-      const a = this.getAverage(Solver.TRACKED_AVGS[i]);
+      const a = this._getAverage(Solver.TRACKED_AVGS[i]);
       if (a != -1) {
         this.avg[i].push(a);
       }
@@ -217,7 +217,7 @@ class Solver {
    * Returns the SolveEntry denoting this Solver's personal best.
    * @returns this Solver's personal best
    */
-  get pb(): SolveEntry | never {
+  public get pb(): SolveEntry | never {
     if (this.solves.empty()) {
       throw "tried to get PB of a Solver with no SolveEntry";
     }
@@ -228,7 +228,7 @@ class Solver {
    * Returns the string showing this Solver's personal best.
    * @returns the personal best string
    */
-  pbString(): string {
+  _pbString(): string {
     if (this.solves.empty()) {
       return "N/A";
     }
@@ -239,7 +239,7 @@ class Solver {
    * Returns whether or not the last solve of this Solver was a personal best.
    * @returns whether the last solve was a personal best
    */
-  lastSolveWasPb(): boolean {
+  public lastSolveWasPb(): boolean {
     return this.getLastSolve() && this.getLastSolve().id == this.pb?.id;
   }
 
@@ -249,7 +249,7 @@ class Solver {
    * @param cnt the number of solves to compute the average over
    * @returns the average number of milliseconds a solve took, or -1 if cnt is less than 3
    */
-  getAverage(cnt: number): number {
+  private _getAverage(cnt: number): number {
     const n = this.solves.size();
     if (cnt <= 2 || cnt > n) {
       return -1;
@@ -271,7 +271,9 @@ class Solver {
     return Math.round(sum / (cnt - 2));
   }
 
-  _getAveragesString(func: (avgStack: MinStack<number>) => number): string {
+  private _getAveragesString(
+    func: (avgStack: MinStack<number>) => number
+  ): string {
     const lines: string[] = [];
     for (let i = 0; i < Solver.AVGS; ++i) {
       if (this.avg[i].empty()) {
@@ -287,13 +289,13 @@ class Solver {
     return lines.join("\n");
   }
 
-  _getBestAveragesString(): string {
+  private _getBestAveragesString(): string {
     return this._getAveragesString((avgStack: MinStack<number>) => {
       return avgStack.best;
     });
   }
 
-  _getCurrentAveragesString(): string {
+  private _getCurrentAveragesString(): string {
     return this._getAveragesString((avgStack: MinStack<number>) => {
       return avgStack.top();
     });
@@ -306,7 +308,7 @@ class Solver {
    * @param to the ending index, inclusive
    * @returns the string showing all solves in the given range
    */
-  _getSolvesString(from: number, to: number): string | never {
+  private _getSolvesString(from: number, to: number): string | never {
     if (!(0 <= from && from <= to && to < this.solves.size())) {
       throw "tried to get solves in an invalid range";
     }
@@ -321,7 +323,7 @@ class Solver {
    * Returns the number of pages the profile would require.
    * @returns {number} the number of pages the profile would require
    */
-  get numPages(): number {
+  public get numPages(): number {
     return 1 + Math.ceil(this.solves.size() / config.SOLVES_PER_PAGE);
   }
 
@@ -329,7 +331,7 @@ class Solver {
    * Returns the embed showing this Solver's profile.
    * @returns the profile embed for this Solver
    */
-  getProfileEmbed() {
+  public getProfileEmbed() {
     return {
       color: 0x0099ff,
       title: `User Profile`,
@@ -357,7 +359,7 @@ class Solver {
         },
         {
           name: "Personal Best",
-          value: this.pbString(),
+          value: this._pbString(),
           // inline: false,
         },
         {
@@ -384,7 +386,7 @@ class Solver {
    * @param page the page number to return
    * @returns the message embed for the given page
    */
-  getSolvesEmbed(page: number) {
+  public getSolvesEmbed(page: number) {
     // page - the solve page id, from 0 to ceil(# solves / config.SOLVES_PER_PAGE) - 1
     if (page < 0 || page >= this.numPages - 1) {
       // not an error

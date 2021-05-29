@@ -28,7 +28,7 @@ class ReactionAddAction {
   public appliesTo: (message: Message) => void;
   public do: (reaction: MessageReaction, user: User) => void;
 
-  constructor(
+  public constructor(
     emoji: string,
     appliesTo: (message: Message) => boolean,
     callback: (reaction: MessageReaction, user: User) => void
