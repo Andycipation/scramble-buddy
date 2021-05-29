@@ -10,9 +10,7 @@ import pkg from "./package.json";
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("NODE_ENV: ", process.env.NODE_ENV);
-
-const config = {
+export default {
   BOT_NAME: "ScrambleBuddy",
   AUTH_TOKEN: process.env.TOKEN,
 
@@ -49,5 +47,3 @@ const config = {
 
   FOOTER_STRING: `ScrambleBuddy, v${pkg.version} | Trademark ${pkg.author}™`,
 };
-
-export default config;
