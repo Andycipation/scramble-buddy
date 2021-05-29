@@ -11,12 +11,8 @@ import config from "../config";
 const S = 32; // side length of a sticker
 const LIGHT = 3; // weight of a light line
 const HEAVY = 7; // weight of a heavy line
-
-const FACES = ["U", "L", "F", "R", "B", "D"];
-const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0];
-const DIR = ["", "2", "'"];
+// color palette; taken from https://colorhunt.co/palettes/white, etc.
 const COLORS = [
-  // taken from https://colorhunt.co/palettes/white, etc.
   0xf9f6f7ff, // white
   0xfc8621ff, // orange
   0x4fa54cff, // green
@@ -24,6 +20,11 @@ const COLORS = [
   0x0e49b5ff, // blue
   0xcad315ff, // yellow
 ];
+
+// scramble parameters
+const FACES = ["U", "L", "F", "R", "B", "D"];
+const OPPOSITE_FACE = [5, 3, 4, 1, 2, 0]; // index of opposite
+const DIR = ["", "2", "'"];
 
 // below: adapted from my submission to https://dmoj.ca/problem/rubik
 const CYCLES: number[][][] = [

@@ -7,13 +7,14 @@ import config from "../config";
 import pkg from "../package.json";
 import fs from "fs";
 
+import { Message, MessageOptions, Snowflake, TextChannel } from "discord.js";
+
 import db = require("./database");
 import { getScramble, makeImage } from "./scramble";
 import solves = require("./solves");
 import timer = require("./timer");
 import { getDateString, parseCommand } from "./util";
 import assert from "assert";
-import { Message, MessageOptions, Snowflake } from "discord.js";
 
 /**
  * A class representing a Command that can be called by the user.
@@ -254,8 +255,9 @@ newCommand(
       options.files = [filename];
     }
     setTimeout(() => {
-      message.channel.send(str, options).then(async (sent) => {
+      message.channel.send(str, options).then(async () => {
         if (config.MAKE_SCRAMBLE_IMAGES) {
+          // TODO: try to avoid blocking?
           fs.unlinkSync(filename);
         }
       });
@@ -328,14 +330,19 @@ newCommand("+2", "changes whether your last solve was a +2", (message) => {
 /**
  * Returns a MessageEmbed containing the leaderboard, ranked by personal
  * bests. This function must be above the newCommand declaration for
- * the 'cube pb' command.
+ * the 'cube pbs' command.
  * @returns the leaderboard embed
  */
-function getPbEmbed() {
-  const pbs = solves.getCurrentPbs();
+function getPbEmbed(textChannel: TextChannel) {
+  const pbs = solves
+    .getCurrentPbs()
+    .filter((se) => textChannel.members.has(se.userId));
   pbs.sort((e1, e2) => {
+    // first by time, then by chronological order
     if (e1.time < e2.time) return -1;
     if (e1.time > e2.time) return 1;
+    if (e1.completed.getTime() < e2.completed.getTime()) return -1;
+    if (e1.completed.getTime() > e2.completed.getTime()) return 1;
     return 0;
   });
   pbs.length = Math.min(pbs.length, config.LEADERBOARD_LENGTH);
@@ -373,7 +380,11 @@ function getPbEmbed() {
 
 // show personal bests
 newCommand("pbs", "shows the personal bests of all members", (message) => {
-  message.channel.send({ embed: getPbEmbed() });
+  if (message.channel instanceof TextChannel) {
+    message.channel.send({ embed: getPbEmbed(message.channel) });
+  } else {
+    console.error("a command got through in a non-TextChannel channel");
+  }
 });
 
 // ========== END COMMAND DEFINITIONS ==========

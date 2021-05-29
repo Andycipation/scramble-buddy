@@ -5,8 +5,7 @@ lol note about package.json:
 https://stackoverflow.com/questions/48972663/how-do-i-compile-typescript-at-heroku-postinstall
 */
 
-import Discord from "discord.js";
-import { Message, TextChannel, User } from "discord.js";
+import Discord, { Message, TextChannel, User } from "discord.js";
 import pkg from "./package.json";
 
 // config and parameters
@@ -22,7 +21,11 @@ import timer = require("./modules/timer");
 import dotenv from "dotenv";
 dotenv.config();
 
-const bot = new Discord.Client();
+const bot = new Discord.Client({
+  ws: {
+    intents: Discord.Intents.ALL,
+  },
+});
 
 bot.on("ready", async () => {
   bot.user!.setActivity(`type '${config.prefix} help' for help`); // set bot status
@@ -30,10 +33,8 @@ bot.on("ready", async () => {
   await actionsTroll.loadJokes();
 
   // load past solves
-  const dataChannel = (await bot.channels.fetch(
-    config.DATA_CHANNEL_ID
-  )) as TextChannel;
-  await db.loadSolves(dataChannel);
+  const dataChannel = await bot.channels.fetch(config.DATA_CHANNEL_ID);
+  await db.loadSolves(dataChannel as TextChannel);
 
   // ready to go
   console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
@@ -77,8 +78,16 @@ bot.on("message", async (message) => {
   if (message.channel.id == config.DATA_CHANNEL_ID) {
     // delete messages sent in the logs to avoid parsing errors
     message.delete({
-      reason: "not supposed to send messages in the data channel",
+      reason: `only ${config.BOT_NAME} can send messages in the data channel`,
     });
+    return;
+  }
+  if (!(message.channel instanceof TextChannel)) {
+    message.channel.send(
+      `Due to handling reactions, ${config.BOT_NAME} can only be used ` +
+        `in text channels in a server. Add ScrambleBuddy to a server ` +
+        `and try your command again.`
+    );
     return;
   }
   await actionsTroll.handleTroll(message); // do troll responses

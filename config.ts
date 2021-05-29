@@ -14,8 +14,9 @@ const config = {
   DATA_CHANNEL_ID: "739940657010835506",
   CCG_GUILD_ID: "694345248163233832",
 
-  // the number of messages to fetch from the data channel
-  LOGS_TO_LOAD: 100000,
+  // the maximum number of messages to fetch from the data channel
+  // LOGS_TO_LOAD: 100000,
+  LOGS_TO_LOAD: 100,
 
   LEADERBOARD_LENGTH: 10,
 

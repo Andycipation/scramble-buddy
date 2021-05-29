@@ -15,7 +15,7 @@ export async function loadSolves(_channel: TextChannel): Promise<void> {
   console.log("loading solve logs");
   channel = _channel;
   let lastId = undefined;
-  const logMessages = [];
+  const logMessages: Message[] = [];
   while (logMessages.length < config.LOGS_TO_LOAD) {
     const messages: Collection<string, Message> = await channel.messages.fetch({
       limit: Math.min(config.LOGS_TO_LOAD - logMessages.length, 100),

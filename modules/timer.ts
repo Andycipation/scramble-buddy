@@ -118,6 +118,6 @@ export function setScramble(userId: Snowflake, scrambleString: string): void {
   curScramble.set(userId, scrambleString);
 }
 
-export function deleteScramble(userId: Snowflake) {
+export function deleteScramble(userId: Snowflake): boolean {
   return curScramble.delete(userId);
 }
