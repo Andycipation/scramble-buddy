@@ -21,12 +21,13 @@ import {
   User,
 } from "discord.js";
 
-import * as actionsTroll from "./bot_modules/actions_troll";
+import * as actionsTroll from "./bot_modules/trollActions";
 import { loadSolves } from "./bot_modules/database";
 import { REACTION_ADD_ACTIONS } from "./bot_modules/reactions";
 import { getSolver } from "./bot_modules/solves";
 import * as timer from "./bot_modules/timer";
 
+// command imports
 import get from "./commands/get";
 import go from "./commands/go";
 import inspect from "./commands/inspect";
@@ -41,7 +42,7 @@ import Command from "./interface/command";
 
 const help: Command = {
   name: "help",
-  description: "shows this help message",
+  description: "shows a help message",
 
   execute: async (interaction: CommandInteraction) => {
     interaction.reply({ embeds: [getHelpEmbed()] });
@@ -99,8 +100,6 @@ const getHelpEmbed = (): MessageEmbed => {
   });
 };
 
-// TODO: add help command
-
 const bot = new Client({
   intents: [
     Intents.FLAGS.GUILDS,
@@ -150,8 +149,8 @@ const checkTimer = async (message: Message) => {
     const lines = [`Timer stopped. **${timer.formatTime(time)}**`];
     if (!hadScramble) {
       lines.push(
-        "To track your solves, generate a scramble using `cube get` and" +
-          " react to it. Then, your next time will be logged on your profile."
+        "To track your solves, generate a scramble using `cube get` and " +
+          "react to it. Then, your next time will be logged on your profile."
       );
     } else if (getSolver(userId).lastSolveWasPb()) {
       lines.push("That is a new personal best. Congratulations!");
@@ -175,7 +174,7 @@ bot.on("interactionCreate", async (interaction: Interaction) => {
   } catch (err) {
     console.log(err);
     await interaction.reply({
-      content: "There was an error while executing this command!",
+      content: "There was an error while executing this command.",
       ephemeral: true,
     });
   }
@@ -194,9 +193,9 @@ bot.on("messageCreate", async (message) => {
     return;
   }
   if (!(message.channel instanceof TextChannel)) {
-    message.channel.send(
+    message.reply(
       `Due to handling reactions, ${config.BOT_NAME} can only be used ` +
-        `in text channels in a server. Add ScrambleBuddy to a server ` +
+        `in text channels in a server. Add ${config.BOT_NAME} to a server ` +
         `and try your command again.`
     );
     return;

@@ -1,6 +1,6 @@
 import Command from "../interface/command";
 
-import inspecting from "../inspectionTimers";
+import inspecting from "../bot_modules/inspectionTimers";
 
 const NOTIFICATIONS = [8, 12]; // notify when 8 and 12 seconds have passed
 const WARNINGS = [15, 17]; // warn at 15 and 17 seconds (> 17 seconds is a DNF)
