@@ -9,7 +9,8 @@
     "dev": "ts-node-dev bot"
   },
   "engines": {
-    "node": "16.x"
+    "node": "16.x",
+    "yarn": "1.22.10"
   },
   "repository": "git+https://github.com/AndrewDongAndy/scramble-buddy.git",
   "author": "ADMathNoob",
