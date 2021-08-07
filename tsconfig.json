@@ -6,7 +6,7 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "strict": true,
-    "noEmit": true,
+    // "noEmit": true,
     "noImplicitAny": true,
     "outDir": "dist",
     "esModuleInterop": true,
