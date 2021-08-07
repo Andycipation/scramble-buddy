@@ -5,11 +5,11 @@ TODO: possibly implement segment tree to query min and max, then compute
 averages faster using PSA and segment tree queries?
 */
 
-import { Snowflake } from "discord.js";
+import { MessageEmbed, Snowflake } from "discord.js";
 import config from "../config";
 
-import { Stack, MinStack } from "./stack";
-import timer = require("./timer");
+import { Stack, MinStack } from "../data_structures/stack";
+import { formatTime } from "./timer";
 
 /**
  * The class representing a solve.
@@ -50,9 +50,7 @@ export class SolveEntry {
   }
 
   toString(): string {
-    return `${timer.formatTime(this.time, this.plusTwo)} **|** ${
-      this.scramble
-    }`;
+    return `${formatTime(this.time, this.plusTwo)} **|** ${this.scramble}`;
   }
 
   /**
@@ -281,7 +279,7 @@ class Solver {
       }
       const toAdd = func(this.avg[i]);
       // "Over 12: 25.366"
-      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${timer.formatTime(toAdd)}`);
+      lines.push(`Over ${Solver.TRACKED_AVGS[i]}: ${formatTime(toAdd)}`);
     }
     if (lines.length == 0) {
       lines.push("none");
@@ -331,8 +329,8 @@ class Solver {
    * Returns the embed showing this Solver's profile.
    * @returns the profile embed for this Solver
    */
-  public getProfileEmbed() {
-    return {
+  public getProfileEmbed(): MessageEmbed {
+    return new MessageEmbed({
       color: 0x0099ff,
       title: `User Profile`,
 
@@ -354,13 +352,13 @@ class Solver {
         },
         {
           name: "Number of Solves",
-          value: this.solves.size(),
+          value: this.solves.size().toString(),
           inline: true,
         },
         {
           name: "Personal Best",
           value: this._pbString(),
-          // inline: false,
+          inline: false,
         },
         {
           name: "Best Averages",
@@ -373,12 +371,12 @@ class Solver {
           inline: true,
         },
       ],
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
         text: `${config.FOOTER_STRING} | Page 1/${this.numPages}`,
       },
-    };
+    });
   }
 
   /**
@@ -386,7 +384,7 @@ class Solver {
    * @param page the page number to return
    * @returns the message embed for the given page
    */
-  public getSolvesEmbed(page: number) {
+  public getSolvesEmbed(page: number): MessageEmbed | null {
     // page - the solve page id, from 0 to ceil(# solves / config.SOLVES_PER_PAGE) - 1
     if (page < 0 || page >= this.numPages - 1) {
       // not an error
@@ -395,7 +393,7 @@ class Solver {
     }
     const to = this.solves.size() - 1 - page * config.SOLVES_PER_PAGE;
     const from = Math.max(to - config.SOLVES_PER_PAGE + 1, 0);
-    return {
+    return new MessageEmbed({
       color: 0x0099ff,
       // below: the title starting with 'Profile of' is what is used
       // in reactions.js to check if the message is a Profile message
@@ -407,15 +405,15 @@ class Solver {
         {
           name: "Solves (most recent solve first)",
           value: this._getSolvesString(from, to),
-          // inline: false,
+          inline: false,
         },
       ],
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         // NOTE: the format 'Page x/y' is required for arrows to work
         text: `${config.FOOTER_STRING} | Page ${page + 2}/${this.numPages}`,
       },
-    };
+    });
   }
 }
 
@@ -427,7 +425,7 @@ const solvers = new Map<Snowflake, Solver>(); // map<userId, Solver>
  * Returns all current personal bests.
  * @returns {SolveEntry[]} all personal best SolveEntry objects
  */
-export function getCurrentPbs(): SolveEntry[] {
+export const getCurrentPbs = (): SolveEntry[] => {
   const res = [];
   for (const solver of solvers.values()) {
     if (!solver.solves.empty()) {
@@ -438,7 +436,7 @@ export function getCurrentPbs(): SolveEntry[] {
     }
   }
   return res;
-}
+};
 
 /**
  * Returns the Solver for the given User object, making a new Solver
@@ -446,13 +444,13 @@ export function getCurrentPbs(): SolveEntry[] {
  * @param userId the id of the user to retrieve a Solver for
  * @returns the Solver object of this user
  */
-export function getSolver(userId: Snowflake): Solver {
+export const getSolver = (userId: Snowflake): Solver => {
   if (!solvers.has(userId)) {
     // console.log(`creating a Solver for the user with id ${userId}`);
     solvers.set(userId, new Solver(userId));
   }
   return solvers.get(userId)!;
-}
+};
 
 /**
  * Returns the requested profile embed.
@@ -460,10 +458,13 @@ export function getSolver(userId: Snowflake): Solver {
  * @param page the page number to get
  * @returns the corresponding MessageEmbed
  */
-export function getSolverEmbed(userId: Snowflake, page: number) {
+export const getSolverEmbed = (
+  userId: Snowflake,
+  page: number
+): MessageEmbed | null => {
   const solver = getSolver(userId);
   if (page == 0) {
     return solver.getProfileEmbed();
   }
   return solver.getSolvesEmbed(page - 1);
-}
+};

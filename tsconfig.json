@@ -2,12 +2,14 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "CommonJS",
-    "sourceMap": false, // slower if true?
+    "sourceMap": true, // slower if true?
     "removeComments": true,
     "resolveJsonModule": true,
     "strict": true,
+    "noEmit": true,
     "noImplicitAny": true,
     "outDir": "dist",
     "esModuleInterop": true,
-  }
+  },
+  "exclude": ["deprecated"],
 }

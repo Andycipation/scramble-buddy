@@ -47,13 +47,13 @@ export const REACTION_ADD_ACTIONS: ReactionAddAction[] = [];
  * @param verifier the function that confirms validity of the reaction
  * @param callback the action taken when the reaction is made
  */
-function newReactionAddAction(
+const newReactionAddAction = (
   emoji: string,
   verifier: (message: Message) => boolean,
   callback: (reaction: MessageReaction, user: User) => void
-) {
+) => {
   REACTION_ADD_ACTIONS.push(new ReactionAddAction(emoji, verifier, callback));
-}
+};
 
 /**
  * Removes the reaction from the given message made by the user.
@@ -61,11 +61,11 @@ function newReactionAddAction(
  * @param userId the user id of the user who reacted
  * @param emojiChar the emoji to remove
  */
-function removeReaction(
+const removeReaction = (
   message: Message,
   userId: Snowflake,
   emojiChar: string
-) {
+) => {
   // https://discordjs.guide/popular-topics/reactions.html#removing-reactions-by-user
   const userReactions = message.reactions.cache.filter((reaction) =>
     reaction.users.cache.has(userId)
@@ -75,7 +75,7 @@ function removeReaction(
       reaction.users.remove(userId);
     }
   }
-}
+};
 
 /**
  * Returns whether or not the given message is a scramble, i.e. if it
@@ -83,19 +83,19 @@ function removeReaction(
  * @param message the message to verify
  * @returns whether or not the given message shows a scramble
  */
-function isScramble(message: Message): boolean {
+const isScramble = (message: Message): boolean => {
   const lines = message.content.split("\n");
   if (lines.length <= 1) {
     return false;
   }
   return lines[1] == SCRAMBLE_REACT_PROMPT;
-}
+};
 
 newReactionAddAction(
   CONFIRM_EMOJI,
   isScramble,
   (reaction: MessageReaction, user: User) => {
-    const message = reaction.message;
+    const message = reaction.message as Message;
     removeReaction(message, user.id, REMOVE_EMOJI);
     const lines = message.content.split("\n");
     const scrambleString = lines[0];
@@ -122,7 +122,7 @@ newReactionAddAction(
 );
 
 newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
-  const message = reaction.message;
+  const message = reaction.message as Message;
   removeReaction(message, user.id, CONFIRM_EMOJI);
   removeReaction(message, user.id, REMOVE_EMOJI);
   const lines = message.content.split("\n");
@@ -150,11 +150,11 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
  * @param message the message to verify
  * @returns whether or not the given message is a profile embed
  */
-function isProfilePage(message: Message): boolean {
+const isProfilePage = (message: Message): boolean => {
   const embeds = message.embeds;
   // too many type assertions
-  return embeds.length == 1 && embeds[0]!.footer!.text!.includes("/");
-}
+  return embeds.length == 1 && embeds[0].footer!.text!.includes("/");
+};
 
 /*
 Map each reaction to a formula to update the page:
@@ -172,7 +172,7 @@ const PROFILE_EMOJIS = [
   LAST_EMOJI,
 ] as const;
 // TODO: make this `as const` or something
-const FUNCTIONS: Array<(userId: Snowflake, x: number) => number> = [
+const FUNCTIONS: ((userId: Snowflake, x: number) => number)[] = [
   (userId, x) => 0,
   (userId, x) => x - 1,
   (userId, x) => x,
@@ -184,7 +184,11 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
   const emoji = PROFILE_EMOJIS[i];
   // add the reaction action that changes the profile page
   newReactionAddAction(emoji, isProfilePage, (reaction, user) => {
-    const message = reaction.message;
+    // let message = reaction.message;
+    // if (reaction.message.partial) {
+    //   message = message.fetch();
+    // }
+    const message = reaction.message as Message;
     removeReaction(message, user.id, emoji);
     if (!message.editable) {
       console.error("why can't the bot edit its own message? :(");
@@ -202,10 +206,10 @@ for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
       userId,
       FUNCTIONS[i](userId, currentPage)
     );
-    if (newEmbed === null) {
+    if (!newEmbed) {
       return false; // invalid request
     }
-    message.edit({ embed: newEmbed });
+    message.edit({ embeds: [newEmbed] });
     return true;
   });
 }

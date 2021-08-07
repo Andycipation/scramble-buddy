@@ -9,22 +9,22 @@ import config from "../config";
  * @param date the date to convert to a string
  * @return the formatted date
  */
-export function getDateString(date: Date): string {
+export const getDateString = (date: Date): string => {
   return date.toLocaleString("en-CA", { timeZone: "America/Toronto" });
-}
+};
 
 /**
  * Returns the arguments of the given command.
  * @param s the command to parse
  * @returns the arguments, split by space
  */
-export function parseCommand(s: string): string[] {
+export const parseCommand = (s: string): string[] => {
   s = s.trim();
   if (s.startsWith(config.prefix)) {
     s = s.substring(config.prefix.length).trim();
   }
   return s.split(" ");
-}
+};
 
 /**
  * Converts a string of the form <@(id)> to id, e.g.
@@ -32,9 +32,9 @@ export function parseCommand(s: string): string[] {
  * @param s the mention string to convert
  * @returns the user id in the given string
  */
-export function parseMention(s: string): string {
+export const parseMention = (s: string): string => {
   return s.substring(2, s.length - 1);
-}
+};
 
 /**
  * Returns a random integer in the range [low, high].
@@ -42,6 +42,6 @@ export function parseMention(s: string): string {
  * @param high the upper bound
  * @returns a random number in the range [low, high]
  */
-export function randInt(low: number, high: number): number {
+export const randInt = (low: number, high: number): number => {
   return low + Math.floor(Math.random() * (high - low + 1));
-}
+};

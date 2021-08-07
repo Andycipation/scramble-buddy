@@ -83,10 +83,10 @@ const CYCLES: number[][][] = [
  * @param scramble the scramble string
  * @param filename the output file, which should end in .png
  */
-export async function makeImage(
+export const makeImage = async (
   scramble: string,
   filename: string
-): Promise<void> {
+): Promise<void> => {
   // initialize the cube
   const moves = scramble.split(" ");
   const cube = new Array<number>(48);
@@ -154,14 +154,14 @@ export async function makeImage(
     }
     image.write(filename);
   });
-}
+};
 
 /**
  * Returns a non-redundant scramble string (e.g. no "F B F").
  * @param numMoves the desired length of the scramble
  * @return a scramble with the specified number of moves
  */
-async function _getScramble(numMoves: number): Promise<string> {
+const _getScramble = async (numMoves: number): Promise<string> => {
   // last 2 moves
   let x = -1;
   let y = -1;
@@ -180,12 +180,12 @@ async function _getScramble(numMoves: number): Promise<string> {
     y = z;
   }
   return moves.join(" ");
-}
+};
 
-export async function getScramble(filename: string): Promise<string> {
+export const getScramble = async (filename: string): Promise<string> => {
   const scramble = await _getScramble(randInt(17, 20));
   if (config.MAKE_SCRAMBLE_IMAGES) {
     makeImage(scramble, filename);
   }
   return scramble;
-}
+};

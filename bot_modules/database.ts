@@ -10,7 +10,7 @@ import * as solves from "./solves";
 // TODO: find a cleaner way
 let channel: TextChannel;
 
-export async function loadSolves(_channel: TextChannel): Promise<void> {
+export const loadSolves = async (_channel: TextChannel): Promise<void> => {
   // only called once for each time the bot starts up
   console.log("loading solve logs");
   channel = _channel;
@@ -60,7 +60,7 @@ export async function loadSolves(_channel: TextChannel): Promise<void> {
     }
   }
   console.log(`loaded ${solveLogs} solve logs and ${methodLogs} method logs`);
-}
+};
 
 /**
  * Logs the solve in the data channel, where +2 is false by default.
@@ -68,11 +68,11 @@ export async function loadSolves(_channel: TextChannel): Promise<void> {
  * @param time the number of milliseconds the solve took
  * @param scramble the scramble used
  */
-export async function logSolve(
+export const logSolve = async (
   userId: Snowflake,
   time: number,
   scramble: string
-): Promise<void> {
+): Promise<void> => {
   const solver = solves.getSolver(userId);
   // kind of a hack
   const se = new solves.SolveEntry(
@@ -86,7 +86,7 @@ export async function logSolve(
   const id = await _sendLog(se.logString());
   se.id = id;
   solver.pushSolve(se);
-}
+};
 
 /**
  * Sets the solving method for a specified user.
@@ -94,10 +94,10 @@ export async function logSolve(
  * @param method the new method of this Solver
  * @returns whether the assignment succeeded
  */
-export async function setMethod(
+export const setMethod = async (
   userId: Snowflake,
   method: string
-): Promise<boolean> {
+): Promise<boolean> => {
   const solver = solves.getSolver(userId);
   if (!solver.setMethod(method)) {
     return false; // invalid method provided
@@ -108,24 +108,24 @@ export async function setMethod(
   const id = await _sendLog(solver.methodLogString());
   solver.setMethodLogId(id);
   return true;
-}
+};
 
 /**
  * Sends the given string to the log channel and returns the message id.
  * @param logString the string to log in the channel
  * @returns the id of the message that was sent
  */
-async function _sendLog(logString: string): Promise<Snowflake> {
+const _sendLog = async (logString: string): Promise<Snowflake> => {
   const sent = await channel.send(logString);
   return sent.id;
-}
+};
 
 /**
  * Removes the message with the given id from the log channel.
  * @param messageId the id of the message to remove
  * @returns whether the deletion was successful
  */
-export async function deleteLog(messageId: Snowflake): Promise<boolean> {
+export const deleteLog = async (messageId: Snowflake): Promise<boolean> => {
   const message = await channel.messages.fetch(messageId);
   if (!message.deletable) {
     console.error(
@@ -135,14 +135,14 @@ export async function deleteLog(messageId: Snowflake): Promise<boolean> {
   }
   message.delete();
   return true;
-}
+};
 
 /**
  * Toggles whether the last solve of a user was a +2.
  * @param userId the id of the user to toggle +2
  * @returns whether the toggle was successful
  */
-export async function togglePlusTwo(userId: Snowflake): Promise<boolean> {
+export const togglePlusTwo = async (userId: Snowflake): Promise<boolean> => {
   const solver = solves.getSolver(userId);
   if (!solver.togglePlusTwo()) {
     return false;
@@ -158,18 +158,18 @@ export async function togglePlusTwo(userId: Snowflake): Promise<boolean> {
   }
   message.edit(se.logString());
   return true;
-}
+};
 
 /**
  * Removes the last solve for the given user.
  * @param userId the user id to pop a solve from
  * @returns whether the removal succeeded
  */
-export async function popSolve(userId: Snowflake): Promise<boolean> {
+export const popSolve = async (userId: Snowflake): Promise<boolean> => {
   const solver = solves.getSolver(userId);
   const id = solver.popSolve();
   if (id === null) {
     return false;
   }
   return deleteLog(id);
-}
+};

@@ -9,29 +9,125 @@ https://stackoverflow.com/questions/48972663/how-do-i-compile-typescript-at-hero
 import pkg from "./package.json";
 import config from "./config";
 
-import Discord, { Message, TextChannel, User } from "discord.js";
+import {
+  Client,
+  CommandInteraction,
+  Intents,
+  Interaction,
+  Message,
+  MessageEmbed,
+  MessageReaction,
+  TextChannel,
+  User,
+} from "discord.js";
 
-import actionsTroll = require("./modules/actions_troll");
-import commands = require("./modules/commands");
-import db = require("./modules/database");
-import { REACTION_ADD_ACTIONS } from "./modules/reactions";
-import solves = require("./modules/solves");
-import timer = require("./modules/timer");
+import * as actionsTroll from "./bot_modules/actions_troll";
+import { loadSolves } from "./bot_modules/database";
+import { REACTION_ADD_ACTIONS } from "./bot_modules/reactions";
+import { getSolver } from "./bot_modules/solves";
+import * as timer from "./bot_modules/timer";
 
-const bot = new Discord.Client({
-  ws: {
-    intents: Discord.Intents.ALL,
+import get from "./commands/get";
+import go from "./commands/go";
+import inspect from "./commands/inspect";
+import pbs from "./commands/pbs";
+import ping from "./commands/ping";
+import plustwo from "./commands/plustwo";
+import remove from "./commands/remove";
+import setmethod from "./commands/setmethod";
+import view from "./commands/view";
+import viewsolve from "./commands/view_solve";
+import Command from "./interface/command";
+
+const help: Command = {
+  name: "help",
+  description: "shows this help message",
+
+  execute: async (interaction: CommandInteraction) => {
+    interaction.reply({ embeds: [getHelpEmbed()] });
   },
+};
+
+const COMMANDS = [
+  // order matters
+  help,
+
+  // remaining commands
+  get,
+  go,
+  inspect,
+  pbs,
+  ping,
+  plustwo,
+  remove,
+  setmethod,
+  view,
+  viewsolve,
+];
+
+const COMMANDS_HELP_STRING = COMMANDS.map(
+  (cmd) => `\`/${cmd.name}\` ${cmd.description}`
+).join("\n");
+
+/**
+ * Returns a MessageEmbed containing the help strings for each command.
+ * @returns {MessageEmbed} the help embed
+ */
+const getHelpEmbed = (): MessageEmbed => {
+  return new MessageEmbed({
+    color: 0x0099ff,
+    title: config.BOT_NAME,
+    // author: {
+    //   name: `by ${pkg.author}`,
+    // },
+    description: pkg.description,
+    // files: ['./assets/avatar.png'],
+    // thumbnail: {
+    //   url: 'attachment://avatar.png'
+    // },
+    fields: [
+      {
+        name: "Commands (no space required directly after `cube`)",
+        value: COMMANDS_HELP_STRING,
+        inline: false,
+      },
+    ],
+    timestamp: Date.now(),
+    footer: {
+      text: config.FOOTER_STRING,
+    },
+  });
+};
+
+// TODO: add help command
+
+const bot = new Client({
+  intents: [
+    Intents.FLAGS.GUILDS,
+    Intents.FLAGS.GUILD_MEMBERS,
+    Intents.FLAGS.GUILD_MESSAGES,
+    Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+  ],
 });
 
-bot.on("ready", async () => {
+bot.once("ready", async () => {
   bot.user!.setActivity(`type '${config.prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   await actionsTroll.loadJokes();
 
   // load past solves
   const dataChannel = await bot.channels.fetch(config.DATA_CHANNEL_ID);
-  await db.loadSolves(dataChannel as TextChannel);
+  await loadSolves(dataChannel as TextChannel);
+
+  // register commands
+  if (process.env.NODE_ENV == "production") {
+    bot.application?.commands.set(COMMANDS);
+    console.log("set commands globally");
+  } else {
+    bot.application?.commands.set([]);
+    bot.guilds.cache.get(config.TEST_GUILD_ID)!.commands.set(COMMANDS);
+    console.log("set commands in test guild");
+  }
 
   // ready to go
   console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
@@ -41,8 +137,9 @@ bot.on("ready", async () => {
  * Checks if this message stops a timer.
  * @param message the message to check
  */
-async function checkTimer(message: Message) {
-  if (timer.hasTimer(message.author.id, message.channel.id)) {
+const checkTimer = async (message: Message) => {
+  const userId = message.author.id;
+  if (timer.hasTimer(userId, message.channel.id)) {
     let time = await timer.stopTimer(message);
     let hadScramble = true;
     if (time < 0) {
@@ -50,33 +147,50 @@ async function checkTimer(message: Message) {
       time = -time;
       hadScramble = false;
     }
-    let s = `Timer stopped for ${message.author.username}. **${timer.formatTime(
-      time
-    )}**`;
+    const lines = [`Timer stopped. **${timer.formatTime(time)}**`];
     if (!hadScramble) {
-      s +=
-        "\nTo track your solves, generate a scramble using `cube get` and" +
-        " react to it. Then, your next time will be logged on your profile.";
-    } else if (solves.getSolver(message.author.id).lastSolveWasPb()) {
-      s += `\nThat is a new personal best. Congratulations!`;
+      lines.push(
+        "To track your solves, generate a scramble using `cube get` and" +
+          " react to it. Then, your next time will be logged on your profile."
+      );
+    } else if (getSolver(userId).lastSolveWasPb()) {
+      lines.push("That is a new personal best. Congratulations!");
     }
-    // message.reply(s);
-    message.channel.send(s);
+    const reply = lines.join("\n");
+    message.reply(reply);
   }
-}
+};
+
+bot.on("interactionCreate", async (interaction: Interaction) => {
+  if (!interaction.isCommand()) {
+    return;
+  }
+  const name = interaction.commandName;
+  const command = COMMANDS.find((c) => c.name == name);
+  if (!command) {
+    return;
+  }
+  try {
+    await command.execute(interaction);
+  } catch (err) {
+    console.log(err);
+    await interaction.reply({
+      content: "There was an error while executing this command!",
+      ephemeral: true,
+    });
+  }
+});
 
 // when a message is sent
-bot.on("message", async (message) => {
+bot.on("messageCreate", async (message) => {
   const userId = message.author.id;
   if (userId == bot.user!.id || (message.author.bot && config.IGNORE_BOTS)) {
     // ignore message if sent by self, or sender is bot and IGNORE_BOTS is on
     return;
   }
   if (message.channel.id == config.DATA_CHANNEL_ID) {
-    // delete messages sent in the logs to avoid parsing errors
-    message.delete({
-      reason: `only ${config.BOT_NAME} can send messages in the data channel`,
-    });
+    // not allowed to send messages here
+    message.delete();
     return;
   }
   if (!(message.channel instanceof TextChannel)) {
@@ -89,30 +203,33 @@ bot.on("message", async (message) => {
   }
   await actionsTroll.handleTroll(message); // do troll responses
   await checkTimer(message);
-  await commands.handleCommand(message);
 });
 
 // when a reaction is added to an existing message
 bot.on("messageReactionAdd", async (messageReaction, user) => {
-  // console.log('someone reacted to: ' + messageReaction.message.content);
-  if (messageReaction.message.author.id != bot.user!.id) {
-    return; // only handle reactions to messages sent by this bot
+  if (!(messageReaction instanceof MessageReaction)) {
+    return;
   }
+  // console.log('someone reacted to: ' + messageReaction.message.content);
+  const message = messageReaction.message as Message;
   if (user.id == bot.user!.id || (user.bot && config.IGNORE_BOTS)) {
     return; // ignore reacts by irrelevant users
   }
-  for (const raa of REACTION_ADD_ACTIONS) {
-    if (
-      messageReaction.emoji.name == raa.emoji &&
-      raa.appliesTo(messageReaction.message)
-    ) {
-      raa.do(messageReaction, user as User);
+  if (message.author.id == bot.user!.id) {
+    // only handle reactions to messages sent by this bot
+    for (const raa of REACTION_ADD_ACTIONS) {
+      if (messageReaction.emoji.name == raa.emoji && raa.appliesTo(message)) {
+        raa.do(messageReaction, user as User);
+      }
     }
   }
 });
 
 // when a reaction is removed from an existing message
 bot.on("messageReactionRemove", async (messageReaction, user) => {
+  if (!(messageReaction instanceof MessageReaction)) {
+    return;
+  }
   if (user.id == bot.user!.id || (user.bot && config.IGNORE_BOTS)) {
     return;
   }

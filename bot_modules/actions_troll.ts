@@ -13,7 +13,7 @@ import fs from "fs";
 const JOKE_FILE = "./jokes.txt"; // path relative to the bot.js file
 const JOKES: string[] = [];
 
-export async function loadJokes(): Promise<void> {
+export const loadJokes = async (): Promise<void> => {
   console.log("loading jokes");
   fs.readFile(JOKE_FILE, (error, data) => {
     const lines = data.toString().split("\n");
@@ -23,13 +23,13 @@ export async function loadJokes(): Promise<void> {
       }
     }
   });
-}
+};
 
 /**
  * Handles all troll features of this bot.
  * @param message the message for which to handle troll actions
  */
-export async function handleTroll(message: Message): Promise<void> {
+export const handleTroll = async (message: Message): Promise<void> => {
   if (message.author.id == config.MY_DISCORD_ID) {
     const args = parseCommand(message.content);
     const op = args[0];
@@ -72,4 +72,4 @@ export async function handleTroll(message: Message): Promise<void> {
       );
     }
   }
-}
+};
