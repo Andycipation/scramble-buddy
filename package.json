@@ -8,6 +8,9 @@
     "start": "node dist/bot.js",
     "dev": "ts-node-dev bot"
   },
+  "engines": {
+    "node": "16.x"
+  },
   "repository": "git+https://github.com/AndrewDongAndy/scramble-buddy.git",
   "author": "ADMathNoob",
   "homepage": "https://github.com/AndrewDongAndy/scramble-buddy#readme",
