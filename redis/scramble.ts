@@ -8,6 +8,12 @@ export const setScramble = async (
   await scrambleRedis.set(userId, scrambleString);
 };
 
+export const getScramble = async (
+  userId: Snowflake
+): Promise<string | null> => {
+  return await scrambleRedis.get(userId);
+};
+
 export const deleteScramble = async (userId: Snowflake): Promise<boolean> => {
   const count = await scrambleRedis.del(userId);
   return count == 1;

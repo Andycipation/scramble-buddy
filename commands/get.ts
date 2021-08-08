@@ -3,9 +3,9 @@ import fs from "fs";
 import Command from "../interface/command";
 import config from "../config";
 
-import { getScramble } from "../bot_modules/genScramble";
-import * as timer from "../bot_modules/timer";
+import { genScramble } from "../bot_modules/genScramble";
 import { Message, MessageOptions } from "discord.js";
+import { setScramble } from "../redis/scramble";
 
 const get: Command = {
   name: "get",
@@ -13,10 +13,10 @@ const get: Command = {
 
   execute: async (interaction) => {
     const filename = `./assets/${interaction.id}.png`;
-    const scramble = await getScramble(filename);
+    const scramble = await genScramble(filename);
     // add the sender automatically
     const userId = interaction.user.id;
-    timer.setScramble(userId, scramble);
+    setScramble(userId, scramble);
 
     // send message
     const messageContent =

@@ -186,7 +186,7 @@ const _getScramble = async (numMoves: number): Promise<string> => {
   return moves.join(" ");
 };
 
-export const getScramble = async (
+export const genScramble = async (
   filename: string,
   generateImage = config.MAKE_SCRAMBLE_IMAGES
 ): Promise<string> => {

@@ -1,5 +1,7 @@
 /*
 Loads data for users, using a certain text channel as the "database".
+
+**TODO**: use MongoDB
 */
 
 import { Collection, Message, Snowflake, TextChannel } from "discord.js";

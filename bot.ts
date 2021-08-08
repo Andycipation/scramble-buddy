@@ -24,8 +24,7 @@ import {
 import * as actionsTroll from "./bot_modules/trollActions";
 import { loadSolves } from "./bot_modules/database";
 import { REACTION_ADD_ACTIONS } from "./bot_modules/reactions";
-import { getSolver } from "./bot_modules/solves";
-import * as timer from "./bot_modules/timer";
+import { checkTimer } from "./bot_modules/timer";
 
 // command imports
 import get from "./commands/get";
@@ -39,7 +38,6 @@ import setmethod from "./commands/setmethod";
 import view from "./commands/view";
 import viewsolve from "./commands/viewsolve";
 import Command from "./interface/command";
-import { formatTime } from "./bot_modules/util";
 
 const help: Command = {
   name: "help",
@@ -132,34 +130,6 @@ bot.once("ready", async () => {
   // ready to go
   console.log(`${pkg.name}, v${pkg.version} is now up and running.`);
 });
-
-/**
- * Checks if this message stops a timer.
- * @param message the message to check
- */
-const checkTimer = async (message: Message) => {
-  const userId = message.author.id;
-  if (timer.hasTimer(userId, message.channel.id)) {
-    let time = await timer.stopTimer(message);
-    let hadScramble = true;
-    if (time < 0) {
-      // kind of a hack
-      time = -time;
-      hadScramble = false;
-    }
-    const lines = [`Timer stopped. **${formatTime(time)}**`];
-    if (!hadScramble) {
-      lines.push(
-        "To track your solves, generate a scramble using `cube get` and " +
-          "react to it. Then, your next time will be logged on your profile."
-      );
-    } else if (getSolver(userId).lastSolveWasPb()) {
-      lines.push("That is a new personal best. Congratulations!");
-    }
-    const reply = lines.join("\n");
-    message.reply(reply);
-  }
-};
 
 bot.on("interactionCreate", async (interaction: Interaction) => {
   if (!interaction.isCommand()) {

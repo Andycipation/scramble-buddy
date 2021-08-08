@@ -11,5 +11,5 @@
     "outDir": "dist",
     "esModuleInterop": true,
   },
-  "exclude": ["deprecated"],
+  // "exclude": ["deprecated"],
 }

@@ -11,22 +11,25 @@ import { getCurrentPbs } from "../bot_modules/solves";
  * @returns the leaderboard embed
  */
 const getPbEmbed = (textChannel: TextChannel): MessageEmbed => {
+  // only include users in this channel
   const pbs = getCurrentPbs().filter((se) =>
     textChannel.members.has(se.userId)
   );
+
+  // sort first by time, then in chronological order
   pbs.sort((e1, e2) => {
-    // first by time, then by chronological order
     if (e1.time < e2.time) return -1;
     if (e1.time > e2.time) return 1;
     if (e1.completed.getTime() < e2.completed.getTime()) return -1;
     if (e1.completed.getTime() > e2.completed.getTime()) return 1;
     return 0;
   });
+
+  // trim list if too long
   pbs.length = Math.min(pbs.length, config.LEADERBOARD_LENGTH);
+
+  // get mentions
   const strings = [];
-  // TODO: don't mention them, just use their username to avoid the
-  // ugly snowflake if a viewer is not friends
-  // e.g. https://cdn.discordapp.com/attachments/701904186081804320/772957988763074570/unknown.png
   for (let i = 0; i < pbs.length; ++i) {
     strings.push(`${i + 1}) ${`<@${pbs[i].userId}>: ${pbs[i]}`}`);
   }
@@ -34,6 +37,7 @@ const getPbEmbed = (textChannel: TextChannel): MessageEmbed => {
     strings.push("No one has a personal best yet. Be the first to have one!");
   }
   const pbStr = strings.join("\n");
+
   return new MessageEmbed({
     color: 0x0099ff,
     title: "Personal Bests",

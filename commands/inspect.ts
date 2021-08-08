@@ -1,6 +1,6 @@
 import Command from "../interface/command";
 
-import inspecting from "../bot_modules/inspectionTimers";
+import { hasInspectionTimer, startInspectionTimer } from "../redis/timer";
 
 const NOTIFICATIONS = [8, 12]; // notify when 8 and 12 seconds have passed
 const WARNINGS = [15, 17]; // warn at 15 and 17 seconds (> 17 seconds is a DNF)
@@ -11,22 +11,22 @@ const inspect: Command = {
 
   execute: async (interaction) => {
     const { user } = interaction;
-    if (inspecting.has(user.id)) {
+    if (await hasInspectionTimer(user.id)) {
       interaction.reply({
-        content: "You currently have an inspecting timer running.",
+        content: "Error: you currently have an inspecting timer running.",
         ephemeral: true,
       });
       return;
     }
-    const startTime = Date.now();
-    inspecting.set(user.id, startTime); // set the start time
+
+    await startInspectionTimer(user.id);
     interaction.reply("Your inspection timer has begun. You have 15 seconds.");
 
     // prepare warning replies
     for (const s of NOTIFICATIONS) {
-      setTimeout(() => {
+      setTimeout(async () => {
         // Map#get returns undefined if the key is not present
-        if (inspecting.get(user.id) == startTime) {
+        if (await hasInspectionTimer(user.id)) {
           interaction.followUp({
             content: `${user.username}, ${s} seconds have gone by.`,
             ephemeral: true,
@@ -38,8 +38,8 @@ const inspect: Command = {
     // notify if the user is "getting penalized" (according to WCA regulations:
     // https://www.worldcubeassociation.org/regulations/)
     for (const s of WARNINGS) {
-      setTimeout(() => {
-        if (inspecting.get(user.id) == startTime) {
+      setTimeout(async () => {
+        if (await hasInspectionTimer(user.id)) {
           interaction.followUp({
             content: `${user.username}, you have used ${s} seconds of inspection!`,
             ephemeral: true,

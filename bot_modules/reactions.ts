@@ -4,6 +4,7 @@ Module for managing reactions.
 
 import { Message, MessageReaction, Snowflake, User } from "discord.js";
 import config from "../config";
+import { deleteScramble, setScramble } from "../redis/scramble";
 
 const {
   REMOVE_EMOJI,
@@ -18,7 +19,6 @@ const {
 } = config;
 
 import * as solves from "./solves";
-import * as timer from "./timer";
 import { parseMention } from "./util";
 
 // action to take when a reaction is added
@@ -108,7 +108,7 @@ newReactionAddAction(
       // add user id if not already mentioned
       users.push(`<@${user.id}>`);
     }
-    timer.setScramble(user.id, scrambleString);
+    setScramble(user.id, scrambleString);
     if (!message.editable) {
       console.error("cannot edit this message");
       return;
@@ -130,7 +130,7 @@ newReactionAddAction(REMOVE_EMOJI, isScramble, (reaction, user) => {
   const instructions = lines[1];
   const tgt = `<@${user.id}>`;
   const users = lines.slice(3).filter((u) => u != tgt);
-  timer.deleteScramble(user.id); // could return true or false
+  deleteScramble(user.id); // could return true or false
   if (!message.editable) {
     console.error("cannot edit this message");
     return;
@@ -171,14 +171,13 @@ const PROFILE_EMOJIS = [
   RIGHT_EMOJI,
   LAST_EMOJI,
 ] as const;
-// TODO: make this `as const` or something
-const FUNCTIONS: ((userId: Snowflake, x: number) => number)[] = [
+const FUNCTIONS: readonly ((userId: Snowflake, x: number) => number)[] = [
   (userId, x) => 0,
   (userId, x) => x - 1,
   (userId, x) => x,
   (userId, x) => x + 1,
   (userId, x) => solves.getSolver(userId).numPages - 1,
-];
+] as const;
 
 for (let i = 0; i < PROFILE_EMOJIS.length; ++i) {
   const emoji = PROFILE_EMOJIS[i];
