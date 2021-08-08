@@ -192,14 +192,6 @@ bot.on("messageCreate", async (message) => {
     message.delete();
     return;
   }
-  if (!(message.channel instanceof TextChannel)) {
-    message.reply(
-      `Due to handling reactions, ${config.BOT_NAME} can only be used ` +
-        `in text channels in a server. Add ${config.BOT_NAME} to a server ` +
-        `and try your command again.`
-    );
-    return;
-  }
   await actionsTroll.handleTroll(message); // do troll responses
   await checkTimer(message);
 });
