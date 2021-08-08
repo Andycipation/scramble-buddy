@@ -7,7 +7,7 @@ import { MessageOptions } from "discord.js";
 
 import * as solves from "../bot_modules/solves";
 import { getDateString } from "../bot_modules/util";
-import { makeImage } from "../bot_modules/scramble";
+import { makeImage } from "../bot_modules/genScramble";
 
 const viewsolve: Command = {
   name: "viewsolve",
@@ -68,13 +68,11 @@ const viewsolve: Command = {
       options.files = [filename];
     }
 
-    setTimeout(async () => {
-      await interaction.reply(options);
-      if (config.MAKE_SCRAMBLE_IMAGES) {
-        // TODO: try to avoid blocking?
-        fs.unlinkSync(filename);
-      }
-    }, 100);
+    await interaction.reply(options);
+    if (config.MAKE_SCRAMBLE_IMAGES) {
+      // TODO: try to avoid blocking?
+      fs.unlinkSync(filename);
+    }
   },
 };
 

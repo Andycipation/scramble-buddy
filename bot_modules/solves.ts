@@ -9,7 +9,7 @@ import { MessageEmbed, Snowflake } from "discord.js";
 import config from "../config";
 
 import { Stack, MinStack } from "../data_structures/stack";
-import { formatTime } from "./timer";
+import { formatTime } from "./util";
 
 /**
  * The class representing a solve.

@@ -37,8 +37,9 @@ import plustwo from "./commands/plustwo";
 import remove from "./commands/remove";
 import setmethod from "./commands/setmethod";
 import view from "./commands/view";
-import viewsolve from "./commands/view_solve";
+import viewsolve from "./commands/viewsolve";
 import Command from "./interface/command";
+import { formatTime } from "./bot_modules/util";
 
 const help: Command = {
   name: "help",
@@ -112,7 +113,7 @@ const bot = new Client({
 bot.once("ready", async () => {
   bot.user!.setActivity(`type '${config.prefix} help' for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
-  await actionsTroll.loadJokes();
+  actionsTroll.loadJokes();
 
   // load past solves
   const dataChannel = await bot.channels.fetch(config.DATA_CHANNEL_ID);
@@ -146,7 +147,7 @@ const checkTimer = async (message: Message) => {
       time = -time;
       hadScramble = false;
     }
-    const lines = [`Timer stopped. **${timer.formatTime(time)}**`];
+    const lines = [`Timer stopped. **${formatTime(time)}**`];
     if (!hadScramble) {
       lines.push(
         "To track your solves, generate a scramble using `cube get` and " +

@@ -3,7 +3,7 @@ import fs from "fs";
 import Command from "../interface/command";
 import config from "../config";
 
-import { getScramble } from "../bot_modules/scramble";
+import { getScramble } from "../bot_modules/genScramble";
 import * as timer from "../bot_modules/timer";
 import { Message, MessageOptions } from "discord.js";
 
@@ -17,6 +17,8 @@ const get: Command = {
     // add the sender automatically
     const userId = interaction.user.id;
     timer.setScramble(userId, scramble);
+
+    // send message
     const messageContent =
       `${scramble}\n` +
       `${config.SCRAMBLE_REACT_PROMPT}\n` +
@@ -28,17 +30,21 @@ const get: Command = {
     if (config.MAKE_SCRAMBLE_IMAGES) {
       options.files = [filename];
     }
-    setTimeout(async () => {
-      const sent = (await interaction.reply({
-        ...options,
-        fetchReply: true,
-      })) as Message;
-      await sent.react(config.CONFIRM_EMOJI);
-      await sent.react(config.REMOVE_EMOJI);
-      if (config.MAKE_SCRAMBLE_IMAGES) {
-        fs.unlinkSync(filename);
-      }
-    }, 100);
+
+    // send scramble
+    const sent = (await interaction.reply({
+      ...options,
+      fetchReply: true,
+    })) as Message;
+
+    // reaction collectors
+    await sent.react(config.CONFIRM_EMOJI);
+    await sent.react(config.REMOVE_EMOJI);
+
+    // clean up
+    if (config.MAKE_SCRAMBLE_IMAGES) {
+      fs.unlinkSync(filename);
+    }
   },
 };
 

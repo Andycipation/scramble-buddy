@@ -1,45 +1,12 @@
 /*
 Module to manage all actions related to timing.
+
+TODO: rework using Redis?
 */
 
 import { Message, Snowflake, TextBasedChannels, User } from "discord.js";
 
 import { logSolve } from "./database";
-
-/**
- * Returns a formatted string for the given solve result.
- * @param milliseconds the time to format in milliseconds
- * @param plusTwo whether the solve was a +2
- * @returns the formatted time
- */
-export const formatTime = (milliseconds: number, plusTwo = false): string => {
-  let seconds = Math.floor(milliseconds / 1000);
-  let minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  let res = "";
-  if (hours > 0) {
-    res += hours + ":";
-  }
-  if (minutes > 0) {
-    minutes %= 60;
-    let minString = minutes.toString();
-    if (hours > 0) {
-      minString = minString.padStart(2, "0");
-    }
-    res += minString + ":";
-  }
-  seconds %= 60;
-  let secString = seconds.toString();
-  if (minutes > 0) {
-    secString = secString.padStart(2, "0");
-  }
-  milliseconds %= 1000;
-  res += secString + "." + milliseconds.toString().padStart(3, "0");
-  if (plusTwo) {
-    res += "+";
-  }
-  return res;
-};
 
 // map<userId, map<channelId, startTime>>
 const startTimes = new Map<Snowflake, Map<Snowflake, number>>();

@@ -1,7 +1,8 @@
 import Command from "../interface/command";
 
 import inspecting from "../bot_modules/inspectionTimers";
-import { formatTime, startTimer } from "../bot_modules/timer";
+import { startTimer } from "../bot_modules/timer";
+import { formatTime } from "../bot_modules/util";
 
 const go: Command = {
   name: "go",

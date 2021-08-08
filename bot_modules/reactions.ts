@@ -97,17 +97,15 @@ newReactionAddAction(
   (reaction: MessageReaction, user: User) => {
     const message = reaction.message as Message;
     removeReaction(message, user.id, REMOVE_EMOJI);
+
     const lines = message.content.split("\n");
     const scrambleString = lines[0];
     const instructions = lines[1];
+    // line 2 is "Contenders:"
     const users = lines.slice(3);
-    let addUser = true;
-    for (const str of users) {
-      if (parseMention(str) == user.id) {
-        addUser = false;
-      }
-    }
-    if (addUser) {
+
+    if (!message.mentions.has(user.id)) {
+      // add user id if not already mentioned
       users.push(`<@${user.id}>`);
     }
     timer.setScramble(user.id, scrambleString);
@@ -115,8 +113,10 @@ newReactionAddAction(
       console.error("cannot edit this message");
       return;
     }
+
+    const mentionsString = users.join("\n");
     message.edit(
-      `${scrambleString}\n${instructions}\nContenders:\n${users.join("\n")}`
+      `${scrambleString}\n${instructions}\nContenders:\n${mentionsString}`
     );
   }
 );

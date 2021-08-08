@@ -88,14 +88,15 @@ export const makeImage = async (
   filename: string
 ): Promise<void> => {
   // initialize the cube
-  const moves = scramble.split(" ");
   const cube = new Array<number>(48);
   for (let c = 0; c < 6; c++) {
     for (let i = 8 * c; i < 8 * (c + 1); i++) {
       cube[i] = c;
     }
   }
+
   // do the turns
+  const moves = scramble.split(" ");
   for (const move of moves) {
     const f = FACES.indexOf(move[0]);
     const turns = DIR.indexOf(move.slice(1)) + 1;
@@ -109,51 +110,54 @@ export const makeImage = async (
       }
     }
   }
+
+  // dimensions
   const height = 9 * S + 4 * HEAVY + 6 * LIGHT;
   const width = 12 * S + 5 * HEAVY + 8 * LIGHT;
-  new Jimp(width, height, 0x000000ff, (error, image) => {
-    for (let f = 0; f < 6; f++) {
-      for (let i = 0; i < 9; i++) {
-        let p = -1;
-        if (i < 3) {
-          p = i;
-        } else if (i >= 6) {
-          p = 12 - i;
-        } else if (i == 3) {
-          p = 7;
-        } else if (i == 5) {
-          p = 3;
-        }
-        const color = p != -1 ? cube[8 * f + p] : f;
-        let row = Math.floor(i / 3);
-        if (f == 5) {
-          row += 6;
-        } else if (f >= 1) {
-          row += 3;
-        }
-        let col = i % 3;
-        if (row < 3 || row >= 6) {
-          col += 3;
-        } else {
-          col += 3 * (f - 1);
-        }
-        const y1 =
-          (row + 1) * LIGHT +
-          Math.ceil((row + 1) / 3) * (HEAVY - LIGHT) +
-          row * S;
-        const x1 =
-          (col + 1) * LIGHT +
-          Math.ceil((col + 1) / 3) * (HEAVY - LIGHT) +
-          col * S;
-        for (let x = x1; x < x1 + S; x++) {
-          for (let y = y1; y < y1 + S; y++) {
-            image.setPixelColor(COLORS[color], x, y);
-          }
+
+  // fill in the cells
+  const image = new Jimp(width, height, 0x000000ff);
+  for (let f = 0; f < 6; f++) {
+    for (let i = 0; i < 9; i++) {
+      let p = -1;
+      if (i < 3) {
+        p = i;
+      } else if (i >= 6) {
+        p = 12 - i;
+      } else if (i == 3) {
+        p = 7;
+      } else if (i == 5) {
+        p = 3;
+      }
+      const color = p != -1 ? cube[8 * f + p] : f;
+      let row = Math.floor(i / 3);
+      if (f == 5) {
+        row += 6;
+      } else if (f >= 1) {
+        row += 3;
+      }
+      let col = i % 3;
+      if (row < 3 || row >= 6) {
+        col += 3;
+      } else {
+        col += 3 * (f - 1);
+      }
+      const y1 =
+        (row + 1) * LIGHT +
+        Math.ceil((row + 1) / 3) * (HEAVY - LIGHT) +
+        row * S;
+      const x1 =
+        (col + 1) * LIGHT +
+        Math.ceil((col + 1) / 3) * (HEAVY - LIGHT) +
+        col * S;
+      for (let x = x1; x < x1 + S; x++) {
+        for (let y = y1; y < y1 + S; y++) {
+          image.setPixelColor(COLORS[color], x, y);
         }
       }
     }
-    image.write(filename);
-  });
+  }
+  await image.writeAsync(filename);
 };
 
 /**
@@ -182,10 +186,13 @@ const _getScramble = async (numMoves: number): Promise<string> => {
   return moves.join(" ");
 };
 
-export const getScramble = async (filename: string): Promise<string> => {
+export const getScramble = async (
+  filename: string,
+  generateImage = config.MAKE_SCRAMBLE_IMAGES
+): Promise<string> => {
   const scramble = await _getScramble(randInt(17, 20));
-  if (config.MAKE_SCRAMBLE_IMAGES) {
-    makeImage(scramble, filename);
+  if (generateImage) {
+    await makeImage(scramble, filename);
   }
   return scramble;
 };
