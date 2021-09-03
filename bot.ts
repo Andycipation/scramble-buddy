@@ -109,7 +109,7 @@ const bot = new Client({
 });
 
 bot.once("ready", async () => {
-  bot.user!.setActivity(`type '${config.prefix} help' for help`); // set bot status
+  bot.user!.setActivity(`use "/help" for help`); // set bot status
   // bot.user.setAvatar('./assets/avatar.png');
   actionsTroll.loadJokes();
 

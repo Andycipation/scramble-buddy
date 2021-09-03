@@ -62,3 +62,11 @@ export const getSolveStartTime = async (
   const res = await timerRedis.hget(userId, channelId);
   return res != null ? +res : null;
 };
+
+export const deleteSolveStartTime = async (
+  userId: Snowflake,
+  channelId: Snowflake
+): Promise<boolean> => {
+  const count = await timerRedis.hdel(userId, channelId);
+  return count == 1;
+};

@@ -6,7 +6,7 @@ TODO: rework using Redis?
 
 import { Message } from "discord.js";
 import { deleteScramble, getScramble } from "../redis/scramble";
-import { getSolveStartTime } from "../redis/timer";
+import { deleteSolveStartTime, getSolveStartTime } from "../redis/timer";
 
 import { logSolve } from "./database";
 import { getSolver } from "./solves";
@@ -33,7 +33,8 @@ export const checkTimer = async (message: Message): Promise<boolean> => {
   const scramble = await getScramble(userId);
   if (scramble != null) {
     await logSolve(userId, time, scramble);
-    deleteScramble(userId);
+    await deleteScramble(userId);
+    await deleteSolveStartTime(userId, channelId);
     if (getSolver(userId).lastSolveWasPb()) {
       lines.push("That is a new personal best. Congratulations!");
     }
@@ -45,7 +46,6 @@ export const checkTimer = async (message: Message): Promise<boolean> => {
     );
   }
 
-  const reply = lines.join("\n");
-  message.reply(reply);
+  await message.reply({ content: lines.join("\n") });
   return true;
 };
