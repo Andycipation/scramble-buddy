@@ -13,16 +13,20 @@ const go: Command = {
 
   execute: async (interaction) => {
     const userId = interaction.user.id;
-    let reply = "";
-    const startTime = await getInspectionStartTime(userId);
-    if (startTime) {
+    const replyLines = [];
+    const inspectionStart = await getInspectionStartTime(userId);
+    if (inspectionStart) {
       await deleteInspectionTimer(userId);
-      const inspectionTime = Date.now() - startTime;
-      reply += `Your inspection time was ${formatTime(inspectionTime)}. `;
+      const inspectionTime = Date.now() - inspectionStart;
+      replyLines.push(
+        `Your inspection time was ${formatTime(inspectionTime)}.`
+      );
     }
-    reply += "Your timer has started. Send anything to stop.";
+    replyLines.push("Your timer has started. Send anything to stop.");
     await startSolveTimer(userId, interaction.channel!.id);
-    await interaction.reply(reply);
+    await interaction.reply({
+      content: replyLines.join("\n"),
+    });
   },
 };
 

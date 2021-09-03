@@ -101,18 +101,18 @@ newReactionAddAction(
     const lines = message.content.split("\n");
     const scrambleString = lines[0];
     const instructions = lines[1];
-    // line 2 is "Contenders:"
+    // line 2 is: "Contenders:"
     const users = lines.slice(3);
 
     if (!message.mentions.has(user.id)) {
       // add user id if not already mentioned
       users.push(`<@${user.id}>`);
     }
-    setScramble(user.id, scrambleString);
     if (!message.editable) {
       console.error("cannot edit this message");
       return;
     }
+    setScramble(user.id, scrambleString);
 
     const mentionsString = users.join("\n");
     message.edit(
