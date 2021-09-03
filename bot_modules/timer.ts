@@ -25,6 +25,7 @@ export const checkTimer = async (message: Message): Promise<boolean> => {
   if (startTime == null) {
     return false;
   }
+  await deleteSolveStartTime(userId, channelId);
 
   let time = Date.now() - startTime;
   const lines = [`Timer stopped. **${formatTime(time)}**`];
@@ -34,7 +35,6 @@ export const checkTimer = async (message: Message): Promise<boolean> => {
   if (scramble != null) {
     await logSolve(userId, time, scramble);
     await deleteScramble(userId);
-    await deleteSolveStartTime(userId, channelId);
     if (getSolver(userId).lastSolveWasPb()) {
       lines.push("That is a new personal best. Congratulations!");
     }
