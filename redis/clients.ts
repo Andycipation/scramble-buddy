@@ -16,6 +16,8 @@ const getRedis = (keyPrefix: string) => {
     console.log(`redis with prefix "${keyPrefix}" is connected`);
   });
 
+  redis.flushall();
+
   return redis;
 };
 
