@@ -18,6 +18,7 @@ export default {
   DATA_CHANNEL_ID: "739940657010835506", // #scramblebuddy-log
   CCG_GUILD_ID: "694345248163233832", // Corona Cuber Gang guild
   TEST_GUILD_ID: "694930063870918678", // development guild
+  CCG_COUNTING_CHANNEL_ID: "894789989915848775", // troll stuff
 
   // the maximum number of messages to fetch from the data channel
   // massive hack for debugging

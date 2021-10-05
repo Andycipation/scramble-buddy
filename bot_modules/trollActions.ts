@@ -38,6 +38,17 @@ export const handleTroll = async (message: Message): Promise<void> => {
       message.reply(`Troll messages ${config.troll ? "enabled" : "disabled"}.`);
     }
   }
+  if (message.channelId == config.CCG_COUNTING_CHANNEL_ID) {
+    // there is a bug: if both David and Michael say it when it's rebooting,
+    // this will fail. but i doubt that bug will ever get exposed
+    const said = parseInt(message.content, 10);
+    if ((said + 1) % 3 == 2) {
+      message.channel.send({
+        content: `${said + 1} (on behalf of <@${config.MY_DISCORD_ID}>)`,
+      });
+    }
+    return;
+  }
   if (!config.troll || message.guild?.id != config.CCG_GUILD_ID) {
     return;
   }
